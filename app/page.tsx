@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function Home() {
   return (
-    <section className="h-screen w-full flex items-center justify-center bg-login">
+    <section className="h-full w-full flex items-center justify-center bg-login">
       <LoginComponent />
     </section>
   )

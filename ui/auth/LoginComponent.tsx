@@ -26,7 +26,7 @@ export default function LoginComponent() {
   };
 
   return (
-    <section className="h-screen flex flex-col items-center justify-center space-y-5 w-[90%] md:w-fit">
+    <section className="h-full lg:h-screen flex flex-col items-center justify-center space-y-5 w-[90%] md:w-fit">
       <Image
         src="/logo-white.svg"
         alt="Eventeev 2024"
