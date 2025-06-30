@@ -37,6 +37,13 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Feather', sans-serif; 
 }
 
+.bg-login {
+  background-image: url("@/public/login.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .custom-underline {
   position: relative;
 }
@@ -44,7 +51,7 @@ h1, h2, h3, h4, h5, h6 {
 .custom-underline::before {
   content: '';
   position: absolute;
-  bottom: -1;
+  bottom: -2;
   left: 0;
   right: 0;
   height: 2px;
