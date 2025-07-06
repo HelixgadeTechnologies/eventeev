@@ -15,7 +15,7 @@ type PasswordInputProps = {
 export default function PasswordInput ({
   value,
   onChange,
-  placeholder = "Enter your password",
+  placeholder = "******",
   label = "Password",
   isLabelShown = true,
   name = "password",
@@ -24,7 +24,7 @@ export default function PasswordInput ({
     const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="space-y-2.5 md:space-y-3">
-        {isLabelShown && <label htmlFor="" className="text-sm font-medium leading-6 block">{label}</label>}
+        {isLabelShown && <label htmlFor="" className="text-xs font-medium leading-6 block">{label}</label>}
         <div className="relative">
             <input
             type={showPassword ? "text" :"password"}
@@ -32,10 +32,10 @@ export default function PasswordInput ({
             name={name}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full border border-gray-400 rounded-[6px] px-3 h-10 md:h-12 outline-none placeholder:text-gray-400 placeholder:font-light font-normal text-sm leading-6 focus:border-[#eb5017] focus:ring-1 focus:ring-[#eb5017] focus:outline-none transition duration-200"
+            className="w-full border border-gray-300 rounded-[6px] px-2 h-10 outline-none placeholder:text-gray-400 placeholder:font-light font-normal text-sm leading-6 focus:border-[#eb5017] focus:ring-1 focus:ring-[#eb5017] focus:outline-none transition duration-200"
             autoComplete="password"
             />
-            <span onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-[30%] md:right-6 md:top-[35%] text-gray-400 text-lg md:text-xl hover:cursor-pointer">{showPassword ? <GoEye /> : <GoEyeClosed /> }</span>
+            <span onClick={() => setShowPassword(!showPassword)} className="absolute right-1.5 top-[20%] md:right-3 md:top-[25%] text-gray-400 text-lg md:text-xl hover:cursor-pointer">{showPassword ? <GoEye /> : <GoEyeClosed /> }</span>
         </div>
     </div>
   );

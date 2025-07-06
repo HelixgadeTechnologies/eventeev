@@ -1,31 +1,10 @@
 @import "tailwindcss";
 
-/* :root {
-  --background: #ffffff;
-  --foreground: #171717;
-} */
-
-/* @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-} */
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
-
 @font-face {
   font-family: 'Feather';
-  src: url('@/public/fonts/feather.ttf') format('truetype'),;
-  font-weight: 700;
-  
+  src: url('@/public/fonts/feather.ttf') format('truetype');
+  font-weight: 600;
 }
-
 
 body {
   background: var(--background);
@@ -65,4 +44,46 @@ h1, h2, h3, h4, h5, h6 {
   transform-origin: bottom left;
   transform: scaleX(1);
 }
+
+.loader-parent {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 2em;
+}
+
+.loader {
+  width: 0.3em;
+  height: 1em;
+  background-color: #ff6924;
+}
+
+.loader:nth-of-type(1) {
+  animation: grow 1s -0.45s ease-in-out infinite;
+}
+
+.loader:nth-of-type(2) {
+  animation: grow 1s -0.3s ease-in-out infinite;
+}
+
+.loader:nth-of-type(3) {
+  animation: grow 1s -0.15s ease-in-out infinite;
+}
+
+.loader:nth-of-type(4) {
+  animation: grow 1s ease-in-out infinite;
+}
+
+@keyframes grow {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(2);
+  }
+}
+
 

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 
 export const metadata: Metadata = {
-  title: "Eventeev",
+  title: "Eventeev - Elevate Your Event Experience",
   description: "Eventeev is a platform for creating and managing events.",
   icons: {
     icon: "/favicon.png",

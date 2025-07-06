@@ -1,7 +1,7 @@
-import LoginComponent from "@/ui/auth/LoginComponent"
+import LoginComponent from "@/components/display/auth/LoginComponent";
 
 export const metadata = {
-  title: 'Login | Eventeev',
+  title: 'Eventeev | Log in - Elevate Your Event Experience',
   description: 'Login to your Eventeev account',
 }
 

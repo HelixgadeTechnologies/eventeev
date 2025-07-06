@@ -1,17 +1,18 @@
 import Image from "next/image";
-import SignUpComponent from "@/components/display/auth/SignUpComponent";
+import OrganizationRegistrationForm from "@/components/display/auth/OrgDetailsComponent";
+
 
 export const metadata = {
-  title: "Eventeev | Sign up - Elevate Your Event Experience",
-  description: "Create an account to start using Eventeev",
-};
+    title: 'Eventeev | Register your organization - Elevate Your Event Experience',
+    description: 'Register your organization to start using Eventeev for your events.',
+}
 
-export default function SignUpPage() {
+export default function OrganizationRegistration() {
   return (
     <section className="flex md:flex-col lg:flex-row items-center justify-center w-screen h-screen gap-10 overflow-hidden">
       <div className="w-2/4 h-full hidden md:flex items-center justify-center relative">
         <Image
-          src="/signup.svg"
+          src="/org-deets.svg"
           alt="Sign up background image"
           width={200}
           height={100}
@@ -26,18 +27,9 @@ export default function SignUpPage() {
           height={100}
           className="absolute top-10 left-5 md:left-10"
         />
-        <div className="flex flex-col gap-10 justify-center items-start absolute top-[40%] text-white/90">
-          <h1 className="text-6xl">
-            Elevate your Event <br /> workflow with <br /> Eventeev
-          </h1>
-          <p className="w-[420px] font-extralight text-white/80 text-[15px]">
-            Our comprehensive Event platform offers you an unparalleled range of
-            event component, sparking creativity and boosting efficiency.
-          </p>
-        </div>
       </div>
       <div className="w-full md:w-2/4 h-full flex items-center justify-center">
-        <SignUpComponent />
+        <OrganizationRegistrationForm/>
       </div>
     </section>
   );
