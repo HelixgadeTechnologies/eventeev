@@ -71,7 +71,7 @@ export default function LoginComponent() {
             </Link>
           </div>
           <div className="mt-5">
-            <Button content="Sign in" />
+            <Button content="Sign in" href="/events" />
           </div>
         </form>
       </div>

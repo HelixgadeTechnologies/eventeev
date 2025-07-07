@@ -43,7 +43,7 @@ export default function NotFound() {
               Oops! It seems this page took an unexpected detour.
             </h2>
             <div className="flex justify-center mx-auto ">
-              <Button content="Back to home" href="/" />
+              <Button content="Back to home" href="/events" />
             </div>
           </div>
         </div>
