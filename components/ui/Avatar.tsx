@@ -40,7 +40,7 @@ export default function Avatar({ src, name }: AvatarProps) {
   return (
     <Link href="/user/profile/all">
       {src ? (
-        <div className="h-[40px] w-[40px] rounded-full overflow-hidden">
+        <div className="h-[30px] w-[30px] md:h-[40px] md:w-[40px] rounded-full overflow-hidden">
           <Image
             src={src}
             alt="Profile picture"
@@ -51,7 +51,7 @@ export default function Avatar({ src, name }: AvatarProps) {
         </div>
       ) : (
         <div
-          className={`h-10 w-10 rounded-full flex justify-center items-center text-sm font-medium text-white ${bgColor}`}
+          className={`h-[30px] w-[30px] md:h-10 md:w-10 rounded-full flex justify-center items-center text-xs md:text-sm font-medium text-white ${bgColor}`}
         >
           <span>{initials}</span>
         </div>

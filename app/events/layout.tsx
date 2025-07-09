@@ -1,6 +1,5 @@
 import Sidebar from "@/components/display/Sidebar";
-import Avatar from "@/components/ui/Avatar";
-import NotificationsComponent from "@/components/ui/NotificationsTab";
+import Navigation from "@/components/display/Navigation";
 
 export default function EventsLayout({
   children,
@@ -16,12 +15,9 @@ export default function EventsLayout({
 
       {/* Main content */}
       <section className="flex-grow flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <div className="flex justify-end items-center gap-3 bg-white px-6 py-3">
-          <NotificationsComponent />
-          <Avatar src="" name="esther chinda" />
-        </div>
-
+        {/* Top bar & mobile navigation */}
+        <Navigation />
+        
         {/* Scrollable content */}
         <div className="flex-grow overflow-y-auto p-6 bg-gray-50">
           {children}
