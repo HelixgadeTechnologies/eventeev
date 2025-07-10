@@ -21,11 +21,14 @@ const bgColors = [
 
 function getInitials(fullName?: string) {
   if (!fullName) return "";
-  const parts = fullName.trim().split(" ");
+
+  const parts = fullName.trim().split(/\s+/); // split on spaces
   const first = parts[0]?.charAt(0).toUpperCase() || "";
-  const last = parts[1]?.charAt(0).toUpperCase() || "";
-  return first + last;
+  const second = parts[1]?.charAt(0).toUpperCase() || "";
+
+  return first + second;
 }
+
 
 function getColorFromName(name?: string) {
   if (!name) return bgColors[0];
@@ -38,7 +41,7 @@ export default function Avatar({ src, name }: AvatarProps) {
   const bgColor = getColorFromName(name);
 
   return (
-    <Link href="/user/profile/all">
+    <Link href="/user/profile">
       {src ? (
         <div className="h-[30px] w-[30px] md:h-[40px] md:w-[40px] rounded-full overflow-hidden">
           <Image

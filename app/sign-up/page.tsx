@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SignUpComponent from "@/components/display/auth/SignUpComponent";
+import SignUpComponent from "@/components/auth/SignUpComponent";
 
 export const metadata = {
   title: "Eventeev | Sign up - Elevate Your Event Experience",

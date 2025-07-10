@@ -1,7 +1,8 @@
 import Sidebar from "@/components/display/Sidebar";
 import Navigation from "@/components/display/Navigation";
+import Breadcrumb from "@/components/ui/BreadcrumbComponent";
 
-export default function EventsLayout({
+export default function UserLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -15,11 +16,9 @@ export default function EventsLayout({
 
       {/* Main content */}
       <section className="flex-grow flex flex-col overflow-hidden">
-        {/* Top bar & mobile navigation */}
         <Navigation />
-        
-        {/* Scrollable content */}
         <div className="flex-grow overflow-y-auto p-6 bg-gray-50">
+          <Breadcrumb />
           {children}
         </div>
       </section>

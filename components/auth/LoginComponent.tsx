@@ -71,13 +71,16 @@ export default function LoginComponent() {
             </Link>
           </div>
           <div className="mt-5">
-            <Button content="Sign in" href="/events" />
+            <Button content="Sign in" href="/user/events" />
           </div>
         </form>
       </div>
       <div className="text-center text-xs text-black leading-6 space-x-1 h-[52px] px-4 py-2 rounded-[30px] bg-white flex justify-center items-center">
         <span>Don&apos;t have an account?</span>
-        <a href="/sign-up" className="text-[#eb5017] custom-underline font-semibold">
+        <a
+          href="/sign-up"
+          className="text-[#eb5017] custom-underline font-semibold"
+        >
           Sign up
         </a>
       </div>
