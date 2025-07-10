@@ -19,6 +19,8 @@ export default function Sidebar() {
     return pattern.test(pathname);
   };
 
+  const eventId = pathname.match(/^\/user\/events\/([^/]+)/)?.[1] || "";
+
   const currentNavGroup = isEventRoute(pathname)
     ? topNavigations
     : eventNavigations;
@@ -52,17 +54,17 @@ export default function Sidebar() {
         <section className="flex flex-col justify-between h-full w-full">
           <div className="space-y-1 border-b border-gray-200 pb-2">
             {currentNavGroup.map((nav, index) => {
-              const isActive = pathname.startsWith(nav.href) || pathname == nav.href;
+              const actualHref = nav.href.replace(":id", eventId);
+              const isActive = pathname.startsWith(actualHref);
               const icon = isActive ? nav.iconActive : nav.iconInactive;
+            
               return (
                 <Link
                   key={index}
-                  href={nav.href}
+                  href={actualHref}
                   onClick={closeMobile}
                   className={`h-11 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
-                    isActive
-                      ? "bg-[#FFECE5] text-black"
-                      : "hover:bg-gray-50 text-gray-600"
+                    isActive ? "bg-[#FFECE5] text-black" : "hover:bg-gray-50 text-gray-600"
                   }`}
                 >
                   <Image src={icon} alt={nav.name} width={18} height={18} />
@@ -70,6 +72,7 @@ export default function Sidebar() {
                 </Link>
               );
             })}
+
           </div>
 
           <div className="space-y-1">
