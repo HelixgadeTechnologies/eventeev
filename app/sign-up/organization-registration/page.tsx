@@ -1,11 +1,12 @@
 import Image from "next/image";
-import OrganizationRegistrationForm from "@/components/display/auth/OrgDetailsComponent";
-
+import OrganizationRegistrationForm from "@/components/auth/OrgDetailsComponent";
 
 export const metadata = {
-    title: 'Eventeev | Register your organization - Elevate Your Event Experience',
-    description: 'Register your organization to start using Eventeev for your events.',
-}
+  title:
+    "Eventeev | Register your organization - Elevate Your Event Experience",
+  description:
+    "Register your organization to start using Eventeev for your events.",
+};
 
 export default function OrganizationRegistration() {
   return (
@@ -29,7 +30,7 @@ export default function OrganizationRegistration() {
         />
       </div>
       <div className="w-full md:w-2/4 h-full flex items-center justify-center">
-        <OrganizationRegistrationForm/>
+        <OrganizationRegistrationForm />
       </div>
     </section>
   );
