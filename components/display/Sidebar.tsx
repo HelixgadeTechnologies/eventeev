@@ -6,7 +6,7 @@ import {
   bottomNavigations,
   eventNavigations,
   topNavigations,
-} from "@/lib/sidebar";
+} from "@/lib/demo-data/sidebar";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 
@@ -57,14 +57,16 @@ export default function Sidebar() {
               const actualHref = nav.href.replace(":id", eventId);
               const isActive = pathname.startsWith(actualHref);
               const icon = isActive ? nav.iconActive : nav.iconInactive;
-            
+
               return (
                 <Link
                   key={index}
                   href={actualHref}
                   onClick={closeMobile}
                   className={`h-11 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
-                    isActive ? "bg-[#FFECE5] text-black" : "hover:bg-gray-50 text-gray-600"
+                    isActive
+                      ? "bg-[#FFECE5] text-black"
+                      : "hover:bg-gray-50 text-gray-600"
                   }`}
                 >
                   <Image src={icon} alt={nav.name} width={18} height={18} />
@@ -72,7 +74,6 @@ export default function Sidebar() {
                 </Link>
               );
             })}
-
           </div>
 
           <div className="space-y-1">

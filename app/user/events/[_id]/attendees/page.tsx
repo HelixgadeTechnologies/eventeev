@@ -1,38 +1,27 @@
-import { publishedEvents } from "@/lib/events";
+import { publishedEvents } from "@/lib/demo-data/events";
+import { generateEventMetadata, generateEventStaticParams } from "@/lib/utils/get-static";
 
 interface EventsDetailsProps {
-    params: Promise<{
-        _id: string;
-    }>
-};
+  params: Promise<{
+    _id: string;
+  }>;
+}
+
+export async function generateMetadata(props: { params: { _id: string } }) {
+  return generateEventMetadata(props);
+}
 
 export async function generateStaticParams() {
-    return publishedEvents.map((events) => ({
-        _id: events._id,
-    }))
-};
-
-export async function generateMetadata({ params }: EventsDetailsProps) {
-    const { _id } = await params; // Await the params Promise
-    const events = publishedEvents.find((ev) => ev._id === _id);
-
-    return {
-        title: `${events?.name} - Eventeev`,
-        description: events?.description,
-    };
+  return generateEventStaticParams();
 }
 
 export default async function EventsDashboard({ params }: EventsDetailsProps) {
-    const { _id } = await params; // Await the params Promise
-    const events = publishedEvents.find((ev) => ev._id === _id);
+  const { _id } = await params; // Await the params Promise
+  const events = publishedEvents.find((ev) => ev._id === _id);
 
-    if (!events) {
-        return (
-            <div>no event found.</div>
-        )
-    }
+  if (!events) {
+    return <div>no event found.</div>;
+  }
 
-    return (
-        <section>dashboard for {events.name}</section>
-    )
+  return <section>Attendees for {events.name}</section>;
 }

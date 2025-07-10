@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { breadcrumbs } from "@/lib/breadcrumbs";
+import { breadcrumbs } from "@/lib/demo-data/breadcrumbs";
 
 type Props = {
   fallbackTitle?: string;

@@ -7,7 +7,7 @@ export const breadcrumbs = [
     subtitle: "Control your profile setup and integrations",
   },
   {
-    href: "/user/events/:id/dasboard",
+    href: "/user/events/:id/dashboard",
     title: `Welcome ${username}`,
     subtitle:
       "It’s a sunny day today, we hope you’re preparing for the big day! 😊",

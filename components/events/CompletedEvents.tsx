@@ -1,4 +1,4 @@
-import { completedEvents } from "@/lib/events";
+import { completedEvents } from "@/lib/demo-data/events";
 import EventPreviewCard from "./EventPreviewCard";
 import EmptyState from "@/components/display/EmptyStateComponent";
 

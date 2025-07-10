@@ -1,4 +1,4 @@
-import { draftedEvents } from "@/lib/events";
+import { draftedEvents } from "@/lib/demo-data/events";
 import EventPreviewCard from "./EventPreviewCard";
 import EmptyState from "@/components/display/EmptyStateComponent";
 

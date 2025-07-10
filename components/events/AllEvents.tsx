@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { publishedEvents, draftedEvents, completedEvents } from "@/lib/events";
+import {
+  publishedEvents,
+  draftedEvents,
+  completedEvents,
+} from "@/lib/demo-data/events";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import PublishedEvents from "@/components/events/PublishedEvents";
@@ -57,10 +61,16 @@ export default function EventsComponent() {
             className="relative hover:cursor-pointer text-xs md:text-sm"
             onClick={() => handleTabChange(tab.id)}
           >
-            <p className={activeTab === tab.id ? "text-[#F56630]" : "text-[#344054]"}>
+            <p
+              className={
+                activeTab === tab.id ? "text-[#F56630]" : "text-[#344054]"
+              }
+            >
               {tab.name}
             </p>
-            {activeTab === tab.id && <span className="border-t-2 border-[#F56630] h-1.5 w-full absolute -bottom-[22px] md:-bottom-5"></span>}
+            {activeTab === tab.id && (
+              <span className="border-t-2 border-[#F56630] h-1.5 w-full absolute -bottom-[22px] md:-bottom-5"></span>
+            )}
           </div>
         ))}
       </div>
