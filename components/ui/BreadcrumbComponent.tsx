@@ -21,10 +21,10 @@ export default function Breadcrumb({
   return (
     <section className="">
       <div>
-        <h2 className="font-semibold text-base md:text-[24px]">
+        <h2 className="font-semibold text-base md:text-[22px]">
           {matched?.title || fallbackTitle}
         </h2>
-        <p className="text-xs md:text-sm text-gray-500">
+        <p className="text-xs text-gray-500">
           {matched?.subtitle || fallbackSubtitle}
         </p>
       </div>

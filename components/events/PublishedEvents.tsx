@@ -19,6 +19,7 @@ export default function PublishedEvents() {
             name={events.name}
             time={events.startTime}
             date={events.startDate}
+            id={events._id}
           />
         )
       )}

@@ -50,17 +50,17 @@ export default function EventsComponent() {
 
   return (
     <section>
-      <div className="h-[52px] w-full gap-4 flex items-center text-sm border-b border-[#E4E7EC] my-6 relative">
+      <div className="h-[52px] w-full gap-6 flex items-center text-sm border-b border-[#E4E7EC] my-6 relative">
         {tabs.map((tab) => (
           <div
             key={tab.id}
-            className="relative hover:cursor-pointer text-xs md:text-base"
+            className="relative hover:cursor-pointer text-xs md:text-sm"
             onClick={() => handleTabChange(tab.id)}
           >
             <p className={activeTab === tab.id ? "text-[#F56630]" : "text-[#344054]"}>
               {tab.name}
             </p>
-            {activeTab === tab.id && <span className="border-t border-[#F56630] h-1.5 w-full absolute -bottom-[22px] md:-bottom-5"></span>}
+            {activeTab === tab.id && <span className="border-t-2 border-[#F56630] h-1.5 w-full absolute -bottom-[22px] md:-bottom-5"></span>}
           </div>
         ))}
       </div>

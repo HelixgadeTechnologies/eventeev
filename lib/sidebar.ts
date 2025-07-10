@@ -1,37 +1,37 @@
 export const topNavigations = [
   {
     name: "Dashboard",
-    href: "/user/events/dashboard",
+    href: "/user/events/:id/dashboard",
     iconInactive: "/icons/dashboard-inactive.svg",
     iconActive: "/icons/dashboard-active.svg",
   },
   {
     name: "Attendees",
-    href: "/user/events/attendees",
+    href: "/user/events/:id/attendees",
     iconInactive: "/icons/attendees-inactive.svg",
     iconActive: "/icons/attendees-active.svg",
   },
   {
     name: "Speaker List",
-    href: "/user/events/speakers",
+    href: "/user/events/:id/speakers",
     iconInactive: "/icons/speakers-inactive.svg",
     iconActive: "/icons/speakers-active.svg",
   },
   {
     name: "Chat Room",
-    href: "/user/events/chat",
+    href: "/user/events/:id/chat",
     iconInactive: "/icons/chat-inactive.svg",
     iconActive: "/icons/chat-active.svg",
   },
   {
     name: "Tickets",
-    href: "/user/events/tickets",
+    href: "/user/events/:id/tickets",
     iconInactive: "/icons/tickets-inactive.svg",
     iconActive: "/icons/tickets-active.svg",
   },
   {
     name: "Analytics",
-    href: "/user/events/analytics",
+    href: "/user/events/:id/analytics",
     iconInactive: "/icons/analytics-inactive.svg",
     iconActive: "/icons/analytics-active.svg",
   },
