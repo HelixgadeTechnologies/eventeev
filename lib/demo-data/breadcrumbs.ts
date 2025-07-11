@@ -1,4 +1,4 @@
-const username = "GDG Port Harcourt";
+const username = "Richard";
 
 export const breadcrumbMap = [
   {
@@ -9,7 +9,7 @@ export const breadcrumbMap = [
   },
   {
     pattern: "/user/events/:id/dashboard",
-    title: (eventName: string) => `Welcome ${eventName}`,
+    title: `Welcome ${username}`,
     subtitle: "It’s a sunny day today, we hope you’re preparing for the big day! 😊",
   },
   {

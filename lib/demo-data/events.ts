@@ -21,6 +21,62 @@ export const publishedEvents = [
     createdAt: "2025-03-11T09:29:07.754Z",
     updatedAt: "2025-03-11T09:29:07.754Z",
     __v: 0,
+    analytics: [
+      { title: "RSVP", value: 0, percentage: 0, icon: "/icons/thermometer.svg" },
+      { title: "Check-ins", value: 0, percentage: 0, icon: "/icons/3d.svg" },
+      { title: "Amount generated", value: 0, percentage: 0, icon: "/icons/sun.svg" },
+    ],
+    attendees: [
+      {
+        id: 1,
+        username: "Olamide Akitan",
+        useremail: "olamideakintan@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 2,
+        username: "Alison David",
+        useremail: "oalisondavid@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 3,
+        username: "Megan Willow",
+        useremail: "meganwillow@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 4,
+        username: "Janelle Levi",
+        useremail: "janellelevi@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 5,
+        username: "Mary Watson",
+        useremail: "marywatson@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 6,
+        username: "Spencer James",
+        useremail: "spencerjames@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+      {
+        id: 7,
+        username: "Olivia Mahun",
+        useremail: "livmahun@gmail.com",
+        dateregistered: "12th August, 2024",
+        pfp: "https://res.cloudinary.com/dnou1zvji/image/upload/v1741602966/confetti-birthday-svgrepo-com_1_kiaroc.png",
+      },
+    ],
   },
 ];
 

@@ -2,7 +2,7 @@
 
 import { breadcrumbMap } from "../demo-data/breadcrumbs";
 
-export function matchBreadcrumb(pathname: string, eventName?: string) {
+export function matchBreadcrumb(pathname: string) {
   for (const item of breadcrumbMap) {
     const regex = new RegExp(
       "^" +
@@ -13,11 +13,13 @@ export function matchBreadcrumb(pathname: string, eventName?: string) {
     );
 
     if (regex.test(pathname)) {
-      const title =
-        typeof item.title === "function" ? item.title(eventName ?? "Event") : item.title;
+    //   const title =
+    //     typeof item.title === "function" ? item.title(eventName ?? "Event") : item.title;
+    const title = item.title;
       return {
         title,
         subtitle: item.subtitle,
+        href: item.pattern
       };
     }
   }
