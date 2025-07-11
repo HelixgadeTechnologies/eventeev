@@ -3,6 +3,7 @@
 import { CiCircleMore } from "react-icons/ci";
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
+import { formatDate } from "@/lib/utils/configure-date";
 
 type EventCardProps = {
     name: string;
@@ -21,7 +22,7 @@ export default function EventPreviewCard({
 }: EventCardProps) {
     return (
         <Link href={`/user/events/${id}/dashboard`}>
-            <div className="rounded-[16px] min-h-[180px] md:min-h-[235px] bg-white border border-[#B8C4CE] p-5 flex flex-col justify-between">
+            <div className="rounded-[16px] min-h-[180px] md:min-h-[200px] bg-white border border-[#B8C4CE] p-5 flex flex-col justify-between">
                 <div>
                     <div className="flex justify-between items-center">
                         {imageURL ? (<Avatar src={imageURL} />) : (<Avatar name={name} />)}
@@ -29,7 +30,7 @@ export default function EventPreviewCard({
                     </div>
                     <div className="space-y-1 mt-4">
                         <p className="text-sm md:text-lg font-bold">{name}</p>
-                        <p className="text-[10px] md:text-xs">{time}, {date}</p>
+                        <p className="text-[10px] md:text-xs">{time}, {formatDate(date)}</p>
                     </div>
                 </div>
                 <footer className="text-[10px] md:text-xs flex justify-between items-center">
