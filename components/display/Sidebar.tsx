@@ -9,6 +9,8 @@ import {
 } from "@/lib/demo-data/sidebar";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
+import Avatar from "@/components/ui/Avatar";
+import { LuLogOut } from "react-icons/lu";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -52,7 +54,7 @@ export default function Sidebar() {
 
         {/* top navigations */}
         <section className="flex flex-col justify-between h-full w-full">
-          <div className="space-y-1 border-b border-gray-200 pb-2">
+          <div className="border-b border-gray-200 pb-2">
             {currentNavGroup.map((nav, index) => {
               const actualHref = nav.href.replace(":id", eventId);
               const isActive = pathname.startsWith(actualHref);
@@ -63,7 +65,7 @@ export default function Sidebar() {
                   key={index}
                   href={actualHref}
                   onClick={closeMobile}
-                  className={`h-11 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
+                  className={`h-10 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
                     isActive
                       ? "bg-[#FFECE5] text-black"
                       : "hover:bg-gray-50 text-gray-600"
@@ -76,7 +78,7 @@ export default function Sidebar() {
             })}
           </div>
 
-          <div className="space-y-1">
+          <div className="">
             {bottomNavigations.map((nav, index) => {
               const isActive = pathname.startsWith(nav.href);
               const icon = isActive ? nav.iconActive : nav.iconInactive;
@@ -84,7 +86,7 @@ export default function Sidebar() {
                 <Link
                   key={index}
                   href={nav.href}
-                  className={`h-11 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
+                  className={`h-10 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
                     isActive
                       ? "bg-[FFECE5] text-black"
                       : "hover:bg-gray-50 text-gray-600"
@@ -99,7 +101,14 @@ export default function Sidebar() {
         </section>
 
         {/* footer */}
-        <footer></footer>
+        <footer className="flex items-end gap-2">
+          <Avatar name="Richard Edem" />
+          <div>
+            <p className="text-[13px] font-semibold text-[#101928]">Richard Edem</p>
+            <p className="text-[11px] font-normal text-[#475367]">richardedem@gmail.com</p>
+          </div>
+          <LuLogOut className="text-xl" />
+        </footer>
       </aside>
     </>
   );

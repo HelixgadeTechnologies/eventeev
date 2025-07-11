@@ -1,27 +1,17 @@
+"use client";
+
 import { publishedEvents } from "@/lib/demo-data/events";
-import { generateEventMetadata, generateEventStaticParams } from "@/lib/utils/get-static";
+import { useParams } from "next/navigation";
 
-interface EventsDetailsProps {
-  params: Promise<{
-    _id: string;
-  }>;
-}
 
-export async function generateMetadata(props: { params: { _id: string } }) {
-  return generateEventMetadata(props);
-}
+export default function EventsDashboard() {
+  const { _id } = useParams();
 
-export async function generateStaticParams() {
-  return generateEventStaticParams();
-}
+  const currentEvent = publishedEvents.find(event => event._id === _id);
 
-export default async function EventsDashboard({ params }: EventsDetailsProps) {
-  const { _id } = await params; // Await the params Promise
-  const events = publishedEvents.find((ev) => ev._id === _id);
-
-  if (!events) {
+  if (!currentEvent) {
     return <div>no event found.</div>;
   }
 
-  return <section>Attendees for {events.name}</section>;
+  return <section>Attendees for {currentEvent.name}</section>;
 }

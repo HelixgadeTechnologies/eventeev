@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { breadcrumbs } from "@/lib/demo-data/breadcrumbs";
+import { usePathname, useParams } from "next/navigation";
+import { publishedEvents } from "@/lib/demo-data/events";
+import { matchBreadcrumb } from "@/lib/utils/match-breadcrumb";
 
 type Props = {
   fallbackTitle?: string;
@@ -13,13 +14,15 @@ export default function Breadcrumb({
   fallbackSubtitle = "Control your profile setup and integrations",
 }: Props) {
   const pathname = usePathname();
+  const { _id } = useParams();
 
-  const matched = breadcrumbs.find((item) =>
-    pathname.startsWith(item.href.replace(/\[.*?\]/, ""))
-  );
+  const currentEvent = publishedEvents.find((event) => event._id === _id);
+  const eventName = currentEvent?.name;
+
+  const matched = matchBreadcrumb(pathname, eventName);
 
   return (
-    <section className="">
+    <section>
       <div>
         <h2 className="font-semibold text-base md:text-[22px]">
           {matched?.title || fallbackTitle}
