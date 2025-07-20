@@ -1,0 +1,58 @@
+export const dashboardServices = [
+  {
+    name: "Tickets",
+    icon: "/icons/service-tickets.svg",
+    bg: "#E7F6EC",
+    borderColor: "green.500",
+    route: "/tickets",
+  },
+  {
+    name: "Check-ins",
+    icon: "/icons/service-checkin.svg",
+    bg: "#E3EFFC",
+    borderColor: "blue.500",
+    route: "",
+  },
+  {
+    name: "Speakers",
+    icon: "/icons/service-speaker.svg",
+    bg: "#FEF6E7",
+    borderColor: "orange.500",
+    route: "",
+  },
+  {
+    name: "Chat Room",
+    icon: "/icons/service-chatroom.svg",
+    bg: "#FFECE5",
+    borderColor: "red.500",
+    route: "",
+  },
+  {
+    name: "Games",
+    icon: "/icons/service-games.svg",
+    bg: "#FEF6E7",
+    borderColor: "orange.500",
+    route: "",
+  },
+  {
+    name: "Analytics",
+    icon: "/icons/service-analytics.svg",
+    bg: "#FFECE5",
+    borderColor: "red.500",
+    route: "",
+  },
+  {
+    name: "Polls",
+    icon: "/icons/service-polls.svg",
+    bg: "#E7F6EC",
+    borderColor: "green.500",
+    route: "",
+  },
+  {
+    name: "Matchmaking",
+    icon: "/icons/service-networking.svg",
+    bg: "#E3EFFC",
+    borderColor: "blue.500",
+    route: "",
+  },
+];

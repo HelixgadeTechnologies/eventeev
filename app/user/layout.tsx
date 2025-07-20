@@ -19,7 +19,9 @@ export default function UserLayout({
         <Navigation />
         <div className="flex-grow overflow-y-auto p-6 bg-gray-50">
           <Breadcrumb />
-          {children}
+          <div className="my-5">
+            {children}
+          </div>
         </div>
       </section>
     </div>

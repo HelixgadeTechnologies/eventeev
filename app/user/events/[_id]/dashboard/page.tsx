@@ -1,27 +1,35 @@
+"use client";
+
+import AnalyticsCard from "@/components/display/AnalyticsCard";
 import { publishedEvents } from "@/lib/demo-data/events";
-import { generateEventMetadata, generateEventStaticParams } from "@/lib/utils/get-static";
+import { useParams } from "next/navigation";
 
-interface EventsDetailsProps {
-  params: Promise<{
-    _id: string;
-  }>;
-}
 
-export async function generateMetadata(props: { params: { _id: string } }) {
-  return generateEventMetadata(props);
-}
+export default function EventsDashboard() {
+  const { _id } = useParams();
 
-export async function generateStaticParams() {
-  return generateEventStaticParams();
-}
+  const currentEvent = publishedEvents.find(event => event._id === _id);
 
-export default async function EventsDashboard({ params }: EventsDetailsProps) {
-  const { _id } = await params; // Await the params Promise
-  const events = publishedEvents.find((ev) => ev._id === _id);
-
-  if (!events) {
+  if (!currentEvent) {
     return <div>no event found.</div>;
   }
 
-  return <section>dashboard for {events.name}</section>;
+  return (
+    <section className="flex gap-5">
+      <div className="w-[70%]">
+        <div className="grid grid-cols-3 w-full gap-3">
+          {currentEvent.analytics.map((a, index) => (
+            <AnalyticsCard 
+            key={index}
+            icon={a.icon}
+            title={a.title}
+            value={a.value}
+            percentage={a.percentage}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="w-[30%]"></div>
+    </section>
+  );
 }
