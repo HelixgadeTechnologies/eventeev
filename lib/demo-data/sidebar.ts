@@ -1,37 +1,37 @@
 export const topNavigations = [
   {
     name: "Dashboard",
-    href: "/user/events/:id/dashboard",
+    href: "/events/:id/dashboard",
     iconInactive: "/icons/dashboard-inactive.svg",
     iconActive: "/icons/dashboard-active.svg",
   },
   {
     name: "Attendees",
-    href: "/user/events/:id/attendees",
+    href: "/events/:id/attendees",
     iconInactive: "/icons/attendees-inactive.svg",
     iconActive: "/icons/attendees-active.svg",
   },
   {
     name: "Speaker List",
-    href: "/user/events/:id/speakers",
+    href: "/events/:id/speakers",
     iconInactive: "/icons/speakers-inactive.svg",
     iconActive: "/icons/speakers-active.svg",
   },
   {
     name: "Chat Room",
-    href: "/user/events/:id/chat",
+    href: "/events/:id/chat",
     iconInactive: "/icons/chat-inactive.svg",
     iconActive: "/icons/chat-active.svg",
   },
   {
     name: "Tickets",
-    href: "/user/events/:id/tickets",
+    href: "/events/:id/tickets",
     iconInactive: "/icons/tickets-inactive.svg",
     iconActive: "/icons/tickets-active.svg",
   },
   {
     name: "Analytics",
-    href: "/user/events/:id/analytics",
+    href: "/events/:id/analytics",
     iconInactive: "/icons/analytics-inactive.svg",
     iconActive: "/icons/analytics-active.svg",
   },
@@ -40,19 +40,19 @@ export const topNavigations = [
 export const bottomNavigations = [
   {
     name: "Settings",
-    href: "/user/settings",
+    href: "/settings",
     iconInactive: "/icons/settings-inactive.svg",
     iconActive: "/icons/settings-active.svg",
   },
   {
     name: "Help Center",
-    href: "/user/help",
+    href: "/help",
     iconInactive: "/icons/help-inactive.svg",
     iconActive: "/icons/help-active.svg",
   },
   {
     name: "Refer family & friends",
-    href: "/user/refer",
+    href: "/refer",
     iconInactive: "/icons/refer-inactive.svg",
     iconActive: "/icons/refer-active.svg",
   },
@@ -61,19 +61,19 @@ export const bottomNavigations = [
 export const eventNavigations = [
   {
     name: "Home",
-    href: "/user/events",
+    href: "/events",
     iconInactive: "/icons/dashboard-inactive.svg",
     iconActive: "/icons/dashboard-active.svg",
   },
   {
     name: "Profile",
-    href: "/user/profile",
+    href: "/profile",
     iconInactive: "/icons/attendees-inactive.svg",
     iconActive: "/icons/attendees-active.svg",
   },
   {
     name: "Monetization",
-    href: "/user/monetization",
+    href: "/monetization",
     iconInactive: "/icons/monetization-inactive.svg",
     iconActive: "/icons/monetization-active.svg",
   },
