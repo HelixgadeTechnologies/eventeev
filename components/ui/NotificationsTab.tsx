@@ -14,7 +14,7 @@ export default function NotificationsComponent() {
   return (
     <Link
       onClick={handleNotifictaion}
-      href={"/user/events/notifications"}
+      href={"/events/notifications"}
       className="h-[30px] w-[30px] md:h-10 md:w-10 rounded-full bg-gray-100 flex justify-center items-center text-sm font-medium"
     >
       <Image

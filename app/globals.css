@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: 'Feather';
-  src: url('@/public/fonts/feather.ttf') format('truetype');
+  src: url('/fonts/feather.ttf') format('truetype');
   font-weight: 600;
 }
 
@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-login {
-  background-image: url("@/public/login.svg");
+  background-image: url("/login.svg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

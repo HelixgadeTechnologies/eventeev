@@ -17,11 +17,11 @@ export default function Sidebar() {
   const { mobileOpen, closeMobile } = useSidebar();
 
   const isEventRoute = (pathname: string) => {
-    const pattern = /^\/user\/events\/[^/]+\/[^/]+$/;
+    const pattern = /^\/events\/[^/]+\/[^/]+$/;
     return pattern.test(pathname);
   };
 
-  const eventId = pathname.match(/^\/user\/events\/([^/]+)/)?.[1] || "";
+  const eventId = pathname.match(/^\/events\/([^/]+)/)?.[1] || "";
 
   const currentNavGroup = isEventRoute(pathname)
     ? topNavigations

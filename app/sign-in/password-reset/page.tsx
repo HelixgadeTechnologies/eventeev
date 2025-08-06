@@ -35,7 +35,7 @@ export default function ResetPassword() {
                         <p className="text-black/80 text-sm text-center">
                             One more step to go and you are back into your account
                         </p>
-                        <form action="">
+                        <form action="" className="space-y-4">
                             <PasswordInput
                                 name="password"
                                 value={userData.password}

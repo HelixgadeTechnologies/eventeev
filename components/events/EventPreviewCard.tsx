@@ -21,7 +21,7 @@ export default function EventPreviewCard({
     id,
 }: EventCardProps) {
     return (
-        <Link href={`/user/events/${id}/dashboard`}>
+        <Link href={`/events/${id}/dashboard`}>
             <div className="rounded-[16px] min-h-[180px] md:min-h-[200px] bg-white border border-[#B8C4CE] p-5 flex flex-col justify-between">
                 <div>
                     <div className="flex justify-between items-center">

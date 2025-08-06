@@ -41,7 +41,7 @@ export default function Avatar({ src, name }: AvatarProps) {
   const bgColor = getColorFromName(name);
 
   return (
-    <Link href="/user/profile">
+    <Link href="/profile">
       {src ? (
         <div className="h-[30px] w-[30px] md:h-[40px] md:w-[40px] rounded-full overflow-hidden">
           <Image
