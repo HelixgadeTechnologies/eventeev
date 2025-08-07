@@ -3,7 +3,9 @@ import Link from "next/link";
 
 type AvatarProps = {
   src?: string;
-  name?: string;
+  name: string;
+  href?: string;
+  isBigger?: boolean;
 };
 
 const bgColors = [
@@ -36,14 +38,14 @@ function getColorFromName(name?: string) {
   return bgColors[charCodeSum % bgColors.length];
 }
 
-export default function Avatar({ src, name }: AvatarProps) {
+export default function Avatar({ src, name, href = "/profile", isBigger }: AvatarProps) {
   const initials = getInitials(name);
   const bgColor = getColorFromName(name);
 
   return (
-    <Link href="/profile">
+    <Link href={href}>
       {src ? (
-        <div className="h-[30px] w-[30px] md:h-[40px] md:w-[40px] rounded-full overflow-hidden">
+        <div className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full overflow-hidden`}>
           <Image
             src={src}
             alt="Profile picture"
@@ -54,7 +56,7 @@ export default function Avatar({ src, name }: AvatarProps) {
         </div>
       ) : (
         <div
-          className={`h-[30px] w-[30px] md:h-10 md:w-10 rounded-full flex justify-center items-center text-xs md:text-sm font-medium text-white ${bgColor}`}
+          className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full flex justify-center items-center text-xs md:text-sm font-medium text-white ${bgColor}`}
         >
           <span>{initials}</span>
         </div>

@@ -86,4 +86,14 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+.primary {
+  color: #eb5017;
+}
 
+.custom-scrollbar::-webkit-scrollbar { width: 4px; } 
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 2px; } 
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 2px; }
+
+.hidden-scrollbar::-webkit-scrollbar {
+    display: none;
+}
