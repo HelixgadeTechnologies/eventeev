@@ -4,7 +4,7 @@ export const publishedEvents = [
     userId: "67ced3aa2c80df22d8d4cbf5",
     name: "Godfrey's Birthday Bash",
     description: "A conference on AI and Tech",
-    startDate: "2025-06-15T00:00:00.000Z",
+    startDate: "2025-08-15T00:00:00.000Z",
     endDate: "2025-06-17T00:00:00.000Z",
     startTime: "10:00 AM",
     endTime: "5:00 PM",
@@ -21,11 +21,6 @@ export const publishedEvents = [
     createdAt: "2025-03-11T09:29:07.754Z",
     updatedAt: "2025-03-11T09:29:07.754Z",
     __v: 0,
-    analytics: [
-      { title: "RSVP", value: 0, percentage: 0, icon: "/icons/thermometer.svg" },
-      { title: "Check-ins", value: 0, percentage: 0, icon: "/icons/3d.svg" },
-      { title: "Amount generated", value: 0, percentage: 0, icon: "/icons/sun.svg" },
-    ],
     attendees: [
       {
         id: 1,

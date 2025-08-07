@@ -36,7 +36,7 @@ export default function Breadcrumb({
 
       {/* tab for dashboard */}
       {matched?.href.includes("dashboard") && (
-        <div className="w-[217px] h-[74px] bg-white rounded-xl gap-3 flex justify-center items-center px-5 py-4 border border-[#B8C4CE] mr-10">
+        <div className="w-[217px] h-[74px] bg-white rounded-xl gap-3 flex justify-center items-center px-5 py-4 border border-[#B8C4CE]">
           <div className="rounded-full bg-[#F0F2F5] h-10 w-10 flex justify-center items-center">
             <Image src={"/icons/speakers-inactive.svg"} alt="Calendar" height={18} width={18} />
           </div>

@@ -54,7 +54,7 @@ export default function Sidebar() {
 
         {/* top navigations */}
         <section className="flex flex-col justify-between h-full w-full">
-          <div className="border-b border-gray-200 pb-2">
+          <div className="border-b border-gray-200 pb-2 space-y-1">
             {currentNavGroup.map((nav, index) => {
               const actualHref = nav.href.replace(":id", eventId);
               const isActive = pathname.startsWith(actualHref);
