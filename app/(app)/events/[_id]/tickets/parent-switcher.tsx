@@ -3,6 +3,9 @@
 import TabComponent from "@/components/ui/TabComponent";
 import { FaMoneyBillWave, FaGift } from "react-icons/fa6";
 import { BiDonateHeart } from "react-icons/bi";
+import PaidTickets from "@/components/tickets/PaidTickets";
+import FreeTickets from "@/components/tickets/FreeTickets";
+import DonatedTickets from "@/components/tickets/DonatedTickets";
 
 
 export default function TicketParentSwitcher() {
@@ -14,6 +17,15 @@ export default function TicketParentSwitcher() {
     return (
         <TabComponent
         data={tabs}
+        renderContent={(tabId => {
+            if (tabId === 1) {
+                return <PaidTickets />;
+            } else if (tabId === 2) {
+                return <FreeTickets/>;
+            } else {
+                return <DonatedTickets/>
+            }
+        })}
         />
     )
 }

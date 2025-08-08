@@ -107,7 +107,9 @@ export default function Sidebar() {
             <p className="text-[13px] font-semibold text-[#101928]">Richard Edem</p>
             <p className="text-[11px] font-normal text-[#475367]">richardedem@gmail.com</p>
           </div>
-          <LuLogOut className="text-xl" />
+          <Link href={"/"}>
+            <LuLogOut className="text-xl" />
+          </Link>
         </footer>
       </aside>
     </>

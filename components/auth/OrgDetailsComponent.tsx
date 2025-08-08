@@ -89,10 +89,13 @@ export default function OrganizationRegistrationForm() {
         <Modal
           isOpen={isModalOpen}
           onClose={handleModalClose}
-          header="Verify your email"
-          message="We sent a mail to your email address, click on the link to verify your account"
-          buttonContent="Open email"
-        />
+        >
+          <h2 className="text-xl font-semibold mb-2 text-center">Verify your email</h2>
+          <p className="text-sm text-center text-black/70">We sent a mail to your email address, click on the link to verify your account</p>
+          <div className="mt-6 flex justify-end gap-2">
+            <Button onClick={handleModalClose} content="Open email" />
+          </div>
+        </Modal>
       )}
     </>
   );

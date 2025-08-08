@@ -6,6 +6,7 @@ import { todaysDate } from "@/lib/utils/configure-date";
 import Image from "next/image";
 import { publishedEvents } from "@/lib/demo-data/events";
 import Button from "./Button";
+import { IoAdd } from "react-icons/io5";
 
 type Props = {
   fallbackTitle?: string;
@@ -40,7 +41,7 @@ export default function Breadcrumb({
       </div>
     ),
     
-    "tickets": <Button content="Add Ticket"/>,
+    "tickets": <Button content="Add Ticket" icon={<IoAdd className="text-lg"/>} />,
     
   };
 
