@@ -106,8 +106,8 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                 New attendees would appear here! 😊
               </p>
             ) : (
-              <div className="flex gap-5 items-center hidden-scrollbar overflow-x-auto w-full mx-4">
-                {currentEvent.attendees.slice(0, 6).map((attendee) => (
+              <div className="flex gap-4 items-center hidden-scrollbar overflow-x-auto w-full mx-4">
+                {currentEvent.attendees.slice(0, 7).map((attendee) => (
                   <div
                     key={attendee.id}
                     className="space-y-1 flex flex-col justify-center items-center w-[90px]"
@@ -116,7 +116,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                     <p className="mt-1 font-semibold text-xs text-gray-900 truncate">
                       {attendee.username}
                     </p>
-                    <p className="text-[10px] text-gray-400 truncate">
+                    <p className="text-[10px] text-gray-400 w-[90px] truncate">
                       {attendee.useremail}
                     </p>
                   </div>
@@ -132,7 +132,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {services.map((service, idx) => (
               <Link
-                href={service.href}
+                href={`/events/${currentEvent._id}/${service.href}`}
                 key={idx}
                 className={`h-[150px] w-full rounded-[10px]`}
                 style={{ backgroundColor: service.bg }}
