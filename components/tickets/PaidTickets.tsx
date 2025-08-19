@@ -5,7 +5,13 @@ import Button from "../ui/Button";
 import Heading from "../ui/HeadingComponent";
 import { IoAdd } from "react-icons/io5";
 
-export default function PaidTickets() {
+type Props = {
+    addTicket: () => void;
+}
+
+export default function PaidTickets({
+    addTicket,
+}: Props) {
   const tickets = [];
   return (
     <section>
@@ -29,7 +35,7 @@ export default function PaidTickets() {
           </div>
           <div className="w-[300px] flex items-center gap-2">
             <Button isSecondary content="Learn More" />
-            <Button content="Add Ticket" icon={<IoAdd className="text-xl" />} />
+            <Button onClick={addTicket} content="Add Ticket" icon={<IoAdd className="text-xl" />} />
           </div>
         </div>
       ) : (

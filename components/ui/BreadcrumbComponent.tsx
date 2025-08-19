@@ -1,10 +1,10 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { matchBreadcrumb } from "@/lib/utils/match-breadcrumb";
 import { todaysDate } from "@/lib/utils/configure-date";
 import Image from "next/image";
-import { publishedEvents } from "@/lib/demo-data/events";
+// import { publishedEvents } from "@/lib/demo-data/events";
 import Button from "./Button";
 import { IoAdd } from "react-icons/io5";
 
@@ -18,15 +18,15 @@ export default function Breadcrumb({
   fallbackSubtitle = "Control your profile setup and integrations",
 }: Props) {
   const pathname = usePathname();
-  const params = useParams();
+  // const params = useParams();
   
-  const _id = Array.isArray(params._id) ? params._id[0] : params._id;
+  // const _id = Array.isArray(params._id) ? params._id[0] : params._id;
 
-  const currentEvent = publishedEvents.find((event) => event._id === _id);
+  // const currentEvent = publishedEvents.find((event) => event._id === _id);
   const matched = matchBreadcrumb(pathname);
 
   // Build the dynamic route pattern
-  const dynamicRoute = currentEvent ? `/events/${currentEvent._id}/dashboard` : null;
+  // const dynamicRoute = currentEvent ? `/events/${currentEvent._id}/dashboard` : null;
 
   const hasButtons: Record<string, React.ReactNode> = {
     "dashboard": (
@@ -36,7 +36,7 @@ export default function Breadcrumb({
         </div>
         <div className="space-y-1">
           <p className="text-xs font-normal text-gray-600">Today&apos;s Date</p>
-          <p className="font-semibold text-sm text-gray-700">{todaysDate()}</p>
+          <p className="font-semibold text-sm text-gray-700 whitespace-nowrap">{todaysDate()}</p>
         </div>
       </div>
     ),
