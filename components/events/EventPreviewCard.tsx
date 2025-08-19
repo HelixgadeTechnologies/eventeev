@@ -25,7 +25,7 @@ export default function EventPreviewCard({
             <div className="rounded-[16px] min-h-[180px] md:min-h-[200px] bg-white border border-[#B8C4CE] p-5 flex flex-col justify-between">
                 <div>
                     <div className="flex justify-between items-center">
-                        {imageURL ? (<Avatar src={imageURL} />) : (<Avatar name={name} />)}
+                        {imageURL ? (<Avatar src={imageURL} name={name} />) : (<Avatar name={name} />)}
                         <CiCircleMore className="text-2xl md:text-3xl text-gray-400 hover:text-gray-600 hover:cursor-pointer"/>
                     </div>
                     <div className="space-y-1 mt-4">
