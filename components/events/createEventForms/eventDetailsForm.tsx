@@ -1,4 +1,6 @@
+"use client"
 import React from "react";
+import { useRouter } from "next/navigation";
 import InputComponent from "@/components/ui/InputComponent";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
@@ -6,13 +8,13 @@ import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { RootState } from "@/store/store";
 import {
   setNextStep,
-  setShowForm,
   updateForm,
 } from "@/store/features/create-event/createEventSlice";
 import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
 
 const EventDetailsForm = () => {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { formData } = useAppSelector(
     (state: RootState) => state.createEvent
@@ -22,7 +24,7 @@ const EventDetailsForm = () => {
     defaultValues: formData,
   });
 
-  const handleFormClose = () => dispatch(setShowForm(false));
+  const handleFormClose = () => router.push("/events");
 
   const onSubmit = (data: createEventData) => {
     dispatch(updateForm(data));
