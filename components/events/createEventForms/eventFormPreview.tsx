@@ -1,14 +1,11 @@
 "use client"
 import React from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { RootState } from "@/store/store";
 import {
-  setNextStep,
   setPrevStep,
-  updateForm,
 } from "@/store/features/create-event/createEventSlice";
 import { createEventData } from "@/types/create-event";
 import { formatFileSize, formatLastModified } from "@/lib/utils/file-utils";
@@ -16,7 +13,6 @@ import document from "@/public/document.svg";
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const { formData } = useAppSelector((state: RootState) => state.createEvent);
   const { handleSubmit } = useForm({
     mode: "all",
@@ -47,8 +43,8 @@ const EventFormPreview = () => {
             <p className="text-base text-black font-semibold">Event Banner</p>
             <div className="flex items-center gap-x-0.5">
               <p className="text-sm text-[#98A2B3] font-semibold">
-                {formatLastModified(formData.thumbnail?.lastModified)} .{" "}
-                {formatFileSize(formData.thumbnail?.size)}
+                {formData.thumbnail?.lastModified && formatLastModified(formData.thumbnail?.lastModified)} .{" "}
+                {formData.thumbnail?.size && formatFileSize(formData.thumbnail?.size)}
               </p>
             </div>
           </div>
