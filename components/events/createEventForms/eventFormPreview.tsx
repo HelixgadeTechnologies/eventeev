@@ -43,8 +43,8 @@ const EventFormPreview = () => {
             <p className="text-base text-black font-semibold">Event Banner</p>
             <div className="flex items-center gap-x-0.5">
               <p className="text-sm text-[#98A2B3] font-semibold">
-                {formatLastModified(formData.thumbnail?.lastModified)} .{" "}
-                {formatFileSize(formData.thumbnail?.size)}
+                {formData.thumbnail?.lastModified && formatLastModified(formData.thumbnail?.lastModified)} .{" "}
+                {formData.thumbnail?.size && formatFileSize(formData.thumbnail?.size)}
               </p>
             </div>
           </div>
