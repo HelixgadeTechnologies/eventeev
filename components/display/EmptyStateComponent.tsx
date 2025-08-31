@@ -1,19 +1,19 @@
-import type { ReactNode } from "react";
-import { FcFile } from "react-icons/fc";
+import Image from "next/image";
 
 type EmptyStateProps = {
-    text: string;
-    icon?: ReactNode;
-}
+  titleText: string;
+  subtitleText?: string;
+  icon: string;
+};
 
-export default function EmptyState({
-    text,
-    icon = <FcFile/>,
-}: EmptyStateProps) {
-    return (
-        <section className="flex flex-col justify-center items-center py-28">
-            <div className="text-7xl">{icon}</div>
-            <p className="text-2xl font-semibold">{text}</p>
-        </section>
-    )
+export default function EmptyState({ titleText, subtitleText, icon }: EmptyStateProps) {
+  return (
+    <section className="flex flex-col justify-center items-center h-[55vh]">
+      <div className="flex flex-col justify-center items-center w-4/12 text-center">
+        <Image src={icon} alt="svg icon" width={146} height={146} />
+        <p className="text-2xl font-semibold mb-1">{titleText}</p>
+        <p className="text-sm font-normal">{subtitleText}</p>
+      </div>
+    </section>
+  );
 }
