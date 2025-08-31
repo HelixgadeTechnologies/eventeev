@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function EventsPage() {
-    return (<EventsComponent />);
+    return <EventsComponent />;
 }

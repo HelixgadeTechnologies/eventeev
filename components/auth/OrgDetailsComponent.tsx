@@ -4,9 +4,11 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/EmailInput";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
 
 export default function OrganizationRegistrationForm() {
+  const router = useRouter();
   const [userData, setUserData] = useState({
     orgName: "",
     orgWebsite: "",
@@ -30,7 +32,10 @@ export default function OrganizationRegistrationForm() {
     // window.open("https://mail.google.com", "_blank");
   };
 
-  const handleModalClose = () => setIsModalOpen(false);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    router.push("/");
+  };
   return (
     <>
       <div className="space-y-2 w-full md:w-[480px] m-4">
@@ -86,12 +91,14 @@ export default function OrganizationRegistrationForm() {
       </div>
 
       {isModalOpen && (
-        <Modal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-        >
-          <h2 className="text-xl font-semibold mb-2 text-center">Verify your email</h2>
-          <p className="text-sm text-center text-black/70">We sent a mail to your email address, click on the link to verify your account</p>
+        <Modal isOpen={isModalOpen} onClose={handleModalClose}>
+          <h2 className="text-xl font-semibold mb-2 text-center">
+            Verify your email
+          </h2>
+          <p className="text-sm text-center text-black/70">
+            We sent a mail to your email address, click on the link to verify
+            your account
+          </p>
           <div className="mt-6 flex justify-end gap-2">
             <Button onClick={handleModalClose} content="Open email" />
           </div>
