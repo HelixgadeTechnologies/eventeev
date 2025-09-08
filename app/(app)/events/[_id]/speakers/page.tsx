@@ -1,5 +1,9 @@
+import Speakers from "@/components/speakers";
+
 export default function SpeakersPage() {
-    return (
-        <>speakers</>
-    )
+  return (
+    <>
+      <Speakers />
+    </>
+  );
 }
