@@ -118,6 +118,7 @@ const columns: ColumnDef<SpeakerDataType>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const item = row.original;
       return (
         <DropdownMenu>

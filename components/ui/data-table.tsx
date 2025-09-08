@@ -34,7 +34,7 @@ const DataTable = <TData, TValue>({
   isPagination = false,
 }: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState<any>([]);
+  const [globalFilter, setGlobalFilter] = React.useState([]);
   const table = useReactTable({
     columns,
     data,
