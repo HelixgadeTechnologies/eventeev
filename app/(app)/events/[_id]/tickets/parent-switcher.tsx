@@ -38,9 +38,9 @@ export default function TicketParentSwitcher() {
             />
             );
             } else if (tabId === 2) {
-            return <FreeTickets />;
+            return <FreeTickets addTicket={handleOpen}  />;
             } else {
-            return <DonatedTickets />;
+            return <DonatedTickets addTicket={handleOpen} />;
             }
         }}
         />
