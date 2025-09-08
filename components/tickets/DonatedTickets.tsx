@@ -1,40 +1,48 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import Heading from "../ui/HeadingComponent";
 import Button from "../ui/Button";
 import { IoAdd } from "react-icons/io5";
 
-export default function DonatedTickets() {
-    const tickets = [];
-      return (
-        <section>
-          {tickets.length === 0 ? (
-            <div className="flex flex-col min-h-[60vh] items-center justify-center gap-6">
-              <div className="h-[100px] w-[100px] relative overflow-hidden">
-                <Image
-                  src={"/no-ticket.svg"}
-                  alt="No ticket"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="w-[300px]">
-                <Heading
-                    heading="No Donations Found"
-                    subtitle="Create a ticket that people have to pay for.
+export default function DonatedTickets({
+  addTicket,
+}: {
+  addTicket: () => void;
+}) {
+  const tickets = [];
+  return (
+    <section>
+      {tickets.length === 0 ? (
+        <div className="flex flex-col min-h-[60vh] items-center justify-center gap-6">
+          <div className="h-[100px] w-[100px] relative overflow-hidden">
+            <Image
+              src={"/no-ticket.svg"}
+              alt="No ticket"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="w-[300px]">
+            <Heading
+              heading="No Donations Found"
+              subtitle="Create a ticket that people have to pay for.
         Click “add Ticket” button to get started in adding your first ticket to your event."
-                    className="text-center"
-                />
-              </div>
-              <div className="w-[300px] flex items-center gap-2">
-                <Button isSecondary content="Learn More" />
-                <Button content="Add Donated Ticket" icon={<IoAdd className="text-xl" />} />
-              </div>
-            </div>
-          ) : (
-            <section></section>
-          )}
-        </section>
-      );
+              className="text-center"
+            />
+          </div>
+          <div className="w-[300px] flex items-center gap-2">
+            <Button isSecondary content="Learn More" />
+            <Button
+              onClick={addTicket}
+              content="Add Donated Ticket"
+              icon={<IoAdd className="text-xl" />}
+            />
+          </div>
+        </div>
+      ) : (
+        <section></section>
+      )}
+    </section>
+  );
 }
