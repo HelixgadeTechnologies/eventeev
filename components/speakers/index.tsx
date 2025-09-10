@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { FolderAdd } from "iconsax-reactjs";
 
 const Speakers = () => {
   const [isGrid, setIsGrid] = useState(true);

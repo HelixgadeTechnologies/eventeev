@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { speakerData, SpeakerDataType } from "@/lib/demo-data/speakers";
+import { speakerData } from "@/lib/demo-data/speakers";
 import { FolderAdd, MoreCircle } from "iconsax-reactjs";
 import {
   Dialog,
