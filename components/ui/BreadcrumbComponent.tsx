@@ -69,7 +69,11 @@ export default function Breadcrumb({
       <Button
         content="Create New Quiz"
         icon={<IoAdd className="text-lg" />}
-        onClick={() => console.log("Create New Quiz clicked")}
+        onClick={() => {
+          const pathSegments = pathname.split("/");
+          const eventId = pathSegments[2];
+          window.location.href = `/events/${eventId}/games/create`;
+        }}
       />
     ),
   };
@@ -91,6 +95,9 @@ export default function Breadcrumb({
   };
 
   const buttonToShow = shouldShowButton();
+
+  // Hide breadcrumb on games pages as per user request to move content up
+  if (pathname.includes("/games")) return null;
 
   return (
     <section className="flex justify-between items-center">

@@ -11,6 +11,8 @@ import {
   HiOutlineFilm
 } from "react-icons/hi";
 import { RiInfinityLine } from "react-icons/ri";
+import { IoAdd } from "react-icons/io5";
+import { usePathname, useRouter } from "next/navigation";
 import QuizCard from "@/components/games/QuizCard";
 
 const categories = [
@@ -82,9 +84,31 @@ interface GamesPageProps {
 
 export default function GamesPage({ params }: GamesPageProps) {
   const [activeCategory, setActiveCategory] = useState("all");
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleCreateQuiz = () => {
+    const pathSegments = pathname.split("/");
+    const eventId = pathSegments[2];
+    router.push(`/events/${eventId}/games/create`);
+  };
 
   return (
     <div className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-12 font-sans">
+      {/* Header with Create Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-black text-[#1B1818] tracking-tight">Games</h1>
+          <p className="text-gray-500 text-sm mt-1 uppercase tracking-widest font-bold">Discover and create interactive quizzes</p>
+        </div>
+        <button 
+          onClick={handleCreateQuiz}
+          className="bg-[#eb5017] text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/30 whitespace-nowrap"
+        >
+          <IoAdd className="text-2xl" />
+          Create New Quiz
+        </button>
+      </div>
       {/* Search Bar */}
       <div className="w-full bg-white rounded-[40px] shadow-sm border border-gray-100 p-2 pl-6 flex items-center md:max-w-4xl mx-auto">
         <FiSearch className="text-[#98A2B3] text-xl" />

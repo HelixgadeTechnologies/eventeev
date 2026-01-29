@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: EventDetailsProps) {
   const event = publishedEvents.find((events) => events._id === _id);
 
   return {
-    title: `${event?.name} | Dashboard - Eventeev`,
-    description: event?.description,
+    title: event ? `${event.name} | Dashboard - Eventeev` : "Dashboard - Eventeev",
+    description: event?.description || "Explore and manage your events on Eventeev.",
   };
 }
 
@@ -40,7 +40,23 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
   const currentEvent = publishedEvents.find((eve) => eve._id === _id);
 
   if (!currentEvent) {
-    return <div>no event found.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+          <Image src="/logo-black.svg" alt="Eventeev" width={40} height={40} className="opacity-20" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-gray-900 leading-tight">Event Not Found</h2>
+          <p className="text-gray-500 font-medium">We couldn&apos;t find an event with the ID &quot;{_id}&quot;.</p>
+        </div>
+        <Link 
+          href="/events"
+          className="bg-[#eb5017] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#d64815] transition-all"
+        >
+          Back to My Events
+        </Link>
+      </div>
+    );
   }
 
   const analytics = [

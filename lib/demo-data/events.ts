@@ -73,6 +73,22 @@ export const publishedEvents = [
       },
     ],
   },
+  {
+    _id: "space-trivia",
+    userId: "67ced3aa2c80df22d8d4cbf5",
+    name: "Space Exploration Trivia",
+    description: "A fun and educational quiz about outer space, galaxies, and the history of space travel.",
+    startDate: "2025-09-12T00:00:00.000Z",
+    endDate: "2025-09-12T00:00:00.000Z",
+    startTime: "02:00 PM",
+    endTime: "04:30 PM",
+    thumbnail: "/thumbnails/space_trivia.png",
+    type: "virtual",
+    location: "Online",
+    category: "quiz",
+    status: "published",
+    attendees: [],
+  },
 ];
 
 export const draftedEvents = [

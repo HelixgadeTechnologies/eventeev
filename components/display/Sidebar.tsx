@@ -17,11 +17,11 @@ export default function Sidebar() {
   const { mobileOpen, closeMobile } = useSidebar();
 
   const isEventRoute = (pathname: string) => {
-    const pattern = /^\/events\/[^/]+\/[^/]+(\/.*)?$/;
-    return pattern.test(pathname);
+    return pathname.startsWith("/events/") && pathname.split("/").length > 3;
   };
 
   const eventId = pathname.match(/^\/events\/([^/]+)/)?.[1] || "";
+  const dashboardHref = eventId ? `/events/${eventId}/dashboard` : "/events";
 
   const currentNavGroup = isEventRoute(pathname)
     ? topNavigations
@@ -41,7 +41,7 @@ export default function Sidebar() {
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 transition-all duration-300 ease-in-out`}
       >
-        <Link href="/" className="flex justify-start mt-2.5">
+        <Link href={dashboardHref} className="flex justify-start mt-2.5">
           <Image
             src="/logo-black.svg"
             alt="Eventeev Logo"

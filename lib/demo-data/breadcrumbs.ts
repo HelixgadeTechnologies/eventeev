@@ -28,6 +28,11 @@ export const breadcrumbMap = [
     subtitle: "Control your profile setup and integrations",
   },
   {
+    pattern: "/events/:id/games/create",
+    title: "Create Quiz",
+    subtitle: "Design your quiz exactly how you want it",
+  },
+  {
     pattern: "/settings",
     title: "Settings",
     subtitle: "Take a look at your policies and the new policy to see what is covered",
