@@ -91,16 +91,16 @@ export default function QuizDetailPage() {
         <div className="flex-grow space-y-12">
           {/* Hero Section */}
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="relative w-full md:w-[320px] lg:w-[400px] h-[320px] lg:h-[400px] flex-shrink-0 rounded-[32px] overflow-hidden shadow-xl shadow-gray-200">
+            <div className="relative w-full md:w-[160px] lg:w-[200px] h-[160px] lg:h-[200px] flex-shrink-0 rounded-[24px] overflow-hidden shadow-xl shadow-gray-200">
               <Image src={quiz.thumbnail} alt={quiz.title} fill className="object-cover" />
             </div>
 
-            <div className="flex-grow space-y-6 py-2">
-              <div className="space-y-2">
-                <span className="text-xs font-black text-[#eb5017] uppercase tracking-[0.1em]">
+            <div className="flex-grow space-y-4 py-1">
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.1em]">
                   {quiz.category}
                 </span>
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#1B1818] leading-[1.1] tracking-tight">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-[#1B1818] leading-tight tracking-tight">
                   {quiz.title}
                 </h1>
               </div>

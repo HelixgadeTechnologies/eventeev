@@ -311,7 +311,7 @@ export default function CreateQuizPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Points</label>
-                <span className="text-sm font-black text-[#EB5017]">1,000</span>
+                <span className="text-sm font-black text-[#EB5017]">5</span>
               </div>
               <div className="relative h-6 flex items-center">
                 <div className="absolute w-full h-1.5 bg-[#F2F4F7] rounded-full" />
@@ -320,8 +320,8 @@ export default function CreateQuizPage() {
               </div>
               <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
                 <span>0</span>
-                <span>1,000</span>
-                <span>2,000</span>
+                <span>5</span>
+                <span>10</span>
               </div>
             </div>
 
