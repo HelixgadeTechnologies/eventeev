@@ -4,7 +4,7 @@ import { useState, ChangeEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import EmailInput from "@/components/ui/EmailInput";
-import Button from "@/components/ui/Button";
+import { MdMail } from "react-icons/md";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -14,45 +14,60 @@ export default function ForgotPassword() {
         setEmail(value);
     };
   return (
-    <section className="flex flex-col md:flex-row items-center justify-center w-screen h-screen gap-10 overflow-hidden">
-      <div className="hidden md:flex w-full md:w-2/4 h-full items-center justify-center relative">
+    <section className="flex flex-col md:flex-row items-center justify-center w-screen h-screen overflow-hidden">
+      {/* Left Panel: Background Image */}
+      <div className="hidden md:flex w-1/2 h-full relative">
         <Image
-          src="/password-reset.svg"
-          alt="Sign up background image"
-          width={200}
-          height={100}
-          style={{ height: "auto", width: "auto" }}
-          className="object-contain h-full"
+          src="/password-reset-bg.png"
+          alt="Cinema seats background"
+          fill
+          className="object-cover"
           priority
         />
-        <Image
-          src="/logo-white.svg"
-          alt="Eventeev 2024"
-          width={150}
-          height={100}
-          className="absolute top-10 left-6 md:left-10"
-        />
+        {/* Logo at top-left */}
+        <div className="absolute top-10 left-10">
+          <Image
+            src="/logo-white.svg"
+            alt="Eventeev"
+            width={150}
+            height={50}
+            className="h-auto"
+          />
+        </div>
       </div>
-      <div className="w-full md:w-2/4 h-full flex items-center justify-center">
-        <div className="space-y-4 md:w-[75%]">
-            <h2 className="text-3xl md:text-4xl">Password Reset</h2>
-            <p className="text-black/80">
-                Don’t worry it happens to the best of us 🔐
-            </p>
-            <form action="">
+
+      {/* Right Panel: Content */}
+      <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center px-6 md:px-0">
+        <div className="w-full max-w-[440px] space-y-8">
+            <div className="space-y-2">
+                <h2 className="text-[32px] md:text-[40px] font-bold text-[#1B1818] leading-tight mb-2">Password Reset</h2>
+                <p className="text-[#667185] text-sm">
+                    Don’t worry it happens to the best of us 🔐
+                </p>
+            </div>
+
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                 <EmailInput
                     name="email"
                     value={email}
                     onChange={handleInputChange}
+                    Icon={MdMail}
+                    placeholder="godfrey@gmail.com"
                 />
-                <div className="mt-4">
-                  <Button content="Send Link" href="/sign-in/password-reset" />
+                <div className="mt-8">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#eb5017] text-white py-4 rounded-xl font-bold hover:bg-[#d64815] transition-all transform active:scale-[0.98] shadow-lg shadow-[#eb5017]/20"
+                  >
+                    Send Link
+                  </button>
                 </div>
             </form>
-            <p className="text-start text-sm text-black/70 leading-6 space-x-2">
+
+            <p className="text-center md:text-start text-sm text-[#667185] font-medium pt-4">
                 <span>Remember your password?</span>
-                <Link href="/" className="text-[#eb5017] custom-underline font-semibold">
-                    Login
+                <Link href="/sign-in" className="text-[#eb5017] font-bold hover:underline ml-2">
+                    Log in
                 </Link>
             </p>
         </div>

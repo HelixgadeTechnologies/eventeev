@@ -64,7 +64,8 @@ export default function OrganizationRegistrationForm() {
             label="Organization Website"
             value={userData.orgWebsite}
             onChange={handleInputChange}
-            placeholder=""
+            type="url"
+            placeholder="https://example.com"
           />
           <InputComponent
             name="orgIndustry"

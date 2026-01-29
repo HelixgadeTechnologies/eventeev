@@ -23,6 +23,11 @@ export const breadcrumbMap = [
     subtitle: "Showing data over the last 30 days",
   },
   {
+    pattern: "/events/:id/games",
+    title: `Welcome ${username}`,
+    subtitle: "Control your profile setup and integrations",
+  },
+  {
     pattern: "/settings",
     title: "Settings",
     subtitle: "Take a look at your policies and the new policy to see what is covered",

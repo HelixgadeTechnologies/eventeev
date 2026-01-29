@@ -35,6 +35,12 @@ export const topNavigations = [
     iconInactive: "/icons/analytics-inactive.svg",
     iconActive: "/icons/analytics-active.svg",
   },
+  {
+    name: "Games",
+    href: "/events/:id/games",
+    iconInactive: "/icons/games-inactive.png",
+    iconActive: "/icons/games-active.png",
+  },
 ];
 
 export const bottomNavigations = [

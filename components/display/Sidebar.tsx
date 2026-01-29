@@ -17,7 +17,7 @@ export default function Sidebar() {
   const { mobileOpen, closeMobile } = useSidebar();
 
   const isEventRoute = (pathname: string) => {
-    const pattern = /^\/events\/[^/]+\/[^/]+$/;
+    const pattern = /^\/events\/[^/]+\/[^/]+(\/.*)?$/;
     return pattern.test(pathname);
   };
 

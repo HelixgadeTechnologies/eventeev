@@ -1,21 +1,28 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import InputComponent from "@/components/ui/InputComponent";
 import EmailInput from "@/components/ui/EmailInput";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Button from "@/components/ui/Button";
 import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignUpComponent() {
+  const router = useRouter();
+  const { signUp } = useAuth();
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,13 +30,86 @@ export default function SignUpComponent() {
       ...prev,
       [name]: value,
     }));
+    // Clear error when user starts typing
+    if (error) setError("");
   };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    // Validation
+    if (!userData.firstName || !userData.lastName || !userData.email || !userData.password) {
+      setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    if (userData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await signUp(userData.email, userData.password, {
+        full_name: `${userData.firstName} ${userData.lastName}`,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        setSuccess(true);
+        setLoading(false);
+        // Redirect to organization registration after successful signup
+        setTimeout(() => {
+          router.push("/sign-up/organization-registration");
+        }, 2000);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <div className="space-y-4 w-full md:w-[480px] m-4 text-center">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+          <div className="flex justify-center mb-4">
+            <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-green-900 mb-2">Check Your Email!</h2>
+          <p className="text-green-700 mb-4">
+            We've sent a confirmation email to <strong>{userData.email}</strong>
+          </p>
+          <p className="text-sm text-green-600">
+            Please click the link in the email to verify your account. Redirecting...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2 w-full md:w-[480px] m-4">
       <h2 className="text-4xl text-center md:text-start font-semibold text-[#1B1818] mb-10">
         Sign up!
       </h2>
-      <form action="" className="space-y-2.5 md:space-y-5">
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-5">
         <div className="flex gap-2.5 flex-col md:flex-row w-full">
           <div className="w-full md:w-1/2">
             <InputComponent
@@ -55,6 +135,7 @@ export default function SignUpComponent() {
           value={userData.email}
           onChange={handleInputChange}
           label="Email Address"
+          type="email"
         />
         <PasswordInput
           value={userData.password}
@@ -63,13 +144,19 @@ export default function SignUpComponent() {
           name="password"
         />
         <div className="mt-5">
-          <Button content="Sign up" href="/sign-up/organization-registration" />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#eb5017] text-white py-3 rounded-lg font-semibold hover:bg-[#d64815] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating account..." : "Sign up"}
+          </button>
         </div>
       </form>
       <section className="space-y-5 mt-5 mb-3">
         <p className="text-center text-sm text-black leading-6 space-x-2">
           <span>Already have an account?</span>
-          <Link href="/" className="text-[#eb5017] custom-underline font-semibold">
+          <Link href="/sign-in" className="text-[#eb5017] custom-underline font-semibold">
             Login
           </Link>
         </p>

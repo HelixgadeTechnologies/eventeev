@@ -4,13 +4,25 @@
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-  font-family: 'Feather';
-  src: url('/fonts/feather.ttf') format('truetype');
-  font-weight: 600;
+  font-family: "Feather";
+  src: url("/fonts/feather.ttf") format("truetype");
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Feather', sans-serif; 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+th,
+strong,
+b,
+.font-bold,
+.font-semibold,
+.font-extrabold,
+.font-black,
+.heading-text {
+  font-family: "Feather", sans-serif !important;
 }
 
 .bg-login {
@@ -25,7 +37,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .custom-underline::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2;
   left: 0;
@@ -87,12 +99,20 @@ h1, h2, h3, h4, h5, h6 {
   color: #eb5017;
 }
 
-.custom-scrollbar::-webkit-scrollbar { width: 4px; } 
-.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 2px; } 
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 2px; }
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
 
 .hidden-scrollbar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 @theme inline {

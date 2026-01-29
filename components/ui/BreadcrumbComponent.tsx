@@ -65,6 +65,13 @@ export default function Breadcrumb({
         onClick={handleOpen}
       />
     ),
+    games: (
+      <Button
+        content="Create New Quiz"
+        icon={<IoAdd className="text-lg" />}
+        onClick={() => console.log("Create New Quiz clicked")}
+      />
+    ),
   };
 
   const getPageType = () => {
