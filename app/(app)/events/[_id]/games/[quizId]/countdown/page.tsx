@@ -21,9 +21,10 @@ export default function CountdownPage() {
       }, 1000);
       return () => clearTimeout(timer);
     } else {
-      // Navigate to the first question or game start
-      // For now, we'll just stay on 0 or redirect back as a placeholder
-      console.log("Countdown finished!");
+      // Navigate to the play page
+      const eventId = params._id;
+      const quizId = params.quizId;
+      router.push(`/events/${eventId}/games/${quizId}/intro`);
     }
   }, [count]);
 
