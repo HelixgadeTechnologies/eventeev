@@ -24,7 +24,7 @@ export default function AuthCodeError() {
             Authentication Error
           </h1>
           <p className="text-gray-600">
-            We couldn't complete your authentication request.
+          The code provided does not match the one sent to you. It might have expired or been entered incorrectly.
           </p>
         </div>
 

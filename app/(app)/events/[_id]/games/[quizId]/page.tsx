@@ -16,12 +16,11 @@ import { LuClock3, LuChartBar } from "react-icons/lu";
 import { FiShare2, FiBookmark, FiAlertTriangle } from "react-icons/fi";
 import QuestionPreviewCard from "@/components/games/QuestionPreviewCard";
 import RelatedQuizItem from "@/components/games/RelatedQuizItem";
-import Button from "@/components/ui/Button";
+
 
 export default function QuizDetailPage() {
   const params = useParams();
   const eventId = params._id;
-  const quizId = params.quizId;
 
   const [showAnswers, setShowAnswers] = useState(false);
 
@@ -125,10 +124,13 @@ export default function QuizDetailPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-4 pt-4">
-                <button className="bg-[#eb5017] text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20">
+                <Link 
+                  href={`/events/${eventId}/games/${params.quizId}/waiting-room`}
+                  className="bg-[#eb5017] text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20"
+                >
                   <HiOutlinePlay className="text-xl" />
                   Play Now
-                </button>
+                </Link>
                 <button className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all">
                   <HiOutlineUsers className="text-xl" />
                   Host Game

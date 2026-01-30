@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile } from "react-icons/fi";
 import { IoSend } from "react-icons/io5";
-import Avatar from "@/components/ui/Avatar";
+
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
@@ -94,16 +94,17 @@ export default function ChatPage() {
               );
             }
 
+            const user = msg.user as { name: string; avatar: string };
             return (
               <div key={msg.id} className={`flex items-start gap-4 ${msg.isSelf ? "flex-row-reverse" : ""}`}>
                 <div className="flex-shrink-0 mt-6">
-                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ring-1 ring-gray-100">
-                      <Image src={msg.user.avatar} alt={msg.user.name} width={40} height={40} className="object-cover" />
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ring-1 ring-gray-100">
+                      <Image src={user.avatar} alt={user.name} width={40} height={40} className="object-cover" />
                    </div>
                 </div>
                 <div className={`flex flex-col max-w-[70%] ${msg.isSelf ? "items-end" : "items-start"}`}>
                   <div className={`flex items-center gap-2 mb-2 text-[11px] font-black uppercase tracking-wider ${msg.isSelf ? "flex-row-reverse text-[#EB5017]" : "text-[#B28A6A]"}`}>
-                    <span>{msg.user.name}</span>
+                    <span>{user.name}</span>
                     <span className="text-gray-300 font-bold">{msg.time}</span>
                   </div>
                   <div className={`px-6 py-4 rounded-[20px] shadow-sm text-sm font-medium leading-relaxed ${

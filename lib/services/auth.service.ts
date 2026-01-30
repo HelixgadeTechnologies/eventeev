@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { AuthError } from '@supabase/supabase-js'
 
 export interface SignUpData {
   email: string

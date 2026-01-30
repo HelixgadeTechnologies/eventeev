@@ -77,12 +77,10 @@ const featuredQuizzes = [
 ];
 
 interface GamesPageProps {
-  params: Promise<{
-    _id: string;
-  }>;
+  // params?: Promise<{ _id: string }>;
 }
 
-export default function GamesPage({ params }: GamesPageProps) {
+export default function GamesPage({ /* params */ }: GamesPageProps) {
   const [activeCategory, setActiveCategory] = useState("all");
   const pathname = usePathname();
   const router = useRouter();

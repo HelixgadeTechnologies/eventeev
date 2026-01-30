@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { Database } from '@/types/database.types'
 
-type Event = Database['public']['Tables']['events']['Row']
 type EventInsert = Database['public']['Tables']['events']['Insert']
 type EventUpdate = Database['public']['Tables']['events']['Update']
 

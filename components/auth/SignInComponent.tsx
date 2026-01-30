@@ -47,7 +47,7 @@ export default function SignInComponent() {
         setLoading(false);
       }
       // On success, the useAuth hook will automatically redirect to /events
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
@@ -127,7 +127,7 @@ export default function SignInComponent() {
       <div className="mt-8 flex justify-center">
         <div className="bg-white px-6 py-2.5 rounded-full shadow-lg">
           <p className="text-sm text-[#475367] flex items-center gap-2">
-            Don't have an account?
+            Don&apos;t have an account?
             <Link
               href="/sign-up"
               className="text-[#eb5017] font-bold hover:underline"

@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 
 export default function CreateQuizPage() {
   const router = useRouter();
-  const [quizTitle, setQuizTitle] = useState("General Knowledge Quiz");
+  const [quizTitle] = useState("General Knowledge Quiz");
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
   const [questions, setQuestions] = useState([
@@ -384,7 +384,7 @@ export default function CreateQuizPage() {
 }
 
 // Simple Icon for Question Type
-function HiOutlineQuestionMarkCircle(props: any) {
+function HiOutlineQuestionMarkCircle(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" {...props}>
       <circle cx="12" cy="12" r="10"></circle>

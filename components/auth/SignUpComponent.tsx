@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import InputComponent from "@/components/ui/InputComponent";
 import EmailInput from "@/components/ui/EmailInput";
 import PasswordInput from "@/components/ui/PasswordInput";
-import Button from "@/components/ui/Button";
+
 import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
@@ -70,7 +70,7 @@ export default function SignUpComponent() {
           router.push("/sign-up/organization-registration");
         }, 2000);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
@@ -89,8 +89,8 @@ export default function SignUpComponent() {
           <p className="text-green-700 mb-4">
             We've sent a confirmation email to <strong>{userData.email}</strong>
           </p>
-          <p className="text-sm text-green-600">
-            Please click the link in the email to verify your account. Redirecting...
+          <p className="text-sm text-[#475367] flex items-center gap-2">
+            Already have an account?he link in the email to verify your account. Redirecting...
           </p>
         </div>
       </div>
