@@ -64,8 +64,7 @@ export default function WaitingRoomPage() {
   };
 
   const handleStartGame = () => {
-    // Logic to start the game
-    console.log("Game started!");
+    router.push(`/events/${eventId}/games/${quizId}/countdown`);
   };
 
   const toggleFullScreen = () => {
@@ -146,7 +145,7 @@ export default function WaitingRoomPage() {
             {players.slice(0, 23).map((player, index) => (
               <div 
                 key={index}
-                className={`px-3 py-2 rounded-lg font-bold text-[10px] transition-all flex items-center justify-center text-center shadow-sm border ${
+                className={`px-2 py-1.5 rounded-lg font-black text-xs transition-all flex items-center justify-center text-center shadow-sm border ${
                   player.isQuizMaster 
                     ? "bg-[#FFF2F0] text-[#EB5017] border-[#EB5017]/30" 
                     : "bg-white text-[#1B1818] border-gray-100"
@@ -156,7 +155,7 @@ export default function WaitingRoomPage() {
               </div>
             ))}
             {playerCount > 23 && (
-              <div className="px-3 py-2 rounded-lg font-black text-[10px] bg-gray-50 text-[#667185] border border-gray-200 flex items-center justify-center text-center shadow-inner">
+              <div className="px-2 py-1.5 rounded-lg font-black text-xs bg-gray-50 text-[#667185] border border-gray-200 flex items-center justify-center text-center shadow-inner">
                 + {playerCount - 23} others
               </div>
             )}
