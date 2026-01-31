@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile } from "react-icons/fi";
 import { IoSend } from "react-icons/io5";
+import EmojiPicker from "@/components/chat/EmojiPicker";
 
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage((prev) => prev + emoji);
+    // Optional: close after selection
+    // setShowEmojiPicker(false);
+  };
+
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      console.log("File attached:", file.name);
+      // In a real app, you'd upload this or show a preview
+      alert(`File "${file.name}" attached. Logic for uploading can be added here.`);
+    }
+  };
 
   const messages = [
     {
@@ -122,11 +144,30 @@ export default function ChatPage() {
 
         {/* Input Area */}
         <div className="px-8 pb-8 pt-4">
-          <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50">
-            <button className="p-3 text-gray-400 hover:text-[#EB5017] transition-colors">
+          <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50 relative">
+            <button 
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className={`p-3 transition-colors ${showEmojiPicker ? "text-[#EB5017]" : "text-gray-400 hover:text-[#EB5017]"}`}
+            >
               <FiSmile size={24} />
             </button>
-            <button className="p-3 text-gray-400 hover:text-[#EB5017] transition-colors">
+            {showEmojiPicker && (
+              <EmojiPicker 
+                onSelect={handleEmojiSelect} 
+                onClose={() => setShowEmojiPicker(false)} 
+              />
+            )}
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            <button 
+              onClick={handleAttachClick}
+              className="p-3 text-gray-400 hover:text-[#EB5017] transition-colors"
+            >
               <FiPaperclip size={24} />
             </button>
             <input 
@@ -135,6 +176,7 @@ export default function ChatPage() {
               className="flex-grow bg-transparent outline-none text-sm font-semibold text-[#1B1818] placeholder:text-gray-300 px-2"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onFocus={() => setShowEmojiPicker(false)}
             />
             <button className="bg-[#EB5017] text-white pl-8 pr-6 py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-md shadow-[#EB5017]/20">
               Send <IoSend className="-rotate-12 ml-1" />

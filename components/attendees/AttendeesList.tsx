@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { checkInData, AttendeesDataType } from "@/lib/demo-data/attendees";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
+import Avatar from "../ui/Avatar";
 import DataTable from "../ui/data-table";
 import { EllipsisVertical, ArrowUpDown } from "lucide-react";
 import {
@@ -18,6 +19,7 @@ const columns: ColumnDef<AttendeesDataType>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
+        className="size-5 data-[state=checked]:bg-[#EB5017] data-[state=checked]:border-[#EB5017]"
         checked={
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
@@ -30,6 +32,7 @@ const columns: ColumnDef<AttendeesDataType>[] = [
     ),
     cell: ({ row }) => (
       <Checkbox
+        className="size-5 data-[state=checked]:bg-[#EB5017] data-[state=checked]:border-[#EB5017]"
         checked={row.getIsSelected()}
         onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
         arai-label="Select row"
@@ -50,9 +53,20 @@ const columns: ColumnDef<AttendeesDataType>[] = [
           isDesc()
         }
       };
-      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer">
+      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer w-full justify-center">
         Name <ArrowUpDown size={12} color="#98A2B3" />
       </button>
+    },
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      return (
+        <div className="relative flex items-center justify-center w-full min-w-[200px]">
+          <div className="absolute left-0">
+            <Avatar name={name} href="#" />
+          </div>
+          <span className="font-medium text-[#101828] text-center">{name}</span>
+        </div>
+      );
     },
   },
   {
@@ -67,10 +81,15 @@ const columns: ColumnDef<AttendeesDataType>[] = [
           isDesc()
         }
       };
-      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer">
+      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer w-full justify-center">
         Email <ArrowUpDown size={12} color="#98A2B3" />
       </button>
     },
+    cell: ({ row }) => (
+      <div className="flex justify-center w-full">
+        {row.getValue("email")}
+      </div>
+    ),
   },
   {
     accessorKey: "dateRegistered",
@@ -84,15 +103,17 @@ const columns: ColumnDef<AttendeesDataType>[] = [
           isDesc()
         }
       };
-      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer">
+      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer w-full justify-center">
         Date Registered <ArrowUpDown size={12} color="#98A2B3" />
       </button>
     },
     cell: ({ row }) => {
       return (
-        <span className="bg-[#ffece5] py-0.5 px-3 rounded-full text-[#AD3307]">
-          {row.getValue("dateRegistered")}
-        </span>
+        <div className="flex justify-center w-full">
+          <span className="bg-[#ffece5] py-0.5 px-3 rounded-full text-[#AD3307]">
+            {row.getValue("dateRegistered")}
+          </span>
+        </div>
       );
     },
   },
@@ -108,9 +129,23 @@ const columns: ColumnDef<AttendeesDataType>[] = [
           isDesc()
         }
       };
-      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer">
+      return <button onClick={toggleSort} className="flex items-center gap-x-1.5 cursor-pointer w-full justify-center">
         Checked In <ArrowUpDown size={12} color="#98A2B3" />
       </button>
+    },
+    cell: ({ row }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const [checked, setChecked] = useState(!!row.getValue("checkedIn"));
+      return (
+        <div className="flex justify-center w-full">
+          <Checkbox
+            className="size-5 data-[state=checked]:bg-[#EB5017] data-[state=checked]:border-[#EB5017]"
+            checked={checked}
+            onCheckedChange={(val: boolean) => setChecked(val)}
+            aria-label="Checked In"
+          />
+        </div>
+      );
     },
   },
   {
@@ -142,7 +177,7 @@ const columns: ColumnDef<AttendeesDataType>[] = [
 const AttendeesList = () => {
   return (
     <div>
-      <DataTable columns={columns} data={checkInData} isPagination />
+      <DataTable columns={columns} data={checkInData.slice(0, 5)} isPagination />
     </div>
   );
 };

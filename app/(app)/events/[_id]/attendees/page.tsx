@@ -3,6 +3,7 @@
 import { publishedEvents } from "@/lib/demo-data/events";
 import { useParams } from "next/navigation";
 import AttendeesList from "@/components/attendees/AttendeesList";
+import AttendeesSummary from "@/components/attendees/AttendeesSummary";
 
 export default function EventsDashboard() {
   const { _id } = useParams();
@@ -15,6 +16,7 @@ export default function EventsDashboard() {
 
   return (
     <section>
+      <AttendeesSummary />
       <AttendeesList />
     </section>
   );

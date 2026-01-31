@@ -6,10 +6,22 @@ export const topNavigations = [
     iconActive: "/icons/dashboard-active.svg",
   },
   {
+    name: "Tickets",
+    href: "/events/:id/tickets",
+    iconInactive: "/icons/tickets-inactive.svg",
+    iconActive: "/icons/tickets-active.svg",
+  },
+  {
     name: "Attendees",
     href: "/events/:id/attendees",
     iconInactive: "/icons/attendees-inactive.svg",
     iconActive: "/icons/attendees-active.svg",
+  },
+  {
+    name: "Games",
+    href: "/events/:id/games",
+    iconInactive: "/icons/service-games-inactive.svg",
+    iconActive: "/icons/service-games-active.svg",
   },
   {
     name: "Speaker List",
@@ -24,22 +36,10 @@ export const topNavigations = [
     iconActive: "/icons/chat-active.svg",
   },
   {
-    name: "Tickets",
-    href: "/events/:id/tickets",
-    iconInactive: "/icons/tickets-inactive.svg",
-    iconActive: "/icons/tickets-active.svg",
-  },
-  {
     name: "Analytics",
     href: "/events/:id/analytics",
     iconInactive: "/icons/analytics-inactive.svg",
     iconActive: "/icons/analytics-active.svg",
-  },
-  {
-    name: "Games",
-    href: "/events/:id/games",
-    iconInactive: "/icons/games-inactive.png",
-    iconActive: "/icons/games-active.png",
   },
 ];
 

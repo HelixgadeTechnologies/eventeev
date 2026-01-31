@@ -1,12 +1,33 @@
+"use client";
+
 import Sidebar from "@/components/display/Sidebar";
 import Navigation from "@/components/display/Navigation";
 import Breadcrumb from "@/components/ui/BreadcrumbComponent";
+import { usePathname } from "next/navigation";
 
 export default function UserLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  
+  // Routes that should be full-screen (game playback)
+  const isGameView = pathname.includes("/games/") && (
+    pathname.includes("/play") || 
+    pathname.includes("/results") || 
+    pathname.includes("/leaderboard") ||
+    pathname.includes("/intro")
+  );
+
+  if (isGameView) {
+    return (
+      <div className="min-h-screen bg-[#F8F7F5]">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       {/* Sidebar */}

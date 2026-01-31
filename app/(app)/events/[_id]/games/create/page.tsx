@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { 
   HiOutlineChevronDown, 
@@ -24,11 +24,12 @@ import { useRouter } from "next/navigation";
 
 export default function CreateQuizPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [quizTitle] = useState("General Knowledge Quiz");
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
   const [questions, setQuestions] = useState([
-    { id: 1, type: "Quiz", title: "1. Quiz", active: true, timeLimit: "20 seconds" },
+    { id: 1, type: "Quiz", title: "1. Quiz", active: true, timeLimit: "20 seconds", media: null as string | null },
   ]);
 
   const activeQuestion = questions.find(q => q.active) || questions[0];
@@ -37,7 +38,7 @@ export default function CreateQuizPage() {
     const newId = Math.max(...questions.map(q => q.id), 0) + 1;
     setQuestions(prev => [
       ...prev.map(q => ({ ...q, active: false })),
-      { id: newId, type: "Quiz", title: `${newId}. Quiz`, active: true, timeLimit: "20 seconds" }
+      { id: newId, type: "Quiz", title: `${newId}. Quiz`, active: true, timeLimit: "20 seconds", media: null }
     ]);
   };
 
@@ -79,6 +80,23 @@ export default function CreateQuizPage() {
 
   const setActive = (id: number) => {
     setQuestions(prev => prev.map(q => ({ ...q, active: q.id === id })));
+  };
+
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setQuestions(prev => prev.map(q => 
+        q.id === activeQuestion.id ? { ...q, media: url } : q
+      ));
+    }
+  };
+
+  const handleRemoveMedia = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setQuestions(prev => prev.map(q => 
+      q.id === activeQuestion.id ? { ...q, media: null } : q
+    ));
   };
 
   return (
@@ -165,19 +183,51 @@ export default function CreateQuizPage() {
             />
 
             {/* Media Upload Area */}
-            <div className="w-full aspect-[3/1] max-h-[240px] bg-white rounded-[24px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 relative group hover:border-[#EB5017]/30 transition-all cursor-pointer">
-              <div className="w-12 h-12 rounded-xl bg-[#FFF2F0] text-[#EB5017] flex items-center justify-center shadow-sm">
-                <HiOutlinePhotograph className="text-2xl" />
-              </div>
-              <div className="text-center">
-                <p className="text-base font-bold text-[#1B1818]">Upload Media</p>
-                <p className="text-xs text-gray-400 font-medium mt-1">
-                  Drag and drop images or videos here, or paste a link from YouTube.
-                </p>
-              </div>
-              <button className="mt-1 px-6 py-2 bg-[#F2F4F7] text-[#344054] font-bold text-xs rounded-xl hover:bg-gray-200 transition-all">
-                Find media
-              </button>
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[3/1] max-h-[240px] bg-white rounded-[24px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 relative group hover:border-[#EB5017]/30 transition-all cursor-pointer overflow-hidden"
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleMediaUpload}
+              />
+              
+              {activeQuestion.media ? (
+                <>
+                  <Image 
+                    src={activeQuestion.media} 
+                    alt="Question media" 
+                    fill 
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button 
+                      onClick={handleRemoveMedia}
+                      className="bg-white/20 hover:bg-white/40 backdrop-blur-md p-3 rounded-full text-white transition-all transform hover:scale-110"
+                    >
+                      <HiOutlineTrash size={24} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-xl bg-[#FFF2F0] text-[#EB5017] flex items-center justify-center shadow-sm">
+                    <HiOutlinePhotograph className="text-2xl" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-base font-bold text-[#1B1818]">Upload Media</p>
+                    <p className="text-xs text-gray-400 font-medium mt-1">
+                      Drag and drop images or videos here, or paste a link from YouTube.
+                    </p>
+                  </div>
+                  <button className="mt-1 px-6 py-2 bg-[#F2F4F7] text-[#344054] font-bold text-xs rounded-xl hover:bg-gray-200 transition-all">
+                    Find media
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Answer Grid */}
