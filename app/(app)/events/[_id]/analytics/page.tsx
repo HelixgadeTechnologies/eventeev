@@ -5,6 +5,7 @@ import StatsCard from "@/components/analytics/StatsCard";
 import SalesAttendance from "@/components/analytics/SalesAttendance";
 import EngagementWidget from "@/components/analytics/EngagementWidget";
 import ChatInteractionWidget from "@/components/analytics/ChatInteractionWidget";
+import PeakChatHoursWidget from "@/components/analytics/PeakChatHoursWidget";
 import MarketingWidget from "@/components/analytics/MarketingWidget";
 import { HiOutlineCurrencyDollar, HiOutlineTicket, HiOutlineUserGroup } from "react-icons/hi";
 import { HiOutlineChartPie } from "react-icons/hi2";
@@ -67,9 +68,14 @@ export default function AnalyticsPage() {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-         {/* Chat Interaction */}
-         <div>
-            <ChatInteractionWidget />
+         {/* Chat & Peak Hours Column */}
+         <div className="space-y-6">
+            <div className="h-[200px]">
+                <PeakChatHoursWidget />
+            </div>
+            <div className="flex-1">
+                <ChatInteractionWidget />
+            </div>
          </div>
 
          {/* Marketing & Demographics (Spans 2 columns) */}

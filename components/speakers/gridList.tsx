@@ -31,7 +31,7 @@ const GridList = () => {
 
   return (
     <div className="py-5 px-2 grid grid-cols-3 gap-[18px]">
-      {speakerData.map((speaker) => (
+      {speakerData.slice(0, 12).map((speaker) => (
         <div
           key={speaker.name}
           className={`font-sans text-[#1A1A1A] px-[26px] py-[18px] rounded-2xl h-[235px] flex flex-col justify-between overflow-hidden relative`}

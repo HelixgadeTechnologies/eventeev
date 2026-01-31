@@ -76,13 +76,13 @@ const SalesAttendance = () => {
            </ResponsiveContainer>
         </div>
 
-        {/* Capacity Fill - Right Side */}
+        {/* Ticket Types - Right Side */}
         <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-8 flex flex-col gap-6 pt-4">
-           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-2">Capacity Fill %</p>
+           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-2">Ticket Types %</p>
            
-           <ProgressBar label="Main Arena" percentage={98} color="#EB5017" />
-           <ProgressBar label="Theater B" percentage={82} color="#E06C00" />
-           <ProgressBar label="Workshop 1" percentage={45} color="#E3A021" />
+           <ProgressBar label="Paid" percentage={65} color="#EB5017" />
+           <ProgressBar label="Free" percentage={25} color="#E06C00" />
+           <ProgressBar label="Donation" percentage={10} color="#E3A021" />
         </div>
       </div>
     </div>

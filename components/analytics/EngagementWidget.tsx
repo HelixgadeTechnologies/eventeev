@@ -1,17 +1,17 @@
 import React from "react";
 import { MoreVertical } from "lucide-react";
 
-interface GameStat {
+interface WinnerStat {
   rank: number;
   name: string;
-  plays: string;
+  score: string;
   color: string;
 }
 
-const games: GameStat[] = [
-  { rank: 1, name: "Digital Treasure Hunt", plays: "4,203 plays", color: "#FFF2F0" },
-  { rank: 2, name: "Trivia Gauntlet", plays: "3,110 plays", color: "#FFF8F2" },
-  { rank: 3, name: "AR Scavenger", plays: "2,890 plays", color: "#F9FAFB" },
+const winners: WinnerStat[] = [
+  { rank: 1, name: "Alex Johnson", score: "2,450 pts", color: "#FFF2F0" },
+  { rank: 2, name: "Sarah Williams", score: "2,110 pts", color: "#FFF8F2" },
+  { rank: 3, name: "David Chen", score: "1,890 pts", color: "#F9FAFB" },
 ];
 
 const EngagementWidget = () => {
@@ -22,21 +22,21 @@ const EngagementWidget = () => {
         <button className="text-gray-400 hover:text-[#EB5017]"><MoreVertical size={20} /></button>
       </div>
 
-      <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-4">Most Played Games</p>
+      <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-4">Top 3 Winners</p>
       
       <div className="space-y-4 flex-1">
-        {games.map((game) => (
-          <div key={game.rank} className="flex items-center justify-between">
+        {winners.map((winner) => (
+          <div key={winner.rank} className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-[#EB5017]"
-                style={{ backgroundColor: game.color }}
+                style={{ backgroundColor: winner.color }}
               >
-                {game.rank}
+                {winner.rank}
               </div>
-              <span className="text-sm font-bold text-[#1B1818]">{game.name}</span>
+              <span className="text-sm font-bold text-[#1B1818]">{winner.name}</span>
             </div>
-            <span className="text-xs font-bold text-gray-400">{game.plays}</span>
+            <span className="text-xs font-bold text-gray-400">{winner.score}</span>
           </div>
         ))}
       </div>

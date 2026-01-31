@@ -29,10 +29,9 @@ const ChatInteractionWidget = () => {
         <button className="text-[#EB5017] text-xs font-bold hover:underline">View Logs</button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-1">
-            <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-4">Discussed Topics</p>
-            <div className="flex flex-wrap gap-2">
+      <div>
+        <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-4">Discussed Topics</p>
+        <div className="flex flex-wrap gap-2">
             {topics.map((topic, idx) => (
                 <span 
                 key={idx}
@@ -42,20 +41,6 @@ const ChatInteractionWidget = () => {
                 {topic.name}
                 </span>
             ))}
-            </div>
-        </div>
-
-        <div className="flex-1 min-h-[160px]">
-            <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-4">Peak Chat Hours</p>
-            <ResponsiveContainer width="100%" height={160}>
-                <BarChart data={data}>
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.value === 100 ? "#F79009" : "#FFE5D5"} />
-                    ))}
-                </Bar>
-                </BarChart>
-            </ResponsiveContainer>
         </div>
       </div>
     </div>

@@ -180,7 +180,7 @@ export default function PaidTickets({ addTicket }: Props) {
               </div>
             </div>
           </div>
-          <DataTable columns={columns} data={soldTicketData} />
+          <DataTable columns={columns} data={soldTicketData} isPagination />
         </section>
       )}
     </section>

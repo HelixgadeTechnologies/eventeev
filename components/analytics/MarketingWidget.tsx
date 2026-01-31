@@ -56,6 +56,7 @@ const MarketingWidget = () => {
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50">
                 <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Top Region</p>
                 <h4 className="text-lg font-black text-[#1B1818]">North America</h4>
+                <p className="text-[11px] font-bold text-[#1B1818] mb-0.5">United States, New York</p>
                 <p className="text-xs font-bold text-[#EB5017]">42% of Total</p>
             </div>
          </div>
