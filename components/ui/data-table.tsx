@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isPagination?: boolean;
+  hideSearch?: boolean;
 }
 
 
@@ -33,7 +34,9 @@ const DataTable = <TData, TValue>({
   columns,
   data,
   isPagination = false,
+  hideSearch = false,
 }: DataTableProps<TData, TValue>) => {
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const table = useReactTable({
@@ -59,18 +62,22 @@ const DataTable = <TData, TValue>({
 
   return (
     <>
-    <div className="w-full bg-white rounded-[40px] shadow-sm border border-gray-100 p-2 pl-6 flex items-center md:max-w-4xl mx-auto mb-8">
-        <FiSearch className="text-[#98A2B3] text-xl" />
-        <Input
-          value={globalFilter}
-          onChange={e => table.setGlobalFilter(String(e.target.value))}
-          placeholder="Search..."
-          className="flex-grow px-4 outline-none text-[#1B1818] text-base placeholder:text-[#98A2B3] font-normal border-none shadow-none focus-visible:ring-0"
-        />
-        <button className="bg-[#eb5017] text-white px-8 py-3.5 rounded-[32px] font-bold hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 ml-2">
-          Search
-        </button>
-    </div>
+    {!hideSearch && (
+      <div className="w-full bg-white rounded-[40px] shadow-sm border border-gray-100 p-2 pl-6 flex items-center md:max-w-4xl mx-auto mb-8">
+          <FiSearch className="text-[#98A2B3] text-xl" />
+          <Input
+            value={globalFilter}
+            onChange={e => table.setGlobalFilter(String(e.target.value))}
+            placeholder="Search..."
+            className="flex-grow px-4 outline-none text-[#1B1818] text-base placeholder:text-[#98A2B3] font-normal border-none shadow-none focus-visible:ring-0"
+          />
+          <button className="bg-[#eb5017] text-white px-8 py-3.5 rounded-[32px] font-bold hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 ml-2">
+            Search
+          </button>
+      </div>
+    )}
+
+    <div className="bg-white border border-gray-100 rounded-[24px] shadow-md overflow-hidden">
       <div className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -149,6 +156,7 @@ const DataTable = <TData, TValue>({
           </div>
         </div>
       )}
+    </div>
     </>
   );
 };

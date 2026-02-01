@@ -1,27 +1,27 @@
 import React from "react";
-import { Users, UserCheck, Clock } from "lucide-react";
+import { Users, Calendar, Clock } from "lucide-react";
 import SummaryCard from "../ui/SummaryCard";
 
-const AttendeesSummary = () => {
+const SpeakersSummary = () => {
   return (
     <div className="grid grid-cols-3 gap-6 mb-8">
       <SummaryCard 
-        label="Total Attendees" 
-        value="1,569" 
+        label="Total Speakers" 
+        value="8" 
         icon={<Users size={20} />} 
         trend="0%" 
         trendLabel="Increase" 
       />
       <SummaryCard 
-        label="Checked In" 
-        value="850" 
-        icon={<UserCheck size={20} />} 
+        label="Sessions Scheduled" 
+        value="42" 
+        icon={<Calendar size={20} />} 
         trend="0%" 
         trendLabel="Healthy" 
       />
       <SummaryCard 
-        label="Last 30 Mins" 
-        value="350" 
+        label="Total Speaker Hours" 
+        value="4 hours" 
         icon={<Clock size={20} />} 
         trend="0%" 
         trendLabel="Recent Activity" 
@@ -30,5 +30,4 @@ const AttendeesSummary = () => {
   );
 };
 
-export default AttendeesSummary;
-
+export default SpeakersSummary;

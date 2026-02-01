@@ -176,7 +176,7 @@ const columns: ColumnDef<AttendeesDataType>[] = [
 
 const AttendeesList = () => {
   return (
-    <div>
+    <div className="mt-6">
       <DataTable columns={columns} data={checkInData.slice(0, 5)} isPagination />
     </div>
   );

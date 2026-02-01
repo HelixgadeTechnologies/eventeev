@@ -17,14 +17,42 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { FiSearch } from "react-icons/fi";
+import SpeakersSummary from "./SpeakersSummary";
 
 const Speakers = () => {
   const [isGrid, setIsGrid] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleToggleGrid = () => setIsGrid(!isGrid);
-  const speakersCount = speakerData.length;
+
+  const filteredSpeakers = speakerData.filter((speaker) =>
+    speaker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    speaker.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    speaker.company.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const speakersCount = filteredSpeakers.length;
+
   return (
-    <div className="border border-[#e4e7ec] bg-white rounded-[10px] overflow-hidden">
+    <div className="space-y-6">
+      <SpeakersSummary />
+      
+      <div className="w-full bg-white rounded-[40px] shadow-sm border border-gray-100 p-2 pl-6 flex items-center md:max-w-4xl mx-auto mb-8">
+        <FiSearch className="text-[#98A2B3] text-xl" />
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search speakers, topics, or companies..."
+          className="flex-grow px-4 outline-none text-[#1B1818] text-base placeholder:text-[#98A2B3] font-normal border-none shadow-none focus-visible:ring-0"
+        />
+        <button className="bg-[#eb5017] text-white px-8 py-3.5 rounded-[32px] font-bold hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 ml-2">
+          Search
+        </button>
+      </div>
+
+      <div className="border border-[#e4e7ec] bg-white rounded-[10px] overflow-hidden">
+
       <div className="border-b border-b-[#f0f2f5] p-4 flex justify-between items-center">
         <p className="text-[#475367] font-sans font-semibold text-base">
           Speakers {speakersCount}
@@ -215,8 +243,10 @@ const Speakers = () => {
           </div>
         </div>
       </div>
-      {isGrid ? <GridList /> : <TableList />}
+      {isGrid ? <GridList data={filteredSpeakers} /> : <TableList data={filteredSpeakers} />}
     </div>
+    </div>
+
   );
 };
 
