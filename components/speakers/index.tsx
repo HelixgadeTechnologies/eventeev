@@ -60,7 +60,7 @@ const Speakers = () => {
         <div className="flex items-center">
           <div className="border-r-[0.25px] border-r-[#E4E7EC] px-2">
             <button
-              onClick={handleToggleGrid}
+              onClick={() => setIsGrid(true)}
               className={`text-[#667185] rounded-tl-[8px] rounded-bl-[8px] p-2 shadow-sm border border-[#D0D5DD] ${
                 isGrid && "bg-[#F0F2F5] text-[#101928]"
               }`}
@@ -68,7 +68,7 @@ const Speakers = () => {
               <RxDashboard size={20} />
             </button>
             <button
-              onClick={handleToggleGrid}
+              onClick={() => setIsGrid(false)}
               className={`text-[#667185] rounded-tr-[8px] rounded-br-[8px] p-2 shadow-sm border border-[#D0D5DD] ${
                 !isGrid && "bg-[#F0F2F5] text-[#101928]"
               }`}

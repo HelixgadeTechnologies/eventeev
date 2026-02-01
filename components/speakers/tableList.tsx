@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { speakerData, SpeakerDataType } from '@/lib/demo-data/speakers'
+import { SpeakerDataType } from '@/lib/demo-data/speakers'
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import DataTable from "../ui/data-table";
@@ -143,9 +143,9 @@ const columns: ColumnDef<SpeakerDataType>[] = [
 ];
 
 
-const TableList = () => {
+const TableList = ({ data }: { data: SpeakerDataType[] }) => {
   return (
-    <DataTable columns={columns} data={speakerData} isPagination />
+    <DataTable columns={columns} data={data} isPagination hideSearch={true} />
   )
 }
 

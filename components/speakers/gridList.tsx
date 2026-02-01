@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { speakerData } from "@/lib/demo-data/speakers";
+import { SpeakerDataType } from "@/lib/demo-data/speakers";
 import { FolderAdd, MoreCircle } from "iconsax-reactjs";
 import Avatar from "../ui/Avatar";
 import {
@@ -22,7 +22,7 @@ const randomColors = [
   { majorColor: "#F5F8FA", minorColor: "#E1E7EC", iconColor: "#73797F" },
 ];
 
-const GridList = () => {
+const GridList = ({ data }: { data: SpeakerDataType[] }) => {
   const handleRandomColors = () => {
     const randomColor =
       randomColors[Math.floor(Math.random() * randomColors.length)];
@@ -31,7 +31,7 @@ const GridList = () => {
 
   return (
     <div className="py-5 px-2 grid grid-cols-3 gap-[18px]">
-      {speakerData.slice(0, 12).map((speaker) => (
+      {data.map((speaker) => (
         <div
           key={speaker.name}
           className={`font-sans text-[#1A1A1A] px-[26px] py-[18px] rounded-2xl h-[235px] flex flex-col justify-between overflow-hidden relative`}
