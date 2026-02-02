@@ -10,6 +10,7 @@ import PasswordInput from "@/components/ui/PasswordInput";
 import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
+import Button from "@/components/ui/Button";
 
 export default function SignUpComponent() {
   const router = useRouter();
@@ -144,13 +145,10 @@ export default function SignUpComponent() {
           name="password"
         />
         <div className="mt-5">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#eb5017] text-white py-3 rounded-lg font-semibold hover:bg-[#d64815] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creating account..." : "Sign up"}
-          </button>
+          <Button
+            content="Sign up"
+            isLoading={loading}
+          />
         </div>
       </form>
       <section className="space-y-5 mt-5 mb-3">

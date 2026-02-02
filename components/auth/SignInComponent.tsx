@@ -7,6 +7,7 @@ import PasswordInput from "@/components/ui/PasswordInput";
 import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
+import Button from "@/components/ui/Button";
 
 export default function SignInComponent() {
   const { signIn } = useAuth();
@@ -113,13 +114,10 @@ export default function SignInComponent() {
           </div>
 
           <div className="mt-8">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#eb5017] text-white py-3.5 rounded-xl font-bold hover:bg-[#d64815] transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#eb5017]/20"
-            >
-              {loading ? "Signing in..." : "Sign in"}
-            </button>
+            <Button
+              content="Sign in"
+              isLoading={loading}
+            />
           </div>
         </form>
       </div>

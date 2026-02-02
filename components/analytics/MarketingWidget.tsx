@@ -46,12 +46,12 @@ const MarketingWidget = () => {
          </div>
 
          {/* Map Section Placeholder */}
-         <div className="flex-1 h-[240px] bg-[#F9FAFB] rounded-xl border border-gray-100 relative overflow-hidden group">
+         <div className="flex-1 h-[240px] bg-[#F9FAFB] rounded-xl border border-gray-100 relative overflow-hidden">
             <Image 
-                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=600"
+                src="/world-map.jpg"
                 alt="World Map"
                 fill
-                className="object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-500"
+                className="object-cover"
             />
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/50">
                 <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Top Region</p>

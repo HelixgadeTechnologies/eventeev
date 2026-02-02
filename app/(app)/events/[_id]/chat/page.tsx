@@ -162,13 +162,28 @@ export default function ChatPage() {
                 <div className={`flex flex-col max-w-[70%] ${msg.isSelf ? "items-end" : "items-start"}`}>
                   <div className={`flex items-center gap-2 mb-2 text-[11px] font-black uppercase tracking-wider ${msg.isSelf ? "flex-row-reverse text-[#EB5017]" : "text-[#B28A6A]"}`}>
                     <span>{user.name}</span>
-                    {msg.label && <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-[9px] lowercase font-bold">{msg.label}</span>}
+                    {msg.label && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] lowercase font-bold ${
+                        msg.label === "Speaker" ? "bg-[#1B1818] text-white" :
+                        msg.label === "Answer" ? "bg-[#EB5017] text-white" :
+                        msg.label === "Question" ? "bg-gray-200 text-gray-700" :
+                        "bg-gray-100 text-gray-600"
+                      }`}>
+                        {msg.label}
+                      </span>
+                    )}
                     <span className="text-gray-300 font-bold">{msg.time}</span>
                   </div>
-                  <div className={`px-6 py-4 rounded-[20px] shadow-sm text-sm font-medium leading-relaxed ${
+                  <div className={`px-6 py-4 rounded-[20px] shadow-sm text-sm font-medium leading-relaxed border-2 ${
                     msg.isSelf 
-                      ? "bg-[#EB5017] text-white rounded-tr-none" 
-                      : "bg-[#F3EBE3]/50 text-[#1B1818] rounded-tl-none"
+                      ? "bg-[#EB5017] text-white rounded-tr-none border-[#EB5017]" 
+                      : msg.label === "Answer"
+                      ? "bg-[#FFF8F2] text-[#1B1818] rounded-tl-none border-[#EB5017]"
+                      : msg.label === "Speaker"
+                      ? "bg-white text-[#1B1818] rounded-tl-none border-[#1B1818]"
+                      : msg.label === "Question"
+                      ? "bg-[#F3EBE3]/30 text-[#1B1818] rounded-tl-none border-gray-200 italic"
+                      : "bg-[#F3EBE3]/50 text-[#1B1818] rounded-tl-none border-transparent"
                   }`}>
                     {msg.text}
                   </div>
