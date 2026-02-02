@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp, HiOutlineRocketLaunch, HiOutlineCog6Tooth, HiOutlineSpeakerWave } from "react-icons/hi2";
+import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp } from "react-icons/hi2";
 
 export default function LeaderboardPage() {
   const router = useRouter();

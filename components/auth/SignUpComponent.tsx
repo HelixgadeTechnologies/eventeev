@@ -87,7 +87,7 @@ export default function SignUpComponent() {
           </div>
           <h2 className="text-2xl font-semibold text-green-900 mb-2">Check Your Email!</h2>
           <p className="text-green-700 mb-4">
-            We've sent a confirmation email to <strong>{userData.email}</strong>
+            We&apos;ve sent a confirmation email to <strong>{userData.email}</strong>
           </p>
           <p className="text-sm text-[#475367] flex items-center gap-2">
             Already have an account?he link in the email to verify your account. Redirecting...

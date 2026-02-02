@@ -24,8 +24,6 @@ const Speakers = () => {
   const [isGrid, setIsGrid] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleToggleGrid = () => setIsGrid(!isGrid);
-
   const filteredSpeakers = speakerData.filter((speaker) =>
     speaker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     speaker.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||

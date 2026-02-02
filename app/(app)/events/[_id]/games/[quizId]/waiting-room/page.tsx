@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { HiOutlineUsers, HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand } from "react-icons/hi";
+import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand } from "react-icons/hi";
 import { useAuth } from "@/context/AuthContext";
 
 const MOCK_PLAYERS = [
@@ -33,11 +32,11 @@ const MOCK_PLAYERS = [
 export default function WaitingRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Removed to fix lint error
   const eventId = params._id;
   const quizId = params.quizId;
 
-  const [players, setPlayers] = useState(MOCK_PLAYERS);
+  const [players] = useState(MOCK_PLAYERS);
   const [playerCount, setPlayerCount] = useState(24);
 
   const [isFullScreen, setIsFullScreen] = useState(false);

@@ -2,7 +2,6 @@ import React from "react";
 import Image from "next/image";
 import { SpeakerDataType } from "@/lib/demo-data/speakers";
 import { FolderAdd, MoreCircle } from "iconsax-reactjs";
-import Avatar from "../ui/Avatar";
 import {
   Dialog,
   DialogContent,

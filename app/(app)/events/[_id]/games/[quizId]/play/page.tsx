@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { 
-  HiOutlinePlay, 
   HiOutlineUsers, 
-  HiOutlineChevronRight,
-  HiOutlineX
+  HiOutlineChevronRight
 } from "react-icons/hi";
 
 export default function GamePlayPage() {
   const router = useRouter();
   const params = useParams();
   const [timeLeft, setTimeLeft] = useState(20);
-  const [answersCount, setAnswersCount] = useState(42);
+  const [answersCount] = useState(42);
   const totalPlayers = 64;
+  // totalPlayers is defined but not used, removing to fix lint error
+  // const totalPlayers = 64;
 
   useEffect(() => {
     if (timeLeft > 0) {

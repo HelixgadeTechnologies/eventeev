@@ -1,17 +1,5 @@
 "use client";
 
-import React from "react";
-import { BarChart, Bar, ResponsiveContainer, Cell } from "recharts";
-
-const data = [
-  { name: "10am", value: 30 },
-  { name: "11am", value: 45 },
-  { name: "12pm", value: 70 },
-  { name: "1pm", value: 100 }, // Peak
-  { name: "2pm", value: 65 },
-  { name: "3pm", value: 20 },
-];
-
 const topics = [
   { name: "Innovation", color: "#FFF2F0", text: "#EB5017" },
   { name: "Sustainability", color: "#F2F4F7", text: "#344054" },

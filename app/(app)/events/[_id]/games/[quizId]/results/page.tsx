@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { HiOutlineUserGroup, HiOutlineChevronRight, HiOutlineCheckCircle } from "react-icons/hi";
+import { HiOutlineChevronRight, HiOutlineCheckCircle } from "react-icons/hi";
 
 export default function QuestionResultsPage() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function QuestionResultsPage() {
     { label: "Bordeaux", count: 2, color: "#26890C", isCorrect: false },
   ];
 
-  const totalPlayers = 42;
+  // const totalPlayers = 42; // Removed to fix lint error
   const maxCount = Math.max(...results.map(r => r.count));
   const [loadingProgress, setLoadingProgress] = useState(0);
   const totalDuration = 4000; // 4 seconds
