@@ -27,11 +27,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+      })
+      .catch((err) => {
+        console.warn('Supabase session fetch failed (likely network/URL issue):', err.message)
+        // Fallback to null session/user is already default state
+      })
+      .finally(() => {
+        setLoading(false)
+      })
 
     // Listen for auth changes
     const {
