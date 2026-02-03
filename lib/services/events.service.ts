@@ -163,7 +163,7 @@ export class EventsService {
   /**
    * Get event statistics for organizer (Mock)
    */
-  async getEventStats(_eventId: string) {
+  async getEventStats() {
     return {
       data: {
         totalTicketsSold: 120,

@@ -26,7 +26,7 @@ export default function CountdownPage() {
       const quizId = params.quizId;
       router.push(`/events/${eventId}/games/${quizId}/intro`);
     }
-  }, [count]);
+  }, [count, params._id, params.quizId, router]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#EB5017] flex flex-col font-sans overflow-hidden items-center justify-center text-white">

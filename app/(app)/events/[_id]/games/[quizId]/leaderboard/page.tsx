@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp } from "react-icons/hi2";
 
@@ -12,9 +12,9 @@ export default function LeaderboardPage() {
   const quizId = params?.quizId;
   const [progress, setProgress] = useState(0);
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = useCallback(() => {
     router.push(`/events/${eventId}/games/${quizId}/intro`);
-  };
+  }, [router, eventId, quizId]);
 
   useEffect(() => {
     // Start progress animation
@@ -31,7 +31,7 @@ export default function LeaderboardPage() {
       clearTimeout(timer);
       clearTimeout(navigationTimer);
     };
-  }, []);
+  }, [handleNextQuestion]);
 
   const leaderboard = [
     { rank: 2, name: "TriviaKing_99", points: "11,200", gained: "+720", avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDMQVUVfDcl_BSZSeuVf2BeAHhTZlb2RhoubZm2Jr54OJUCpFIxwgTNlrIPllfl-nPqCR2XEYME1f9DWspgwyy0PqTFojsMTfyAXep_ItSGiGmwHiKlLvxoSSowttHoIle1dyHbVFcYbcJeQ4qNrAgUPBpSte6irDOdEo--xLDKd7pdoI-UWxkFv1UcknQflgEbTmFnuSOcB7VHJi1aHuPErHdhM5FXNnMn4xbHI1FmhXVpAVN5Di3ZPy9F99KDfNzpBbtOMwK8ad8", message: "Keep it up! Close gap." },
