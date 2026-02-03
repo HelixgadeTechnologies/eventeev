@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp } from "react-icons/hi2";
 
 export default function LeaderboardPage() {
@@ -52,10 +53,11 @@ export default function LeaderboardPage() {
           {/* 1st Place Highlight Card */}
           <div className="relative rounded-[28px] overflow-hidden shadow-2xl shadow-[#f48c25]/20 bg-[#f48c25] text-white flex flex-col md:flex-row ring-6 ring-[#f48c25]/10 animate-in fade-in slide-in-from-bottom-8 duration-700">
              <div className="md:w-[28%] aspect-square relative bg-gray-200">
-               <img 
+               <Image 
                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBnKgN_ceXyFP8eAnDuclQlZK8YnW16ndR346p5X_2PXT8obw60STjkgm_L0vBHwgNWZwjDVFt160VchUD_Mq5XROE7aLBqU96TDDC0hff5kuFduegbzvmr-l_RY8JShAm4fMO7RxABE7Ng0CRGj-i7dkfQG-ChADxUiqzxuvCk6I9F3-ggxoH76XSbZDiUSHTPavMSCzsEAviYmdwUv9im-6WXjyJJ8d19jjOjUJ3VvDYKB2cV-268uJI4IK0cbc9ddyQ-vap3DM" 
                  alt="Leader Avatar"
-                 className="object-cover w-full h-full"
+                 fill
+                 className="object-cover"
                />
                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#f48c25]/20" />
              </div>
@@ -98,7 +100,7 @@ export default function LeaderboardPage() {
                 <div className="flex items-center gap-5 flex-1">
                   <span className="text-xl font-black text-[#9c7349]/40 w-6">{player.rank}</span>
                   <div className="size-11 rounded-full overflow-hidden border-2 border-[#f4ede7] relative shrink-0">
-                    <img src={player.avatar} alt={player.name} className="object-cover w-full h-full" />
+                    <Image src={player.avatar} alt={player.name} fill className="object-cover" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-lg font-black font-feather uppercase">{player.name}</span>

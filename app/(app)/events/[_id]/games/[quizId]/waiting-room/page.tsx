@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand } from "react-icons/hi";
-import { useAuth } from "@/context/AuthContext";
 
 const MOCK_PLAYERS = [
   { name: "Alex 🔥", isQuizMaster: false },

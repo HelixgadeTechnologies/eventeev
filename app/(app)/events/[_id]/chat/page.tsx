@@ -6,6 +6,30 @@ import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile } from "react-icons/fi";
 import { IoSend } from "react-icons/io5";
 import EmojiPicker from "@/components/chat/EmojiPicker";
 
+interface UserInfo {
+  name: string;
+  avatar: string;
+}
+
+interface BaseMessage {
+  id: number;
+  text: string;
+}
+
+interface SystemMessage extends BaseMessage {
+  user: "System";
+  type: "system";
+}
+
+interface UserChatMessage extends BaseMessage {
+  user: UserInfo;
+  time: string;
+  isSelf: boolean;
+  label?: string;
+  type?: never;
+}
+
+type ChatMessage = SystemMessage | UserChatMessage;
 
 export default function ChatPage() {
   const [activeRoom, setActiveRoom] = useState({ id: "general", name: "General Lobby", description: "Public room for all event participants" });
@@ -29,7 +53,7 @@ export default function ChatPage() {
     }
   };
 
-  const messages = {
+  const messages: { general: ChatMessage[]; private: ChatMessage[] } = {
     general: [
       {
         id: 1,
@@ -151,7 +175,7 @@ export default function ChatPage() {
               );
             }
 
-            const user = msg.user as { name: string; avatar: string };
+            const user = msg.user;
             return (
               <div key={msg.id} className={`flex items-start gap-4 ${msg.isSelf ? "flex-row-reverse" : ""}`}>
                 <div className="flex-shrink-0 mt-6">
