@@ -26,6 +26,7 @@
     "iconsax-reactjs": "^0.0.8",
     "lucide-react": "^0.542.0",
     "next": "15.3.8",
+
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.62.0",
@@ -42,7 +43,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.4",
+    "eslint-config-next": "15.3.6",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.7",
     "typescript": "^5"
