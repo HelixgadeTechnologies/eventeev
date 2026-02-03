@@ -1,7 +1,6 @@
 "use client"
 import React from "react";
 import { useRouter } from "next/navigation";
-import InputComponent from "@/components/ui/InputComponent";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
@@ -12,6 +11,7 @@ import {
 } from "@/store/features/create-event/createEventSlice";
 import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const EventDetailsForm = () => {
   const router = useRouter();
@@ -33,166 +33,162 @@ const EventDetailsForm = () => {
   }
 
   return (
-    <div className="font-sans">
-      <div className="flex flex-col items-center gap-y-2 mb-8">
-        <h4 className="!font-sans text-[#1A1A21] font-semibold text-2xl">
-          Create a new Event
+    <div className="font-sans flex flex-col h-full animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="flex flex-col mb-6">
+        <h4 className="text-xl font-black text-[#1B1818] tracking-tight">
+          Basic Event Details
         </h4>
-        <p className="text-base text-[#8c94A6] font-normal">
-          Fill out these details to create your event
+        <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90">
+          Set up the foundation of your event. These details will be visible to all attendees.
         </p>
       </div>
-      <form className="flex flex-col gap-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="name"
-          control={control}
-          rules={{
-            required: true,
-          }}
-          render={({ field }) => (
-            <InputComponent
-              name={field.name}
-              label="Event Name"
-              value={field.value}
-              onChange={field.onChange}
-              placeholder="Enter Event Name"
-            />
-          )}
-        />
-        {errors.name && <p role="alert" className="text-xs text-red-700 -mt-6">Event name is required</p>}
 
-        <Controller
-          name="description"
-          control={control}
-          rules={{
-            required: true,
-          }}
-          render={({ field }) => (
-            <div className="grid w-full gap-3">
-              <label htmlFor="desc">Your Message</label>
-              <Textarea
-                placeholder="Enter text here."
-                id="desc"
-                className="placeholder-[#98A2B3] focus-visible:ring-0 focus-visible:border-[#FA9874]"
-                {...field}
-              />
-              <p className="text-muted-foreground text-sm">
-                Keep this simple, maximum of 50 characters
-              </p>
-            </div>
-          )}
-        />
-        {errors.description && <p role="alert" className="text-xs text-red-700 -mt-6">Description is required</p>}
+      <form className="flex flex-col gap-y-5 flex-1" onSubmit={handleSubmit(onSubmit)}>
+        {/* Event Name */}
+        <div className="space-y-1.5">
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Name</Label>
+                <input 
+                  type="text" 
+                  value={field.value}
+                  onChange={field.onChange}
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] transition-all outline-none placeholder:text-gray-300"
+                  placeholder="e.g. Annual Tech Summit 2024"
+                />
+              </div>
+            )}
+          />
+          {errors.name && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Event name is required</p>}
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-center md:gap-x-[18px]">
-          <div className="w-full md:w-1/2">
-            <Controller
-              name="startDate"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => (
-                <InputComponent
-                  name={field.name}
-                  label="Event Start Date"
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="01 September 2024"
-                />
-              )}
-            />
-            {errors.startDate && <p role="alert" className="text-xs text-red-700 mt-1">Start date is required</p>}
-          </div>
-          <div className="w-full md:w-1/2">
-            <Controller
-              name="stopDate"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => (
-                <InputComponent
-                  name={field.name}
-                  label="Event End Date"
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="01 September 2024"
-                />
-              )}
-            />
-            {errors.stopDate && <p role="alert" className="text-xs text-red-700 mt-1">Stop date is required</p>}
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row md:items-center md:gap-x-[18px]">
-          <div className="w-full md:w-1/2">
-            <Controller
-              name="startTime"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => (
-                <InputComponent
-                  name={field.name}
-                  label="Event Start Time"
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="01 September 2024"
-                />
-              )}
-            />
-            {errors.startTime && <p role="alert" className="text-xs text-red-700 mt-1">Start time is required</p>}
-          </div>
-          <div className="w-full md:w-1/2">
-            <Controller
-              name="stopTime"
-              control={control}
-              rules={{
-                required: true,
-              }}
-              render={({ field }) => (
-                <InputComponent
-                  name={field.name}
-                  label="Event End Time"
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="01 September 2024"
-                />
-              )}
-            />
-            {errors.stopTime && <p role="alert" className="text-xs text-red-700 mt-1">Stop time is required</p>}
-          </div>
-        </div>
-        <div className="border-t border-b border-t-[#E9E9E9] border-b-[#E9E9E9] py-4 flex justify-between items-center">
-          <label className="text-[#1D2739] font-sans text-sm fornt-medium">
-            Recurrent event?
-          </label>
+        {/* Description */}
+        <div className="space-y-1.5">
           <Controller
             name="description"
             control={control}
-            rules={{
-              required: true,
-            }}
+            rules={{ required: true }}
             render={({ field }) => (
-              <Switch
-                className="data-[state=checked]:bg-[#F56630]"
-                {...field}
-              />
+              <div className="space-y-1.5">
+                <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Description</Label>
+                <Textarea
+                  placeholder="What is this event about?"
+                  className="min-h-[80px] text-xs font-medium text-[#1B1818] border-gray-200 focus-visible:ring-1 focus-visible:ring-[#F56630]/20 focus-visible:border-[#F56630] rounded-xl resize-none"
+                  {...field}
+                />
+                <p className="text-[9px] font-medium text-gray-400">
+                  Provide a brief summary for your attendees
+                </p>
+              </div>
             )}
           />
+          {errors.description && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Description is required</p>}
         </div>
-        <div className="flex flex-col md:flex-row items-center gap-x-8">
+
+        {/* Dates & Times Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Start Date</Label>
+              <Controller
+                name="startDate"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <input 
+                    type="date"
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                  />
+                )}
+              />
+              {errors.startDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Start Time</Label>
+              <Controller
+                name="startTime"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <input 
+                    type="time" 
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                  />
+                )}
+              />
+              {errors.startTime && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">End Date</Label>
+              <Controller
+                name="stopDate"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <input 
+                    type="date"
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                  />
+                )}
+              />
+              {errors.stopDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">End Time</Label>
+              <Controller
+                name="stopTime"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <input 
+                    type="time" 
+                    value={field.value}
+                    onChange={field.onChange}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                  />
+                )}
+              />
+              {errors.stopTime && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Recurrent Toggle */}
+        <div className="bg-[#F9FAFB] border border-gray-100 rounded-xl px-4 py-3 flex justify-between items-center mt-2">
+          <div className="space-y-0.5">
+            <Label className="text-xs font-bold text-[#1B1818]">Recurrent Event?</Label>
+            <p className="text-[9px] font-medium text-gray-400 uppercase tracking-wider">Repeat this event periodically</p>
+          </div>
+          <Switch className="data-[state=checked]:bg-[#F56630] scale-90" />
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center gap-4 pt-4 mt-auto">
           <button
             type="button"
             onClick={handleFormClose}
-            className="text-[#F56630] border border-[#F56630] w-4/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
+            className="flex-1 text-[#475367] border border-gray-200 hover:bg-gray-50 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all active:scale-95"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="text-white border border-[#F56630] bg-[#F56630] w-8/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
+            className="flex-[2] text-white bg-[#F56630] hover:bg-[#d64815] text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all shadow-md shadow-[#F56630]/20 active:scale-95"
           >
             Next Step
           </button>

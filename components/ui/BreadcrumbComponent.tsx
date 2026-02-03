@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function Breadcrumb({
-  fallbackTitle = "Welcome",
+  fallbackTitle = "Dashboard",
   fallbackSubtitle = "Control your profile setup and integrations",
 }: Props) {
   const pathname = usePathname();

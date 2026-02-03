@@ -46,7 +46,7 @@ export const topNavigations = [
 export const bottomNavigations = [
   {
     name: "Settings",
-    href: "/settings",
+    href: "/events/:id/settings",
     iconInactive: "/icons/settings-inactive.svg",
     iconActive: "/icons/settings-active.svg",
   },

@@ -37,5 +37,20 @@ export const breadcrumbMap = [
     title: "Settings",
     subtitle: "Take a look at your policies and the new policy to see what is covered",
   },
+  {
+    pattern: "/events/:id/chat",
+    title: "Chat Room",
+    subtitle: "Real-time communication with event participants",
+  },
+  {
+    pattern: "/events/:id/analytics",
+    title: "Analytics Page",
+    subtitle: "Comprehensive overview of event performance and engagement",
+  },
+  {
+    pattern: "/events/:id/settings/integrations",
+    title: "Integrations",
+    subtitle: "Connect and manage external services for your event",
+  },
 ];
 

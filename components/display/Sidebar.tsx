@@ -80,15 +80,22 @@ export default function Sidebar() {
 
           <div className="">
             {bottomNavigations.map((nav, index) => {
-              const isActive = pathname.startsWith(nav.href);
+              const actualHref = nav.href.replace(":id", eventId);
+              const isActive = eventId ? pathname.startsWith(actualHref) : pathname.startsWith(nav.href);
               const icon = isActive ? nav.iconActive : nav.iconInactive;
+              
+              // If it's the settings link and we don't have an event context, 
+              // we might want to hide it or point to a default settings page.
+              // For now, if :id is in the href and we have no eventId, we'll use a placeholder or hide.
+              if (nav.href.includes(":id") && !eventId) return null;
+
               return (
                 <Link
                   key={index}
-                  href={nav.href}
+                  href={actualHref}
                   className={`h-10 w-full px-4 py-2 rounded-[4px] flex items-center gap-2 ${
                     isActive
-                      ? "bg-[FFECE5] text-black"
+                      ? "bg-[#FFECE5] text-black"
                       : "hover:bg-gray-50 text-gray-600"
                   }`}
                 >

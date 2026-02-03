@@ -5,21 +5,37 @@ import avatar from "@/public/avatar.png";
 
 const ShowProfile = () => {
   return (
-    <div className="bg-white border border-[#F0F2F5] rounded-[10px] px-10 py-20">
-      <div className="flex gap-x-6 items-center mb-16">
-        <div className="w-[100px] h-[100px] rounded-full overflow-hidden">
-          <Image src={avatar} alt="profile picture" className="w-full h-full" />
-        </div>
-        <div className="flex flex-col gap-y-1.5">
-          <p className="text-black font-sans font-medium text-xl">
-            Esther Tracy
-          </p>
-          <p className="text-base font-normal text-black">
-            esthertracy@gmail.com
-          </p>
+    <div className="max-w-[800px] mx-auto">
+      <div className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[24px] overflow-hidden">
+        {/* Header/Cover background (subtle gradient) */}
+        <div className="h-32 bg-gradient-to-r from-[#eb5017]/10 via-[#F56630]/5 to-transparent w-full" />
+        
+        <div className="px-8 pb-12 -mt-12">
+          <div className="flex flex-col md:flex-row gap-6 items-end mb-10">
+            <div className="relative group">
+              <div className="w-[120px] h-[120px] rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white">
+                <Image src={avatar} alt="profile picture" className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-2xl cursor-pointer">
+                <span className="text-white text-xs font-medium">Change Photo</span>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-y-1 mb-2">
+              <h1 className="text-[#1D2739] font-sans font-bold text-2xl tracking-tight">
+                Esther Tracy
+              </h1>
+              <p className="text-base font-normal text-[#667185]">
+                esthertracy@gmail.com
+              </p>
+            </div>
+          </div>
+
+          <div className="border-t border-[#F0F2F5] pt-10">
+            <ProfileDisabled />
+          </div>
         </div>
       </div>
-      <ProfileDisabled />
     </div>
   );
 };

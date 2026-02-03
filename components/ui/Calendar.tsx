@@ -90,7 +90,7 @@ export default function Calendar({ eventDate }: CalendarProps) {
             <div
               key={`day-${format(day, "yyyy-MM-dd")}`}
               className={`p-2 rounded-full flex h-10 w-10 justify-center items-center text-sm transition-colors ${
-                isToday ? "bg-gray-200 font-bold" : ""
+                isToday ? "bg-[#EB5017] text-white font-bold" : ""
               } ${!isCurrentMonth ? "text-gray-400" : ""} ${
                 isHighlighted ? "bg-[#eb5017] text-white font-semibold" : ""
               }`}

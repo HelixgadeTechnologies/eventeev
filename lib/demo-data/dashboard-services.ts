@@ -49,7 +49,7 @@ export const services = [
     href: "polls",
   },
   {
-    name: "Matchmaking",
+    name: "Networking",
     icon: "/icons/service-networking.svg",
     bg: "#E3EFFC",
     borderColor: "blue-500",

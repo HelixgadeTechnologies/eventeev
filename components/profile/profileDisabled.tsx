@@ -5,136 +5,148 @@ import { Switch } from "../ui/switch";
 
 const ProfileDisabled = () => {
   return (
-    <div className="flex flex-col gap-y-8">
-      <div className="grid grid-cols-2 gap-x-[18px]">
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="fName"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            First Name
-          </Label>
-          <Input
-            type="text"
-            placeholder="Esther"
-            id="fName"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
+    <div className="flex flex-col gap-y-10">
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="fName"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              First Name
+            </Label>
+            <Input
+              type="text"
+              placeholder="Esther"
+              id="fName"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="lName"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Last Name
+            </Label>
+            <Input
+              type="text"
+              placeholder="Tracy"
+              id="lName"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="lName"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            Last Name
-          </Label>
-          <Input
-            type="text"
-            placeholder="Tracy"
-            id="lName"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="email"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Email Address
+            </Label>
+            <Input
+              type="email"
+              placeholder="esthertracy@gmail.com"
+              id="email"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="gender"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Gender
+            </Label>
+            <Input
+              type="text"
+              placeholder="Female"
+              id="gender"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="tZone"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Time Zone
+            </Label>
+            <Input
+              type="text"
+              placeholder="GMT +1"
+              id="tZone"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="country"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Country
+            </Label>
+            <Input
+              type="text"
+              placeholder="Nigeria"
+              id="country"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-[18px]">
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="email"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            Email
-          </Label>
-          <Input
-            type="email"
-            placeholder="esthertracy@gmail.com"
-            id="email"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
+      <div className="bg-[#F9FAFB]/50 rounded-2xl p-6 border border-[#F0F2F5] space-y-4">
+        <div className="flex justify-between items-center w-full">
+          <div className="space-y-1">
+            <label className="text-[#1D2739] font-sans text-sm font-semibold">
+              Recurrent event?
+            </label>
+            <p className="text-[#667185] font-sans text-xs">
+              Automatically set up follow-up events
+            </p>
+          </div>
+          <Switch className="data-[state=checked]:bg-[#eb5017]" checked />
         </div>
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="gender"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            Gender
-          </Label>
-          <Input
-            type="text"
-            placeholder="female"
-            id="gender"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
+        <div className="pt-2">
+          <p className="text-[#667185] font-sans text-sm leading-relaxed">
+            You can set up a{" "}
+            <span className="text-[#eb5017] font-medium cursor-pointer hover:underline underline-offset-4">
+              custom domain
+            </span> or{" "}
+            <span className="text-[#eb5017] font-medium cursor-pointer hover:underline underline-offset-4">
+              connect your email service provider
+            </span>{" "}
+            to change these settings.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-[18px]">
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="tZone"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            Time Zone
-          </Label>
-          <Input
-            type="text"
-            placeholder="GMT +1"
-            id="tZone"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
-        </div>
-        <div className="flex flex-col gap-y-1">
-          <Label
-            htmlFor="country"
-            className="text-[#475367] font-sans text-sm font-medium"
-          >
-            Country
-          </Label>
-          <Input
-            type="text"
-            placeholder="Nigeria"
-            id="country"
-            disabled
-            className="border-[#D0D5DD] rounded-[6px] p-4 focus-visible:ring-0 focus-visible:border-[#EB5017] w-full"
-          />
-        </div>
+      <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+        <button
+          type="button"
+          className="w-full sm:w-1/3 h-12 flex justify-center items-center text-[#344054] font-semibold text-base border border-[#D0D5DD] bg-white rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="w-full sm:w-2/3 h-12 flex justify-center items-center text-white font-semibold text-base bg-gradient-to-r from-[#eb5017] to-[#F56630] rounded-xl hover:opacity-90 transition-all duration-200 shadow-md shadow-[#eb5017]/20"
+        >
+          Edit Profile
+        </button>
       </div>
-
-      <div className="border-t border-t-[#E9E9E9] border-b border-b-[#E9E9E9] py-4 flex flex-col justify-between">
-        <div className="py-4 flex justify-between items-center w-full">
-          <label className="text-[#1D2739] font-sans text-sm fornt-medium">
-            Recurrent event?
-          </label>
-          <Switch className="data-[state=checked]:bg-[#F56630]" checked />
-        </div>
-        <p className="text-[#667185] font-sans text-sm fornt-medium">
-          You can set up a{" "}
-          <span className="text-[#F56630]">
-            custom domain or connect your email service provider
-          </span>{" "}
-          to change this.
-        </p>
-      </div>
-
-      <div className="flex flex-col md:flex-row items-center gap-x-8">
-          <button
-            type="button"
-            className="text-[#F56630] border border-[#F56630] w-4/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="text-white border border-[#F56630] bg-[#F56630] w-8/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
-          >
-            Edit
-          </button>
-        </div>
     </div>
   );
 };

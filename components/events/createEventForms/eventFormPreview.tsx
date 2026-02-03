@@ -8,8 +8,9 @@ import {
   setPrevStep,
 } from "@/store/features/create-event/createEventSlice";
 import { createEventData } from "@/types/create-event";
-import { formatFileSize, formatLastModified } from "@/lib/utils/file-utils";
+// import { formatFileSize, formatLastModified } from "@/lib/utils/file-utils";
 import document from "@/public/document.svg";
+import { Label } from "@/components/ui/label";
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
@@ -23,89 +24,119 @@ const EventFormPreview = () => {
 
   const onSubmit = (data: createEventData = formData) => {
     console.log(data);
+    // Simulate a successful publish
+    alert("Event Published Successfully!");
     window.location.reload();
   };
 
   return (
-    <div>
-      <div className="flex flex-col items-center gap-y-2 mb-8">
-        <h4 className="!font-sans text-[#1A1A21] font-semibold text-2xl">
-          Event Review
+    <div className="font-sans flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
+      {/* Header */}
+      <div className="flex flex-col mb-8 text-center md:text-left">
+        <h4 className="text-xl font-black text-[#1B1818] tracking-tight">
+          Review & Publish
         </h4>
-        <p className="text-base text-[#8c94A6] font-normal">
-          Fill out these details to create your event
+        <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90 uppercase tracking-widest">
+          Double check everything before we go live.
         </p>
       </div>
-      <div className="flex justify-center gap-x-4">
-        <div className="w-7/12 border-b border-b-[#F0F2F5] pb-6 flex gap-x-2 mb-4">
-          <Image src={document} alt="document icon" />
-          <div className="flex flex-col gap-y-0.5">
-            <p className="text-base text-black font-semibold">Event Banner</p>
-            <div className="flex items-center gap-x-0.5">
-              <p className="text-sm text-[#98A2B3] font-semibold">
-                {formData.thumbnail?.lastModified && formatLastModified(formData.thumbnail?.lastModified)} .{" "}
-                {formData.thumbnail?.size && formatFileSize(formData.thumbnail?.size)}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+        {/* Visual Summary Card */}
+        <div className="bg-[#FAF9F6] border border-gray-100 rounded-3xl p-5 shadow-sm space-y-4">
+          <div className="relative aspect-video rounded-2xl bg-gray-200 overflow-hidden group">
+            <div className="absolute inset-0 bg-[#F56630]/10 flex items-center justify-center">
+               <Image src={document} alt="banner" width={48} height={48} className="opacity-20 translate-y-2 group-hover:translate-y-0 transition-transform" />
+            </div>
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          </div>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Event Name</Label>
+              <h3 className="text-lg font-black text-[#1B1818] leading-tight">{formData.name || "Untitled Event"}</h3>
+            </div>
+            
+            <div className="space-y-1">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Description</Label>
+              <p className="text-xs font-medium text-[#475367] leading-relaxed line-clamp-3 italic">
+                &quot;{formData.description || "No description provided."}&quot;
               </p>
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col gap-y-4">
-        <p className="border-t border-t-[#F0F2F5] pt-4 text-[#1D2739] font-medium text-sm">
-          <strong>Event Name:</strong> {formData.name}
-        </p>
-        <p className="border-t border-t-[#F0F2F5] pt-4 text-[#1D2739] font-medium text-sm">
-          <strong>Event Description:</strong> {formData.description}
-        </p>
-        <div className="border-t border-t-[#F0F2F5] pt-4 flex items-center gap-x-2">
-          <p className="text-[#1D2739] font-medium text-sm">
-            <strong>Start Date:</strong> {formData.startDate}
-          </p>
-          <p className="text-[#1D2739] font-medium text-sm">
-            <strong>Stop Date:</strong> {formData.stopDate}
-          </p>
-        </div>
-        <div className="border-t border-t-[#F0F2F5] pt-4 flex items-center gap-x-2">
-          <p className="text-[#1D2739] font-medium text-sm">
-            <strong>Start Time:</strong> {formData.startTime}
-          </p>
-          <p className="text-[#1D2739] font-medium text-sm">
-            <strong>Stop Time:</strong> {formData.stopTime}
-          </p>
-        </div>
-        <p className="border-t border-t-[#F0F2F5] pt-4 text-[#1D2739] font-medium text-sm">
-          <strong>Event Type:</strong> {formData.eventType}
-        </p>
-        <p className="border-t border-t-[#F0F2F5] pt-4 text-[#1D2739] font-medium text-sm">
-          <strong>Location:</strong> {formData.location}
-        </p>
-        <p className="border-t border-t-[#F0F2F5] pt-4 text-[#1D2739] font-medium text-sm">
-          <strong>Category:</strong> {formData.category}
-        </p>
-        <div className="border-t border-t-[#F0F2F5] pt-4 flex items-center gap-x-8">
-          <button
-            type="button"
-            onClick={handlePrevStep}
-            className="text-[#F56630] border border-[#F56630] w-4/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={handlePrevStep}
-            className="text-[#F56630] border border-[#F56630] w-4/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
-          >
-            Save
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit(onSubmit)}
-            className="text-white border border-[#F56630] bg-[#F56630] w-4/12 flex justify-center items-center text-base font-semibold py-4 rounded-[8px] cursor-pointer"
-          >
-            Publish Event
-          </button>
+
+        {/* Detailed Specs */}
+        <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+            <div className="space-y-1">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Timeline</Label>
+              <div className="flex flex-col">
+                <p className="text-xs font-bold text-[#1B1818]">{formData.startDate}</p>
+                <p className="text-[10px] font-medium text-[#F56630]">{formData.startTime}</p>
+              </div>
+            </div>
+
+            <div className="space-y-1 text-right">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Category</Label>
+              <p className="text-xs font-black text-[#1B1818] uppercase">{formData.category || "General"}</p>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Location</Label>
+              <p className="text-xs font-bold text-[#1B1818] truncate max-w-[150px]">{formData.location || "Online"}</p>
+            </div>
+
+            <div className="space-y-1 text-right">
+              <Label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Visibility</Label>
+              <div className="flex justify-end">
+                <span className="bg-orange-50 text-[#F56630] text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-orange-100">
+                  {formData.eventType || "Public"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-gray-50">
+            <div className="bg-green-50/30 border border-green-100/50 rounded-2xl p-4 flex items-center justify-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <p className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Ready for instant deployment</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-4 pt-8 mt-auto">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          className="flex-1 text-[#475367] border border-gray-200 hover:bg-gray-50 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all active:scale-95"
+        >
+          Back to Edit
+        </button>
+        <button
+          type="submit"
+          onClick={handleSubmit(onSubmit)}
+          className="flex-[2] text-white bg-[#F56630] hover:bg-[#d64815] text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all shadow-xl shadow-[#F56630]/30 active:scale-95 border border-[#F56630]"
+        >
+          Publish & Go Live
+        </button>
+      </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #E2DBD4;
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 };
