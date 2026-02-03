@@ -1,56 +1,45 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, AuthError } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
-  user: User | null
-  session: Session | null
+  user: any | null
+  session: any | null
   loading: boolean
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: AuthError | null }>
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any | null }>
+  signIn: (email: string, password: string) => Promise<{ error: any | null }>
   signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>
-  updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>
+  resetPassword: (email: string) => Promise<{ error: any | null }>
+  updatePassword: (newPassword: string) => Promise<{ error: any | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<any | null>(null)
+  const [session, setSession] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-      })
-      .catch((err) => {
-        console.warn('Supabase session fetch failed (likely network/URL issue):', err.message)
-        // Fallback to null session/user is already default state
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    // Mock initial session
+    const mockUser = {
+      id: "mock-user-id",
+      email: "demo@eventeev.com",
+      user_metadata: {
+        full_name: "Demo User",
+      }
+    }
+    const mockSession = {
+      access_token: "mock-token",
+      user: mockUser
+    }
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    setSession(mockSession)
+    setUser(mockUser)
+    setLoading(false)
+  }, [])
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     // Mocking signup for direct navigation
@@ -68,22 +57,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    setUser(null)
+    setSession(null)
     router.push('/sign-in')
   }
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/sign-in/password-reset`,
-    })
-    return { error }
+    console.log('Mock reset password for:', email)
+    return { error: null }
   }
 
   const updatePassword = async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
-    return { error }
+    console.log('Mock update password')
+    return { error: null }
   }
 
   const value = {
@@ -107,3 +93,4 @@ export function useAuth() {
   }
   return context
 }
+

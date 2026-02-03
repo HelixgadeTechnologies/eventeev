@@ -1,12 +1,7 @@
-import { createClient } from '@/lib/supabase/client'
-import { Database } from '@/types/database.types'
 
-type EventInsert = Database['public']['Tables']['events']['Insert']
-type EventUpdate = Database['public']['Tables']['events']['Update']
+import { publishedEvents, draftedEvents, completedEvents } from '@/lib/demo-data/events'
 
 export class EventsService {
-  private supabase = createClient()
-
   /**
    * Get all published events
    */
@@ -16,122 +11,129 @@ export class EventsService {
     category?: string
     searchQuery?: string
   }) {
-    let query = this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('is_published', true)
-      .order('start_date', { ascending: true })
+    let data = [...publishedEvents].map(event => ({
+      ...event,
+      id: event._id,
+      title: event.name,
+      is_published: event.status === 'published',
+      organizer_id: event.userId,
+      profiles: {
+        full_name: "Demo Organizer",
+        avatar_url: null
+      }
+    }))
 
     if (options?.category) {
-      query = query.eq('category', options.category)
+      data = data.filter(e => e.category === options.category)
     }
 
     if (options?.searchQuery) {
-      query = query.or(`title.ilike.%${options.searchQuery}%,description.ilike.%${options.searchQuery}%`)
+      const q = options.searchQuery.toLowerCase()
+      data = data.filter(e => 
+        e.title.toLowerCase().includes(q) || 
+        e.description.toLowerCase().includes(q)
+      )
     }
 
-    if (options?.limit) {
-      query = query.limit(options.limit)
+    if (options?.offset !== undefined && options?.limit !== undefined) {
+      data = data.slice(options.offset, options.offset + options.limit)
+    } else if (options?.limit) {
+      data = data.slice(0, options.limit)
     }
 
-    if (options?.offset) {
-      query = query.range(options.offset, options.offset + (options.limit || 10) - 1)
-    }
-
-    const { data, error } = await query
-
-    return { data, error }
+    return { data, error: null }
   }
 
   /**
    * Get featured events
    */
   async getFeaturedEvents(limit = 6) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('is_published', true)
-      .eq('is_featured', true)
-      .order('start_date', { ascending: true })
-      .limit(limit)
-
-    return { data, error }
+    const { data } = await this.getPublishedEvents({ limit })
+    return { data, error: null }
   }
 
   /**
    * Get event by ID
    */
   async getEventById(eventId: string) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url, email), tickets(*)')
-      .eq('id', eventId)
-      .single()
+    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents]
+    const event = allEvents.find(e => e._id === eventId)
 
-    return { data, error }
+    if (!event) {
+      return { data: null, error: { message: "Event not found" } }
+    }
+
+    const mappedEvent = {
+      ...event,
+      id: event._id,
+      title: event.name,
+      is_published: event.status === 'published',
+      organizer_id: event.userId,
+      profiles: {
+        full_name: "Demo Organizer",
+        avatar_url: null,
+        email: "organizer@demo.com"
+      },
+      tickets: [] // Mock tickets
+    }
+
+    return { data: mappedEvent, error: null }
   }
 
   /**
    * Get events created by a specific user
    */
   async getUserEvents(userId: string) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, tickets(count)')
-      .eq('organizer_id', userId)
-      .order('created_at', { ascending: false })
+    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents]
+    const userEvents = allEvents
+      .filter(e => e.userId === userId)
+      .map(event => ({
+        ...event,
+        id: event._id,
+        title: event.name,
+        is_published: event.status === 'published',
+        organizer_id: event.userId,
+        tickets: { count: 0 }
+      }))
 
-    return { data, error }
+    return { data: userEvents, error: null }
   }
 
   /**
-   * Create a new event
+   * Create a new event (Mock)
    */
-  async createEvent(event: EventInsert) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .insert(event)
-      .select()
-      .single()
-
-    return { data, error }
+  async createEvent(event: Record<string, unknown>) {
+    const newEvent = {
+      ...event,
+      id: "mock-new-id",
+      created_at: new Date().toISOString()
+    }
+    return { data: newEvent, error: null }
   }
 
   /**
-   * Update an event
+   * Update an event (Mock)
    */
-  async updateEvent(eventId: string, updates: EventUpdate) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .update(updates)
-      .eq('id', eventId)
-      .select()
-      .single()
-
-    return { data, error }
+  async updateEvent(eventId: string, updates: Record<string, unknown>) {
+    return { data: { id: eventId, ...updates }, error: null }
   }
 
   /**
-   * Delete an event
+   * Delete an event (Mock)
    */
-  async deleteEvent(eventId: string) {
-    const { error } = await this.supabase
-      .from('events')
-      .delete()
-      .eq('id', eventId)
-
-    return { error }
+  async deleteEvent() {
+    return { error: null }
   }
 
   /**
-   * Publish an event
+   * Publish an event (Mock)
    */
   async publishEvent(eventId: string) {
     return this.updateEvent(eventId, { is_published: true })
   }
 
   /**
-   * Unpublish an event
+   * Unpublish an event (Mock)
    */
   async unpublishEvent(eventId: string) {
     return this.updateEvent(eventId, { is_published: false })
@@ -141,95 +143,34 @@ export class EventsService {
    * Get upcoming events
    */
   async getUpcomingEvents(limit = 10) {
-    const now = new Date().toISOString()
-
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('is_published', true)
-      .gte('start_date', now)
-      .order('start_date', { ascending: true })
-      .limit(limit)
-
-    return { data, error }
+    return this.getPublishedEvents({ limit })
   }
 
   /**
    * Get events by category
    */
   async getEventsByCategory(category: string, limit = 10) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('is_published', true)
-      .eq('category', category)
-      .order('start_date', { ascending: true })
-      .limit(limit)
-
-    return { data, error }
+    return this.getPublishedEvents({ category, limit })
   }
 
   /**
    * Search events
    */
   async searchEvents(query: string, limit = 20) {
-    const { data, error } = await this.supabase
-      .from('events')
-      .select('*, profiles(full_name, avatar_url)')
-      .eq('is_published', true)
-      .or(`title.ilike.%${query}%,description.ilike.%${query}%,tags.cs.{${query}}`)
-      .order('start_date', { ascending: true })
-      .limit(limit)
-
-    return { data, error }
+    return this.getPublishedEvents({ searchQuery: query, limit })
   }
 
   /**
-   * Get event statistics for organizer
+   * Get event statistics for organizer (Mock)
    */
-  async getEventStats(eventId: string) {
-    // Get total tickets sold
-    const { data: tickets, error: ticketsError } = await this.supabase
-      .from('tickets')
-      .select('quantity_sold, quantity_total, price')
-      .eq('event_id', eventId)
-
-    if (ticketsError) {
-      return { data: null, error: ticketsError }
-    }
-
-    const totalTicketsSold = tickets?.reduce((sum, t) => sum + t.quantity_sold, 0) || 0
-    const totalTicketsAvailable = tickets?.reduce((sum, t) => sum + t.quantity_total, 0) || 0
-    const totalRevenue = tickets?.reduce((sum, t) => sum + (t.quantity_sold * t.price), 0) || 0
-
-    // Get total attendees
-    const { count: attendeesCount, error: attendeesError } = await this.supabase
-      .from('attendees')
-      .select('*', { count: 'exact', head: true })
-      .eq('event_id', eventId)
-
-    if (attendeesError) {
-      return { data: null, error: attendeesError }
-    }
-
-    // Get checked-in count
-    const { count: checkedInCount, error: checkedInError } = await this.supabase
-      .from('attendees')
-      .select('*', { count: 'exact', head: true })
-      .eq('event_id', eventId)
-      .eq('checked_in', true)
-
-    if (checkedInError) {
-      return { data: null, error: checkedInError }
-    }
-
+  async getEventStats(_eventId: string) {
     return {
       data: {
-        totalTicketsSold,
-        totalTicketsAvailable,
-        totalRevenue,
-        totalAttendees: attendeesCount || 0,
-        checkedInCount: checkedInCount || 0,
+        totalTicketsSold: 120,
+        totalTicketsAvailable: 500,
+        totalRevenue: 4500,
+        totalAttendees: 115,
+        checkedInCount: 98,
       },
       error: null,
     }
@@ -237,3 +178,4 @@ export class EventsService {
 }
 
 export const eventsService = new EventsService()
+

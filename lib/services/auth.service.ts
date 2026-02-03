@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/client'
 
 export interface SignUpData {
   email: string
@@ -13,167 +12,132 @@ export interface SignInData {
 }
 
 export class AuthService {
-  private supabase = createClient()
-
   /**
-   * Sign up a new user
+   * Sign up a new user (Mock)
    */
   async signUp(data: SignUpData) {
-    const { email, password, fullName, phoneNumber } = data
-
-    const { data: authData, error } = await this.supabase.auth.signUp({
+    const { email, fullName } = data
+    
+    // Mock successful signup
+    const user = {
+      id: "mock-user-id",
       email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          phone_number: phoneNumber,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-
-    if (error) {
-      return { user: null, error }
-    }
-
-    // Create user profile in the database
-    if (authData.user) {
-      await this.createUserProfile(authData.user.id, {
-        email,
+      user_metadata: {
         full_name: fullName,
-        phone_number: phoneNumber,
-      })
+      }
     }
 
-    return { user: authData.user, error: null }
+    return { user, error: null }
   }
 
   /**
-   * Sign in an existing user
+   * Sign in an existing user (Mock)
    */
   async signIn(data: SignInData) {
-    const { email, password } = data
+    const { email } = data
 
-    const { data: authData, error } = await this.supabase.auth.signInWithPassword({
+    // Mock successful signin
+    const user = {
+      id: "mock-user-id",
       email,
-      password,
-    })
+    }
+    const session = {
+      access_token: "mock-token",
+      user,
+    }
 
-    return { user: authData.user, session: authData.session, error }
+    return { user, session, error: null }
   }
 
   /**
-   * Sign out the current user
+   * Sign out the current user (Mock)
    */
   async signOut() {
-    const { error } = await this.supabase.auth.signOut()
-    return { error }
+    return { error: null }
   }
 
   /**
-   * Send password reset email
+   * Send password reset email (Mock)
    */
-  async resetPassword(email: string) {
-    const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/sign-in/password-reset`,
-    })
-    return { error }
+  async resetPassword() {
+    return { error: null }
   }
 
   /**
-   * Update user password
+   * Update user password (Mock)
    */
-  async updatePassword(newPassword: string) {
-    const { error } = await this.supabase.auth.updateUser({
-      password: newPassword,
-    })
-    return { error }
+  async updatePassword() {
+    return { error: null }
   }
 
   /**
-   * Get current user
+   * Get current user (Mock)
    */
   async getCurrentUser() {
-    const { data: { user }, error } = await this.supabase.auth.getUser()
-    return { user, error }
+    const user = {
+      id: "mock-user-id",
+      email: "demo@eventeev.com",
+      user_metadata: {
+        full_name: "Demo User",
+      }
+    }
+    return { user, error: null }
   }
 
   /**
-   * Get current session
+   * Get current session (Mock)
    */
   async getSession() {
-    const { data: { session }, error } = await this.supabase.auth.getSession()
-    return { session, error }
-  }
-
-  /**
-   * Sign in with OAuth provider (Google, GitHub, etc.)
-   */
-  async signInWithOAuth(provider: 'google' | 'github' | 'facebook') {
-    const { data, error } = await this.supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    return { data, error }
-  }
-
-  /**
-   * Create user profile in the database
-   */
-  private async createUserProfile(
-    userId: string,
-    profile: { email: string; full_name?: string; phone_number?: string }
-  ) {
-    const { error } = await this.supabase.from('profiles').insert({
-      id: userId,
-      email: profile.email,
-      full_name: profile.full_name,
-      phone_number: profile.phone_number,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-
-    if (error) {
-      console.error('Error creating user profile:', error)
+    const session = {
+      access_token: "mock-token",
+      user: {
+        id: "mock-user-id",
+        email: "demo@eventeev.com",
+      }
     }
+    return { session, error: null }
   }
 
   /**
-   * Update user profile
+   * Sign in with OAuth provider (Mock)
+   */
+  async signInWithOAuth() {
+    return { data: { url: '#' }, error: null }
+  }
+
+  /**
+   * Update user profile (Mock)
    */
   async updateProfile(userId: string, updates: Partial<{
     full_name: string
     phone_number: string
     avatar_url: string
   }>) {
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId)
-      .select()
-      .single()
+    const data = {
+      id: userId,
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }
 
-    return { data, error }
+    return { data, error: null }
   }
 
   /**
-   * Get user profile
+   * Get user profile (Mock)
    */
   async getProfile(userId: string) {
-    const { data, error } = await this.supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    const data = {
+      id: userId,
+      email: "demo@eventeev.com",
+      full_name: "Demo User",
+      phone_number: "+1234567890",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
 
-    return { data, error }
+    return { data, error: null }
   }
 }
 
 export const authService = new AuthService()
+
