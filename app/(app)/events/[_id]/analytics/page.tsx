@@ -10,78 +10,89 @@ import MarketingWidget from "@/components/analytics/MarketingWidget";
 import { HiOutlineCurrencyDollar, HiOutlineTicket, HiOutlineUserGroup } from "react-icons/hi";
 import { HiOutlineChartPie } from "react-icons/hi2";
 
+import Link from "next/link";
+import { FaAngleLeft } from "react-icons/fa6";
+
 export default function AnalyticsPage() {
   return (
-    <div className="p-8 space-y-6 pb-20">
-      {/* Header Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatsCard 
-          title="Total Revenue" 
-          value="$1.24M" 
-          trend="14.2%" 
-          trendUp={true} 
-          icon={<HiOutlineCurrencyDollar className="text-xl" />}
-          data={[{value: 30}, {value: 40}, {value: 35}, {value: 50}, {value: 45}, {value: 60}, {value: 75}]}
-          chartHeaderColor="#F79009"
-        />
-        <StatsCard 
-          title="Net Profit" 
-          value="$482.5K" 
-          trend="6.8%" 
-          trendUp={true} 
-          icon={<HiOutlineChartPie className="text-xl" />}
-          data={[{value: 20}, {value: 25}, {value: 22}, {value: 30}, {value: 28}, {value: 35}, {value: 40}]}
-          chartHeaderColor="#F04438"
-        />
-        <StatsCard 
-          title="Tickets Sold" 
-          value="18,540" 
-          trend="21.4%" 
-          trendUp={true} 
-          icon={<HiOutlineTicket className="text-xl" />}
-          data={[{value: 10}, {value: 15}, {value: 12}, {value: 20}, {value: 25}, {value: 30}, {value: 45}]}
-          chartHeaderColor="#EB5017"
-        />
-        <StatsCard 
-          title="Attendance Rate" 
-          value="94.2%" 
-          trend="1.2%" 
-          trendUp={false} 
-          icon={<HiOutlineUserGroup className="text-xl" />}
-          data={[{value: 90}, {value: 88}, {value: 85}, {value: 82}, {value: 80}, {value: 78}, {value: 75}]}
-          chartHeaderColor="#D92D20"
-        />
+    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      {/* Premium Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-1">
+          <div className="space-y-1.5">
+              <Link 
+                  href="./dashboard" 
+                  className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
+              >
+                  <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
+                  Back to Dashboard
+              </Link>
+              <div className="space-y-0.5">
+                  <p className="text-[10px] font-black text-[#EB5017] uppercase tracking-[0.2em]">Insights</p>
+                  <h1 className="text-3xl font-black text-[#1B1818] tracking-tighter">Event Analytics</h1>
+              </div>
+          </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Sales & Attendance (Spans 2 columns) */}
-        <div className="xl:col-span-2">
+      <div className="px-1 space-y-6">
+        {/* Header Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <StatsCard 
+            title="Total Revenue" 
+            value="$1.24M" 
+            trend="14.2%" 
+            trendUp={true} 
+            icon={<HiOutlineCurrencyDollar className="text-xl" />}
+            data={[{value: 30}, {value: 40}, {value: 35}, {value: 50}, {value: 45}, {value: 60}, {value: 75}]}
+            chartHeaderColor="#F79009"
+          />
+          <StatsCard 
+            title="Net Profit" 
+            value="$482.5K" 
+            trend="6.8%" 
+            trendUp={true} 
+            icon={<HiOutlineChartPie className="text-xl" />}
+            data={[{value: 20}, {value: 25}, {value: 22}, {value: 30}, {value: 28}, {value: 35}, {value: 40}]}
+            chartHeaderColor="#F04438"
+          />
+          <StatsCard 
+            title="Tickets Sold" 
+            value="18,540" 
+            trend="21.4%" 
+            trendUp={true} 
+            icon={<HiOutlineTicket className="text-xl" />}
+            data={[{value: 10}, {value: 15}, {value: 12}, {value: 20}, {value: 25}, {value: 30}, {value: 45}]}
+            chartHeaderColor="#EB5017"
+          />
+          <StatsCard 
+            title="Attendance Rate" 
+            value="94.2%" 
+            trend="1.2%" 
+            trendUp={false} 
+            icon={<HiOutlineUserGroup className="text-xl" />}
+            data={[{value: 90}, {value: 88}, {value: 85}, {value: 82}, {value: 80}, {value: 78}, {value: 75}]}
+            chartHeaderColor="#D92D20"
+          />
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
+          <div className="xl:col-span-2 space-y-5">
             <SalesAttendance />
-        </div>
-        
-        {/* Engagement Widget */}
-        <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <ChatInteractionWidget />
+              <PeakChatHoursWidget />
+            </div>
+          </div>
+          <div className="space-y-5">
             <EngagementWidget />
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-         {/* Chat & Peak Hours Column */}
-         <div className="space-y-6">
-            <div className="h-[200px]">
-                <PeakChatHoursWidget />
-            </div>
-            <div className="flex-1">
-                <ChatInteractionWidget />
-            </div>
-         </div>
+        {/* Marketing (Full Width) */}
+        <div className="w-full h-auto">
+          <MarketingWidget />
+        </div>
 
-         {/* Marketing & Demographics (Spans 2 columns) */}
-         <div className="xl:col-span-2">
-            <MarketingWidget />
-         </div>
       </div>
     </div>
   );

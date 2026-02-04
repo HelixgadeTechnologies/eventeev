@@ -4,114 +4,128 @@ import { Input } from "../ui/input";
 
 const PaidTicketsForm = () => {
   return (
-    <form className="flex flex-col gap-y-4">
-      <div className="flex flex-col gap-y-1">
-        <Label
-          htmlFor="ticketName"
-          className="text-[#101928] text-sm font-medium"
-        >
-          Ticket Name
-        </Label>
-        <Input
-          type="text"
-          className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-          id="ticketName"
-        />
-      </div>
-      <div className="flex flex-col gap-y-1">
-        <Label
-          htmlFor="ticketName"
-          className="text-[#101928] text-sm font-medium"
-        >
-          Ticket Quantity
-        </Label>
-        <Input
-          type="text"
-          className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-          id="ticketName"
-        />
-      </div>
-      <div className="flex flex-col gap-y-1">
-        <Label
-          htmlFor="ticketName"
-          className="text-[#101928] text-sm font-medium"
-        >
-          Price
-        </Label>
-        <Input
-          type="text"
-          className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-          id="ticketName"
-        />
-      </div>
-      <div className="flex gap-x-3.5 items-center">
-        <div className="flex flex-col gap-y-1 w-1/2">
-          <Label
-            htmlFor="startDate"
-            className="text-[#101928] text-sm font-medium"
-          >
-            Start Date
-          </Label>
-          <Input
-            type="date"
-            className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-            id="startDate"
-          />
+    <form className="space-y-6">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="ticketName"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Ticket Name
+            </Label>
+            <Input
+              type="text"
+              placeholder="e.g. VIP Experience"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="ticketName"
+            />
+          </div>
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="ticketQuantity"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Total Inventory
+            </Label>
+            <Input
+              type="number"
+              placeholder="0"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="ticketQuantity"
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-y-1 w-1/2">
+
+        <div className="space-y-1.5 flex flex-col">
           <Label
-            htmlFor="startTime"
-            className="text-[#101928] text-sm font-medium"
+            htmlFor="price"
+            className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
           >
-            Start Time
+            Price (USD)
           </Label>
-          <Input
-            type="time"
-            className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-            id="startTime"
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+            <Input
+              type="number"
+              placeholder="0.00"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all pl-8"
+              id="price"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="startDate"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Sales Start Date
+            </Label>
+            <Input
+              type="date"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="startDate"
+            />
+          </div>
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="startTime"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Sales Start Time
+            </Label>
+            <Input
+              type="time"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="startTime"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="stopDate"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Sales End Date
+            </Label>
+            <Input
+              type="date"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="stopDate"
+            />
+          </div>
+          <div className="space-y-1.5 flex flex-col">
+            <Label
+              htmlFor="stopTime"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Sales End Time
+            </Label>
+            <Input
+              type="time"
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
+              id="stopTime"
+            />
+          </div>
         </div>
       </div>
-      <div className="flex gap-x-3.5 items-center">
-        <div className="flex flex-col gap-y-1 w-1/2">
-          <Label
-            htmlFor="stopDate"
-            className="text-[#101928] text-sm font-medium"
-          >
-            Stop Date
-          </Label>
-          <Input
-            type="date"
-            className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-            id="stopDate"
-          />
-        </div>
-        <div className="flex flex-col gap-y-1 w-1/2">
-          <Label
-            htmlFor="stopTime"
-            className="text-[#101928] text-sm font-medium"
-          >
-            Stop Time
-          </Label>
-          <Input
-            type="time"
-            className="w-full !p-4 border-[#D0D5DD] rounded-[6px] focus-visible:ring-0 focus-visible:border-[#F56630]"
-            id="stopTime"
-          />
-        </div>
-      </div>
-      <div className="flex flex-col md:flex-row items-center gap-x-8">
+
+      <div className="flex items-center gap-4 pt-4 border-t border-gray-50/50">
         <button
           type="button"
-          className="text-[#F56630] border border-[#F56630] w-6/12 flex justify-center items-center text-base font-semibold py-3 rounded-[8px] cursor-pointer"
+          className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 transition-all active:scale-95"
         >
-          Cancel
+          Discard Changes
         </button>
         <button
           type="submit"
-          className="text-white border border-[#F56630] bg-[#F56630] w-6/12 flex justify-center items-center text-base font-semibold py-3 rounded-[8px] cursor-pointer"
+          className="flex-[2] bg-[#EB5017] text-white py-4 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#EB5017]/20 hover:scale-[1.02] active:scale-95 transition-all"
         >
-          Save
+          Initialize Ticket Tier
         </button>
       </div>
     </form>
@@ -119,3 +133,4 @@ const PaidTicketsForm = () => {
 };
 
 export default PaidTicketsForm;
+

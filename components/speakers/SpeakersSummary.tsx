@@ -4,7 +4,7 @@ import SummaryCard from "../ui/SummaryCard";
 
 const SpeakersSummary = () => {
   return (
-    <div className="grid grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <SummaryCard 
         label="Total Speakers" 
         value="8" 
@@ -28,6 +28,7 @@ const SpeakersSummary = () => {
       />
     </div>
   );
+
 };
 
 export default SpeakersSummary;

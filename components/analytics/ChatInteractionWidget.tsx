@@ -12,13 +12,14 @@ const topics = [
 const ChatInteractionWidget = () => {
   return (
     <div className="bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm h-full flex flex-col">
-       <div className="flex justify-between items-center mb-6">
+       <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-bold text-[#1B1818]">Chat & Interaction</h2>
         <button className="text-[#EB5017] text-xs font-bold hover:underline">View Logs</button>
       </div>
 
       <div>
-        <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-4">Discussed Topics</p>
+        <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-3">Discussed Topics</p>
+
         <div className="flex flex-wrap gap-2">
             {topics.map((topic, idx) => (
                 <span 

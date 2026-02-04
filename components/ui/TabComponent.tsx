@@ -13,58 +13,62 @@ type TabProps = {
   data: Array<TabType>;
   renderContent?: (activeTabId: number) => React.ReactNode;
   width?: string;
-//   onTabChange?: (tabId: number) => void
 };
 
 export default function TabComponent({ 
     data,
     renderContent,
     width,
-    // onTabChange,
  }: TabProps) {
 
   const [activeTab, setActiveTab] = useState(1);
   const handleTabChange = (index: number) => {
     setActiveTab(index);
-    // onTabChange?.(index);
   }
 
   return (
-    <div className="w-full space-y-4">
-      {/* Tabs */}
-      <div className={`${width ? `w-${width}`: 'w-full'} relative h-10 flex justify-between items-center gap-4 px-2 bg-[#f1f5f9] rounded-lg overflow-x-auto`}>
-        {data.map((d) => {
-          const isActive = activeTab === d.id;
-          return (
-            <div key={d.id} onClick={() => handleTabChange(d.id)} className="relative z-10">
-              <div
-                className={`relative z-10 px-3 md:px-6 h-10 w-[300px] flex items-center justify-center font-bold text-xs md:text-sm cursor-pointer gap-3 whitespace-nowrap ${
-                  isActive ? "primary" : "text-gray-600"
+    <div className="w-full space-y-8">
+      {/* Premium Tabs Container */}
+      <div className="flex justify-center">
+        <div className={`${width ? `w-${width}` : 'w-full max-w-2xl'} p-1.5 bg-white/50 backdrop-blur-md border border-gray-100 rounded-full shadow-sm flex items-center gap-1 overflow-x-auto no-scrollbar`}>
+          {data.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`relative flex-1 flex items-center justify-center gap-2.5 h-10 px-6 rounded-full transition-all duration-300 group ${
+                  isActive ? "text-white" : "text-gray-400 hover:text-gray-600"
                 }`}
-                >
-                <div className="text-lg">{d.icon}</div>
-                {d.tabName}
-              </div>
-                  {isActive && (
-                    <motion.div
-                      layoutId="tab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#f7a88c] rounded-lg"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-            </div>
-          );
-        })}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 bg-[#EB5017] rounded-full shadow-lg shadow-[#EB5017]/20"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className={`relative z-10 text-lg transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                  {tab.icon}
+                </span>
+                <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.15em] whitespace-nowrap">
+                  {tab.tabName}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Animated Content */}
+      {/* Animated Content Layer */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.25 }}
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          className="min-h-[400px]"
         >
           {renderContent?.(activeTab)}
         </motion.div>

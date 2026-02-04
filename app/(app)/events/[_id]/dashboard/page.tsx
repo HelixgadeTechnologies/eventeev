@@ -3,11 +3,8 @@ import { publishedEvents } from "@/lib/demo-data/events";
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import { FaAngleRight } from "react-icons/fa6";
-import Heading from "@/components/ui/HeadingComponent";
 import { services } from "@/lib/demo-data/dashboard-services";
 import Image from "next/image";
-import CardComponent from "@/components/ui/CardComponent";
-import Button from "@/components/ui/Button";
 import { formatDate } from "@/lib/utils/configure-date";
 import { LuClock3 } from "react-icons/lu";
 import { IoCalendarClearOutline } from "react-icons/io5";
@@ -36,22 +33,24 @@ export async function generateMetadata({ params }: EventDetailsProps) {
 }
 
 export default async function EventsDashboard({ params }: EventDetailsProps) {
-  const { _id } = await params; // Await the params Promise
+  const { _id } = await params;
   const currentEvent = publishedEvents.find((eve) => eve._id === _id);
 
   if (!currentEvent) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
-          <Image src="/logo-black.svg" alt="Eventeev" width={40} height={40} className="opacity-20" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+        <div className="w-24 h-24 bg-gray-50/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-100 shadow-sm animate-pulse">
+          <Image src="/logo-black.svg" alt="Eventeev" width={48} height={48} className="opacity-10" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-gray-900 leading-tight">Event Not Found</h2>
-          <p className="text-gray-500 font-medium">We couldn&apos;t find an event with the ID &quot;{_id}&quot;.</p>
+          <h2 className="text-3xl font-black text-[#1B1818] tracking-tight mb-2">Event Not Found</h2>
+          <p className="text-gray-400 font-medium max-w-sm mx-auto uppercase text-[10px] tracking-widest">
+            The requested event ID &quot;{_id}&quot; does not exist in our database.
+          </p>
         </div>
         <Link 
           href="/events"
-          className="bg-[#eb5017] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#d64815] transition-all"
+          className="bg-[#eb5017] text-white px-10 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/20"
         >
           Back to My Events
         </Link>
@@ -61,36 +60,36 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
 
   const analytics = [
     {
-      title: "RSVP",
-      value: 0,
-      percentage: 0,
+      title: "Expected RSVP",
+      value: 1240,
+      percentage: 12,
       icon: "/icons/thermometer.svg",
-      text: "Increase",
+      text: "Trending Up",
       isCurrency: false,
     },
     {
-      title: "Check-ins",
-      value: 0,
-      percentage: 0,
+      title: "Actual Check-ins",
+      value: 856,
+      percentage: 8,
       icon: "/icons/3d.svg",
-      text: "Healthy",
+      text: "Stable Flow",
       isCurrency: false,
     },
     {
-      title: "Amount generated",
-      value: 0,
-      percentage: 0,
+      title: "Revenue Forecast",
+      value: 450000,
+      percentage: 15,
       icon: "/icons/sun.svg",
-      text: "₦0",
+      text: "Growth Phase",
       isCurrency: true,
     },
   ];
 
   return (
-    <section className="flex gap-5">
-      <div className="w-[65%] space-y-5">
-        {/* analytics */}
-        <div className="grid grid-cols-3 w-full gap-3">
+    <section className="flex flex-col lg:flex-row gap-8 font-sans">
+      <div className="flex-1 space-y-10">
+        {/* Analytics Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {analytics.map((a, index) => (
             <AnalyticsCard
               key={index}
@@ -104,108 +103,175 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           ))}
         </div>
 
-        {/* attendees */}
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <Heading heading="Newest peeps" />
+        {/* Newest Attendees Section */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end px-2">
+            <div>
+              <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em] mb-1">Activity</p>
+              <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">Recent Peeps</h3>
+            </div>
             <Link
-              className="text-xs font-semibold primary flex items-center group"
+              className="text-[10px] font-black primary flex items-center gap-1 uppercase tracking-widest group hover:translate-x-1 transition-transform"
               href={`/events/${currentEvent._id}/attendees`}
             >
-              <span className="group-hover:underline">See all attendees</span>
-              <FaAngleRight className="text-xl" />
+              See all attendees
+              <FaAngleRight className="text-lg" />
             </Link>
           </div>
-          <div className="h-36 w-full rounded-[10px] bg-white border border-gray-200 flex justify-center items-center">
-            {currentEvent.attendees.length === 0 ? (
-              <p className="font-medium text-gray-600 text-sm">
-                New attendees would appear here! 😊
-              </p>
-            ) : (
-              <div className="flex gap-4 items-center hidden-scrollbar overflow-x-auto w-full mx-4">
-                {currentEvent.attendees.slice(0, 7).map((attendee) => (
-                  <div
-                    key={attendee.id}
-                    className="space-y-1 flex flex-col justify-center items-center w-[90px]"
-                  >
-                    <Avatar name={attendee.username} isBigger={true} />
-                    <p className="mt-1 font-semibold text-xs text-gray-900 truncate">
-                      {attendee.username}
-                    </p>
-                    <p className="text-[10px] text-gray-400 w-[90px] truncate">
-                      {attendee.useremail}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="relative group">
+            <div className="h-44 w-full rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 shadow-sm flex items-center overflow-hidden">
+              {currentEvent.attendees.length === 0 ? (
+                <div className="w-full text-center space-y-2">
+                  <p className="font-extrabold text-[#1B1818] text-sm uppercase tracking-wider">Empty Horizon</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                    New attendees will materialize here soon! 😊
+                  </p>
+                </div>
+              ) : (
+                <div className="flex gap-8 items-center overflow-x-auto w-full px-8 py-4 custom-scrollbar">
+                  {currentEvent.attendees.slice(0, 8).map((attendee) => (
+                    <div
+                      key={attendee.id}
+                      className="flex flex-col shrink-0 items-center justify-center space-y-3 group/item cursor-pointer"
+                    >
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-[#eb5017] rounded-full scale-0 group-hover/item:scale-110 transition-transform duration-300 opacity-20" />
+                        <Avatar name={attendee.username} isBigger={true} />
+                      </div>
+                      <div className="text-center">
+                        <p className="font-black text-[11px] text-[#1B1818] uppercase tracking-tight truncate w-20">
+                          {attendee.username}
+                        </p>
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter w-20 truncate">
+                          Peep #{attendee.id.toString().slice(-4)}
+                        </p>
+                      </div>
+                    </div>
+
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* services */}
-        <div className="space-y-3">
-          <Heading heading="Services" />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Services Grid Section */}
+        <div className="space-y-6">
+          <div className="px-2">
+            <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em] mb-1">Extensions</p>
+            <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">Power-ups</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {services.map((service, idx) => (
               <Link
                 href={`/events/${currentEvent._id}/${service.href}`}
                 key={idx}
-                className={`h-[150px] w-full rounded-[10px]`}
-                style={{ backgroundColor: service.bg }}
+                className="group relative overflow-hidden rounded-[28px] h-40 bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               >
-                <div className="h-full w-full flex justify-between flex-col px-5 py-7">
-                  <div className="h-8 w-8 relative overflow-hidden">
-                    <Image src={service.icon} alt="Icon" fill />
+                <div 
+                  className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity" 
+                  style={{ backgroundColor: service.bg }} 
+                />
+                <div className="relative h-full w-full flex flex-col justify-between p-7">
+                  <div className="h-10 w-10 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500 bg-opacity-70 backdrop-blur-sm border border-gray-50">
+                    <div className="h-5 w-5 relative">
+                      <Image src={service.icon} alt={service.name} fill className="object-contain" />
+                    </div>
                   </div>
-                  <p className="leading-5 text-gray-800 font-semibold">
-                    {service.name}
-                  </p>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Module</p>
+                    <p className="text-sm font-black text-[#1B1818] uppercase tracking-tighter leading-none">
+                      {service.name}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         </div>
       </div>
-      <div className="w-[35%] space-y-7">
-        <CardComponent>
-          <header className="p-4">
-            <Heading heading="Event day" />
-          </header>
-          <div className="border-t border-b border-gray-300 w-full">
-            <div className="p-4 space-y-4">
-              <Heading heading={formatDate(currentEvent.startDate)} />
-              <div className="gap-2.5 items-center flex">
-                <LuClock3 className="text-base text-[#475367]" />
-                <p className="font-normal text-[11px] text-[#475367]">
-                  {currentEvent.startTime} - {currentEvent.endTime}
+
+      {/* Sidebar Section */}
+      <div className="w-full lg:w-[380px] space-y-8">
+        <div className="bg-white/95 backdrop-blur-xl border border-gray-100 rounded-[32px] shadow-2xl shadow-gray-200/50 overflow-hidden">
+          <div className="p-8 pb-0">
+             <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em] mb-1">Timeline</p>
+             <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">Event Snapshot</h3>
+          </div>
+          
+          <div className="p-8 space-y-8">
+            <div className="flex items-center gap-6">
+              <div className="h-14 w-14 rounded-2xl bg-[#eb5017]/5 flex flex-col items-center justify-center border border-[#eb5017]/10">
+                <span className="text-[10px] font-black text-[#eb5017] uppercase">{formatDate(currentEvent.startDate).split(' ')[0]}</span>
+                <span className="text-xl font-black text-[#eb5017] -mt-1">{formatDate(currentEvent.startDate).split(' ')[1]}</span>
+              </div>
+              <div>
+                <h4 className="font-black text-[#1B1818] tracking-tight text-lg leading-tight uppercase">
+                  {formatDate(currentEvent.startDate)}
+                </h4>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                  Main Event Day
                 </p>
               </div>
-              <div className="flex items-center gap-2.5">
-                <IoCalendarClearOutline className="text-base text-[#475367]" />
-                <p className="text-[#475367] capitalize text-[11px]">
-                  {currentEvent.location}
-                </p>
-              </div>
-              <div className="flex gap-2.5 items-center">
-                <Avatar name={"Richard Edem"} />
-                <div className="my-3">
-                  <p className="font-medium text-sm text-[#101928]">
-                    {/* {userData.username} */} Dr. Richard Edem
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <LuClock3 className="text-lg text-[#eb5017]" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Aura Duration</p>
+                  <p className="text-xs font-black text-[#1B1818] uppercase tracking-tighter">
+                    {currentEvent.startTime} — {currentEvent.endTime}
                   </p>
-                  <p className="text-[#475367] capitalize text-[11px]">
-                    Event Organiser
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <IoCalendarClearOutline className="text-lg text-[#eb5017]" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Base Camp</p>
+                  <p className="text-xs font-black text-[#1B1818] uppercase tracking-tighter truncate w-48">
+                    {currentEvent.location}
                   </p>
                 </div>
               </div>
             </div>
+
+            <div className="pt-4 border-t border-gray-50">
+               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Master of Ceremony</p>
+               <div className="flex items-center justify-center gap-4">
+                  <Avatar name={"Richard Edem"} isBigger={true} />
+                  <div>
+                    <p className="font-black text-sm text-[#1B1818] uppercase tracking-tighter leading-none">
+                      Dr. Richard Edem
+                    </p>
+                    <p className="text-[10px] text-[#eb5017] font-black uppercase tracking-widest mt-1">
+                      Event Architect
+                    </p>
+                  </div>
+               </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button className="w-full bg-[#eb5017] text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/20">
+                Edit Protocol
+              </button>
+              <button className="w-full bg-white border border-gray-100 text-[#1B1818] py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all transform active:scale-95 shadow-sm">
+                Broadcast Link
+              </button>
+            </div>
           </div>
-          <footer className="px-4 pt-4 flex items-center gap-2.5">
-            <Button content="Edit Event details" isSecondary />
-            <Button content="Copy Event Link" />
-          </footer>
-        </CardComponent>
-        <Calendar eventDate={currentEvent.startDate} />
+        </div>
+        
+        <div className="rounded-[32px] overflow-hidden shadow-sm border border-gray-100 bg-white p-2">
+            <Calendar eventDate={currentEvent.startDate} />
+        </div>
       </div>
     </section>
   );
 }
+

@@ -17,13 +17,13 @@ const winners: WinnerStat[] = [
 
 const EngagementWidget = () => {
   return (
-    <div className="bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm flex flex-col">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-bold text-[#1B1818]">Engagement & Games</h2>
         <button className="text-gray-400 hover:text-[#EB5017]"><MoreVertical size={20} /></button>
       </div>
 
-      <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-4">Top 3 Winners</p>
+      <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-3">Top 3 Winners</p>
       
       <div className="space-y-4 flex-1">
         {winners.map((winner) => (
@@ -42,8 +42,8 @@ const EngagementWidget = () => {
         ))}
       </div>
 
-      <div className="mt-8 bg-[#FFF8F2] border border-[#FFD9B3] rounded-[16px] p-5">
-        <div className="flex justify-between items-center mb-2">
+      <div className="mt-4 bg-[#FFF8F2] border border-[#FFD9B3] rounded-[16px] p-5">
+        <div className="flex justify-between items-center mb-1.5">
            <span className="text-[10px] font-black text-[#EB5017] uppercase tracking-wide">Avg. Completion Rate</span>
            <span className="text-2xl font-black text-[#EB5017]">78%</span>
         </div>

@@ -31,7 +31,7 @@ const ProgressBar = ({ label, percentage, color }: { label: string; percentage: 
 const SalesAttendance = () => {
   return (
     <div className="bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-5">
         <div>
           <h2 className="text-base font-bold text-[#1B1818]">Sales & Attendance</h2>
           <p className="text-xs text-gray-400 font-medium">Daily trend performance across all venues</p>
@@ -39,12 +39,12 @@ const SalesAttendance = () => {
         <button className="text-[#EB5017] text-xs font-bold hover:underline">Export Details</button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* Chart Area */}
-        <div className="flex-1 min-h-[300px]">
-           <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-4">Revenue Growth Trend</p>
+        <div className="flex-1 min-h-[250px]">
+           <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-3">Revenue Growth Trend</p>
            <ResponsiveContainer width="100%" height={260}>
-             <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+             <AreaChart data={data} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
                <defs>
                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                    <stop offset="5%" stopColor="#EB5017" stopOpacity={0.2}/>
@@ -77,8 +77,8 @@ const SalesAttendance = () => {
         </div>
 
         {/* Ticket Types - Right Side */}
-        <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-8 flex flex-col gap-6 pt-4">
-           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-2">Ticket Types %</p>
+        <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-5 flex flex-col gap-5 pt-3">
+           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Ticket Types %</p>
            
            <ProgressBar label="Paid" percentage={65} color="#EB5017" />
            <ProgressBar label="Free" percentage={25} color="#E06C00" />

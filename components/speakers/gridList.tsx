@@ -1,240 +1,66 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { SpeakerDataType } from "@/lib/demo-data/speakers";
-import { FolderAdd, MoreCircle } from "iconsax-reactjs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { MoreCircle } from "iconsax-reactjs";
+import { FaTwitter } from "react-icons/fa6";
 
-const randomColors = [
-  { majorColor: "#B4A3F824", minorColor: "#D4CAFF", iconColor: "#6145D0" },
-  { majorColor: "#FFF8F0", minorColor: "#FFE5C2", iconColor: "#E08304" },
-  { majorColor: "#FFF0F2", minorColor: "#FCC5CE", iconColor: "#EF5DA8" },
-  { majorColor: "#EAF6FC", minorColor: "#D5EDFA", iconColor: "#177AE5" },
-  { majorColor: "#F5F8FA", minorColor: "#E1E7EC", iconColor: "#73797F" },
-];
+
 
 const GridList = ({ data }: { data: SpeakerDataType[] }) => {
-  const handleRandomColors = () => {
-    const randomColor =
-      randomColors[Math.floor(Math.random() * randomColors.length)];
-    return randomColor;
-  };
-
   return (
-    <div className="py-5 px-2 grid grid-cols-3 gap-[18px]">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
       {data.map((speaker) => (
         <div
           key={speaker.name}
-          className={`font-sans text-[#1A1A1A] px-[26px] py-[18px] rounded-2xl h-[235px] flex flex-col justify-between overflow-hidden relative`}
-          style={{ backgroundColor: handleRandomColors().majorColor }}
+          className="group relative bg-white/70 backdrop-blur-xl border border-gray-100 rounded-[32px] p-6 hover:shadow-2xl hover:shadow-[#EB5017]/10 transition-all duration-500 overflow-hidden"
         >
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-y-1">
-              <h6 className="font-bold text-xl">{speaker.name}</h6>
-              <p className="font-normal text-sm">{speaker.title}</p>
-              <p className="font-normal text-sm">{speaker.twitterHandle}</p>
+          {/* Decorative background element */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#EB5017]/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#EB5017]/10 transition-colors duration-500" />
+          
+          <div className="flex justify-between items-start relative z-10">
+            <div className="space-y-4 flex-1 pr-4">
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-[#1B1818] tracking-tight leading-loose">{speaker.name}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">{speaker.title}</p>
+                <Link 
+                  href={`https://x.com/${speaker.twitterHandle.replace('@', '')}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-1.5 text-[10px] font-black text-[#EB5017] uppercase tracking-widest mt-2 hover:opacity-70 transition-opacity"
+                >
+                  <FaTwitter size={10} /> {speaker.twitterHandle}
+                </Link>
+              </div>
+
+              <div className="pt-4 border-t border-gray-50">
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 leading-none">Presentation Topic</p>
+                <p className="text-xs font-bold text-[#1B1818] leading-relaxed">
+                  {speaker.topic}
+                </p>
+              </div>
             </div>
-            <button className="cursor-pointer">
-              <MoreCircle size="24" color="#73797F" />
-            </button>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-[#EB5017] rounded-3xl scale-0 group-hover:scale-110 transition-transform duration-500 opacity-20" />
+              <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-2 border-white shadow-xl bg-gray-50 ring-1 ring-gray-100">
+                <Image
+                  src={speaker.avatar}
+                  alt={speaker.name}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+              </div>
+            </div>
           </div>
-          <div
-            className="w-[238px] h-[238px] rounded-full absolute top-5/12 -right-20"
-            style={{ backgroundColor: handleRandomColors().minorColor }}
-          ></div>
-          <div className="w-[100px] h-[100px] rounded-full border border-[#177AE5] absolute top-1/2 -translate-y-1/2 right-[63px]">
-            <Image
-              src={speaker.avatar}
-              alt={speaker.name}
-              fill
-              className="object-cover rounded-full"
-            />
-          </div>
-          <div className="flex flex-col font-normal text-[10px]">
-            <p>Topic: </p>
-            <p>{speaker.topic}</p>
-          </div>
+          
+          <button className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-gray-50/50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-white transition-all shadow-sm">
+            <MoreCircle size="20" />
+          </button>
         </div>
       ))}
-
-      <Dialog>
-        <DialogTrigger asChild>
-          <button className="bg-[#F0EDFB] rounded-2xl h-[235px] flex flex-col items-center justify-center cursor-pointer">
-            <div className="flex flex-col items-center justify-center gap-y-3">
-              <FolderAdd size="60" color="#6145D0" />
-              <p className="text-[#1A1A1A] font-sans text-lg font-normal">
-                Add New Speaker
-              </p>
-            </div>
-          </button>
-        </DialogTrigger>
-        <DialogContent className="min-w-8/12 px-8">
-          <DialogHeader>
-            <DialogTitle></DialogTitle>
-            <DialogDescription className="flex flex-col">
-              <div className="w-full flex">
-                <div className="w-4/12 flex flex-col gap-y-1.5">
-                  <h4 className="!font-sans text-2xl text-black font-semibold">
-                    Add a New Speaker
-                  </h4>
-                  <h5 className="!font-sans text-base text-[#101928] font-semibold">
-                    Profile photo
-                  </h5>
-                  <p className="!font-sans text-sm text-[#667185] font-normal w-8/12">
-                    This image will be displayed on your profile
-                  </p>
-                  <Input type="file" />
-                </div>
-                <div className="w-8/12 flex justify-center items-center">
-                  <div className="w-[100px] h-[100px] rounded-full border border-[#177AE5]">
-                    <Image
-                      src="/placeholder.svg"
-                      alt="alt"
-                      fill
-                      className="object-cover rounded-full"
-                    />
-                  </div>
-                </div>
-              </div>
-              <form className="flex gap-x-3.5 mt-5">
-                <div className="w-4/12">
-                  <h5 className="!font-sans text-base text-[#101928] font-semibold">
-                    Speaker Information
-                  </h5>
-                  <p className="!font-sans text-sm text-[#667185] font-normal w-8/12">
-                    Update speaker details here.
-                  </p>
-                  <button className="bg-[#E8562E] flex items-center gap-x-2.5 text-white rounded-[8px] border border-[#E8562E] mt-5 px-3 py-2 font-sans font-semibold text-sm">
-                    Save Changes
-                  </button>
-                </div>
-                <div className="w-8/12 flex flex-col gap-y-5">
-                  <div className="flex gap-x-5">
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="fName"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        First Name
-                      </Label>
-                      <Input
-                        id="fName"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="lName"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        Last Name
-                      </Label>
-                      <Input
-                        id="lName"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-x-5">
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="title"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        Title
-                      </Label>
-                      <Input
-                        id="title"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="cpName"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        Company Name
-                      </Label>
-                      <Input
-                        id="cpName"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-y-3">
-                    <Label
-                      htmlFor="bio"
-                      className="text-[#101928] text-sm font-medium"
-                    >
-                      Bio
-                    </Label>
-                    <Input
-                      id="bio"
-                      type="text"
-                      className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-y-3">
-                    <Label
-                      htmlFor="topic"
-                      className="text-[#101928] text-sm font-medium"
-                    >
-                      Enter Topic  
-                    </Label>
-                    <Input
-                      id="topic"
-                      type="text"
-                      className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                    />
-                  </div>
-                  <div className="flex gap-x-5">
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="twHandle"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        Enter Speaker twitter (X) handle
-                      </Label>
-                      <Input
-                        id="twHandle"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-y-3">
-                      <Label
-                        htmlFor="cpTwHandle"
-                        className="text-[#101928] text-sm font-medium"
-                      >
-                        Company Twitter (X) handle
-                      </Label>
-                      <Input
-                        id="cpTwHandle"
-                        type="text"
-                        className="border border-[#D0D5DD] p-4 rounded-[6px] text-[#101928] text-sm font-medium"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
 export default GridList;
+

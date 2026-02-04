@@ -14,40 +14,48 @@ type AddProps = {
 export default function AddTickets({ isOpen, onClose }: AddProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex flex-col gap-y-4">
-        <h5>Add Ticket</h5>
-        <Tabs defaultValue="paid">
-          <TabsList className="w-full gap-x-5 border-0 bg-transparent">
+      <div className="flex flex-col gap-y-8 min-w-[500px]">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-[#EB5017] uppercase tracking-[0.2em]">Inventory</p>
+          <h5 className="text-2xl font-black text-[#1B1818] tracking-tight">Add New Ticket</h5>
+        </div>
+
+        <Tabs defaultValue="paid" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 gap-2 bg-gray-50/50 p-1.5 rounded-full border border-gray-100 mb-8">
             <TabsTrigger
-              className="data-[state=active]:bg-[#E8562E] bg-[#D93F1661] text-white border border-[#FD9670] rounded-full !py-4"
+              className="rounded-full py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-[#EB5017] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#EB5017]/20 transition-all duration-300"
               value="paid"
             >
               Paid
             </TabsTrigger>
             <TabsTrigger
-              className="data-[state=active]:bg-[#E8562E] bg-[#D93F1661] text-white border border-[#FD9670] rounded-full !py-4"
+              className="rounded-full py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-[#EB5017] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#EB5017]/20 transition-all duration-300"
               value="free"
             >
               Free
             </TabsTrigger>
             <TabsTrigger
-              className="data-[state=active]:bg-[#E8562E] bg-[#D93F1661] text-white border border-[#FD9670] rounded-full !py-4"
+              className="rounded-full py-2.5 text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-[#EB5017] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#EB5017]/20 transition-all duration-300"
               value="donation"
             >
-              Donation
+              Donated
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="paid">
-            <PaidTicketsForm />
-          </TabsContent>
-          <TabsContent value="free">
-            <FreeTicketsForm />
-          </TabsContent>
-          <TabsContent value="donation">
-            <DonatedTicketsForm />
-          </TabsContent>
+          
+          <div className="bg-gray-50/30 rounded-[32px] p-8 border border-gray-50/50">
+            <TabsContent value="paid" className="mt-0 focus-visible:outline-none">
+              <PaidTicketsForm />
+            </TabsContent>
+            <TabsContent value="free" className="mt-0 focus-visible:outline-none">
+              <FreeTicketsForm />
+            </TabsContent>
+            <TabsContent value="donation" className="mt-0 focus-visible:outline-none">
+              <DonatedTicketsForm />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </Modal>
   );
 }
+
