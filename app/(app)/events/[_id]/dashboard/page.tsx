@@ -5,7 +5,7 @@ import Avatar from "@/components/ui/Avatar";
 import { FaAngleRight } from "react-icons/fa6";
 import { services } from "@/lib/demo-data/dashboard-services";
 import Image from "next/image";
-import { formatDate } from "@/lib/utils/configure-date";
+import { formatDate, formatDay } from "@/lib/utils/configure-date";
 import { LuClock3 } from "react-icons/lu";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import Calendar from "@/components/ui/Calendar";
@@ -201,9 +201,8 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           
           <div className="p-8 space-y-8">
             <div className="flex items-center gap-6">
-              <div className="h-14 w-14 rounded-2xl bg-[#eb5017]/5 flex flex-col items-center justify-center border border-[#eb5017]/10">
-                <span className="text-[10px] font-black text-[#eb5017] uppercase">{formatDate(currentEvent.startDate).split(' ')[0]}</span>
-                <span className="text-xl font-black text-[#eb5017] -mt-1">{formatDate(currentEvent.startDate).split(' ')[1]}</span>
+              <div className="h-14 w-14 rounded-2xl bg-[#eb5017]/10 flex flex-col items-center justify-center border border-[#eb5017]/20 shrink-0">
+                <span className="text-xl font-black text-[#eb5017]">{formatDay(currentEvent.startDate)}</span>
               </div>
               <div>
                 <h4 className="font-black text-[#1B1818] tracking-tight text-lg leading-tight uppercase">
@@ -215,26 +214,26 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                 <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm">
                   <LuClock3 className="text-lg text-[#eb5017]" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Aura Duration</p>
-                  <p className="text-xs font-black text-[#1B1818] uppercase tracking-tighter">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Duration</p>
+                  <p className="text-[10px] font-black text-[#1B1818] uppercase tracking-tighter">
                     {currentEvent.startTime} — {currentEvent.endTime}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+              <div className="flex flex-col gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                 <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm">
                   <IoCalendarClearOutline className="text-lg text-[#eb5017]" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Base Camp</p>
-                  <p className="text-xs font-black text-[#1B1818] uppercase tracking-tighter truncate w-48">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Venue</p>
+                  <p className="text-[10px] font-black text-[#1B1818] uppercase tracking-tighter truncate w-full">
                     {currentEvent.location}
                   </p>
                 </div>
@@ -242,7 +241,6 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
             </div>
 
             <div className="pt-4 border-t border-gray-50">
-               <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Master of Ceremony</p>
                <div className="flex items-center justify-center gap-4">
                   <Avatar name={"Richard Edem"} isBigger={true} />
                   <div>
@@ -250,7 +248,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                       Dr. Richard Edem
                     </p>
                     <p className="text-[10px] text-[#eb5017] font-black uppercase tracking-widest mt-1">
-                      Event Architect
+                      Event Organiser
                     </p>
                   </div>
                </div>

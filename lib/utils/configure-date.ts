@@ -10,6 +10,21 @@ export const formatDate = (dateStr: string) => {
   return `${dayOfWeek}, ${month} ${year}`;
 };
 
+// function to get the ordinal suffix (st, nd, rd, th)
+export function getOrdinalSuffix(day: number) {
+  if (day > 3 && day < 21) return "th"; // Covers 11th-13th
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
 // for getting today's date
 export function todaysDate() {
   const date = new Date();
@@ -19,23 +34,16 @@ export function todaysDate() {
   const month = date.toLocaleString("en-US", { month: "long" });
   const year = date.getFullYear();
 
-  // Function to get the ordinal suffix (st, nd, rd, th)
-  function getOrdinalSuffix(day: number) {
-    if (day > 3 && day < 21) return "th"; // Covers 11th-13th
-    switch (day % 10) {
-      case 1:
-        return "st";
-      case 2:
-        return "nd";
-      case 3:
-        return "rd";
-      default:
-        return "th";
-    }
-  }
-
   return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
 }
+
+// for getting day like "11th" from date string
+export const formatDay = (dateStr: string) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  return `${day}${getOrdinalSuffix(day)}`;
+};
 
 // function to convert 12-hour time to 24-hour format
 export const convertTo24HourFormat = (timeStr: string) => {
