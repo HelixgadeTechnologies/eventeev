@@ -106,7 +106,7 @@ export default function Breadcrumb({
           {matched?.title || fallbackTitle}
         </h2>
         <p className="text-[10px] md:text-xs text-gray-500">
-          {matched?.subtitle || fallbackSubtitle}
+          {matched !== null ? matched.subtitle : fallbackSubtitle}
         </p>
       </div>
 

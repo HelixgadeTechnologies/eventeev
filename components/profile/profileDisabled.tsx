@@ -107,31 +107,6 @@ const ProfileDisabled = () => {
         </div>
       </div>
 
-      <div className="bg-[#F9FAFB]/50 rounded-2xl p-6 border border-[#F0F2F5] space-y-4">
-        <div className="flex justify-between items-center w-full">
-          <div className="space-y-1">
-            <label className="text-[#1D2739] font-sans text-sm font-semibold">
-              Recurrent event?
-            </label>
-            <p className="text-[#667185] font-sans text-xs">
-              Automatically set up follow-up events
-            </p>
-          </div>
-          <Switch className="data-[state=checked]:bg-[#eb5017]" checked />
-        </div>
-        <div className="pt-2">
-          <p className="text-[#667185] font-sans text-sm leading-relaxed">
-            You can set up a{" "}
-            <span className="text-[#eb5017] font-medium cursor-pointer hover:underline underline-offset-4">
-              custom domain
-            </span> or{" "}
-            <span className="text-[#eb5017] font-medium cursor-pointer hover:underline underline-offset-4">
-              connect your email service provider
-            </span>{" "}
-            to change these settings.
-          </p>
-        </div>
-      </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
         <button

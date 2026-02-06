@@ -52,5 +52,11 @@ export const breadcrumbMap = [
     title: "Integrations",
     subtitle: "Connect and manage external services for your event",
   },
+  {
+    pattern: "/profile",
+    title: "Profile page",
+    subtitle: "",
+    exact: true,
+  },
 ];
 
