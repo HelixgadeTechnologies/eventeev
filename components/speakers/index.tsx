@@ -19,10 +19,19 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { FiSearch } from "react-icons/fi";
 import SpeakersSummary from "./SpeakersSummary";
+import SpeakerDetailView from "./SpeakerDetailView";
+import { SpeakerDataType } from "@/lib/demo-data/speakers";
 
 const Speakers = () => {
   const [isGrid, setIsGrid] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerDataType | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  const handleSpeakerClick = (speaker: SpeakerDataType) => {
+    setSelectedSpeaker(speaker);
+    setIsDetailOpen(true);
+  };
 
   const filteredSpeakers = speakerData.filter((speaker) =>
     speaker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -235,8 +244,18 @@ const Speakers = () => {
       </div>
 
       <div className="mt-4">
-        {isGrid ? <GridList data={filteredSpeakers} /> : <TableList data={filteredSpeakers} />}
+        {isGrid ? (
+          <GridList data={filteredSpeakers} onSpeakerClick={handleSpeakerClick} />
+        ) : (
+          <TableList data={filteredSpeakers} onSpeakerClick={handleSpeakerClick} />
+        )}
       </div>
+
+      <SpeakerDetailView 
+        speaker={selectedSpeaker} 
+        isOpen={isDetailOpen} 
+        onClose={() => setIsDetailOpen(false)} 
+      />
     </div>
   );
 };
