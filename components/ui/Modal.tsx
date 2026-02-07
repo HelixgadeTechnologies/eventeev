@@ -1,18 +1,21 @@
 'use client';
 
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  className?: string;
 };
 
 export default function Modal({ 
     isOpen, 
     onClose, 
     children,
+    className,
 }: ModalProps) {
   return (
     <AnimatePresence>
@@ -20,7 +23,7 @@ export default function Modal({
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black/80 z-40 flex items-center justify-center"
+            className="fixed inset-0 bg-black/80 z-40 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -28,7 +31,10 @@ export default function Modal({
           >
             {/* Modal */}
             <motion.div
-              className="bg-white rounded-2xl shadow-xl w-[90%] max-w-md p-6 z-50 relative text-black"
+              className={cn(
+                "bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-50 relative text-black overflow-hidden",
+                className
+              )}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
