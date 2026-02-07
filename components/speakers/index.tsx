@@ -6,7 +6,7 @@ import { speakerData } from "@/lib/demo-data/speakers";
 import GridList from "./gridList";
 import TableList from "./tableList";
 import { RxDashboard } from "react-icons/rx";
-import { List, CirclePlus } from "lucide-react";
+import { List, CirclePlus, User } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,7 @@ const Speakers = () => {
               <CirclePlus size={18} /> Add New Speaker
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-6xl bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-hidden font-sans border">
+          <DialogContent className="max-w-[86rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-hidden font-sans border">
             {/* Modal content remains the same as it was already modernized in previous steps or is consistent with the design */}
             <DialogHeader className="p-8 pb-0">
               <DialogTitle className="text-2xl font-black text-[#1B1818] tracking-tight">Add New Speaker</DialogTitle>
@@ -106,13 +106,8 @@ const Speakers = () => {
                   </div>
                   <div className="flex-1 flex items-center gap-6">
                     <div className="relative group">
-                      <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-50 ring-1 ring-gray-100">
-                        <Image
-                          src="/placeholder.svg"
-                          alt="Profile Preview"
-                          fill
-                          className="object-cover"
-                        />
+                      <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-50 ring-1 ring-gray-100 flex items-center justify-center">
+                        <User className="w-12 h-12 text-gray-300" />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                           <span className="text-[10px] text-white font-bold uppercase tracking-widest">Change</span>
                         </div>
