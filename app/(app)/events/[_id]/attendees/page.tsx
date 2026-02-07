@@ -38,10 +38,7 @@ export default function AttendeesPage() {
                   <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
                   Back to Dashboard
               </Link>
-              <div className="space-y-1">
-                  <p className="text-[10px] font-black text-[#EB5017] uppercase tracking-[0.2em]">Community Insight</p>
-                  <h1 className="text-4xl font-black text-[#1B1818] tracking-tighter">Event Peeps</h1>
-              </div>
+
           </div>
       </div>
 

@@ -20,10 +20,7 @@ export default function Tickets() {
                         <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
                         Back to Dashboard
                     </Link>
-                    <div className="space-y-1">
-                        <p className="text-[10px] font-black text-[#EB5017] uppercase tracking-[0.2em]">Ticketing Engine</p>
-                        <h1 className="text-4xl font-black text-[#1B1818] tracking-tighter">Access Passports</h1>
-                    </div>
+
                 </div>
             </div>
 

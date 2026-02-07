@@ -2,7 +2,7 @@ import AnalyticsCard from "@/components/display/AnalyticsCard";
 import { publishedEvents } from "@/lib/demo-data/events";
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
-import { FaAngleRight } from "react-icons/fa6";
+import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
 import { services } from "@/lib/demo-data/dashboard-services";
 import Image from "next/image";
 import { formatDate, formatDay } from "@/lib/utils/configure-date";
@@ -86,8 +86,22 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
   ];
 
   return (
-    <section className="flex flex-col lg:flex-row gap-8 font-sans">
-      <div className="flex-1 space-y-10">
+    <section className="flex flex-col gap-10 font-sans">
+      {/* Back Navigation */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
+          <div className="space-y-2">
+              <Link 
+                  href="/events" 
+                  className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
+              >
+                  <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
+                  Back to event page
+              </Link>
+          </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 space-y-10">
         {/* Analytics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {analytics.map((a, index) => (
@@ -267,6 +281,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
         
         <div className="rounded-[32px] overflow-hidden shadow-sm border border-gray-100 bg-white p-2">
             <Calendar eventDate={currentEvent.startDate} />
+        </div>
         </div>
       </div>
     </section>

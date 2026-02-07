@@ -16,22 +16,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 export default function AnalyticsPage() {
   return (
     <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-      {/* Premium Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-1">
-          <div className="space-y-1.5">
-              <Link 
-                  href="./dashboard" 
-                  className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
-              >
-                  <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
-                  Back to Dashboard
-              </Link>
-              <div className="space-y-0.5">
-                  <p className="text-[10px] font-black text-[#EB5017] uppercase tracking-[0.2em]">Insights</p>
-                  <h1 className="text-3xl font-black text-[#1B1818] tracking-tighter">Event Analytics</h1>
-              </div>
-          </div>
-      </div>
+
 
       <div className="px-1 space-y-6">
         {/* Header Stats Row */}

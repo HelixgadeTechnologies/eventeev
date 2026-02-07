@@ -44,13 +44,18 @@ export const breadcrumbMap = [
   },
   {
     pattern: "/events/:id/analytics",
-    title: "Analytics Page",
-    subtitle: "Comprehensive overview of event performance and engagement",
+    title: "Event Analytics",
+    subtitle: "",
   },
   {
     pattern: "/events/:id/settings/integrations",
     title: "Integrations",
     subtitle: "Connect and manage external services for your event",
+  },
+  {
+    pattern: "/events/:id/speakers",
+    title: "Speaker Directory",
+    subtitle: "",
   },
   {
     pattern: "/profile",
