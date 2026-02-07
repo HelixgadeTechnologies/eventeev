@@ -23,7 +23,7 @@ const SpeakerDetailView = ({ speaker, isOpen, onClose }: SpeakerDetailViewProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-y-auto overflow-x-hidden font-sans border max-h-[90vh] custom-scrollbar selection:bg-[#EB5017]/10">
+      <DialogContent className="max-w-[92rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-y-auto overflow-x-hidden font-sans border max-h-[90vh] custom-scrollbar selection:bg-[#EB5017]/10">
         <div className="relative h-48 w-full bg-[#EB5017]/10 overflow-hidden">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#EB5017] rounded-full blur-3xl" />

@@ -85,7 +85,7 @@ const Speakers = () => {
               <CirclePlus size={18} /> Add New Speaker
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-hidden font-sans border">
+          <DialogContent className="max-w-6xl bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-hidden font-sans border">
             {/* Modal content remains the same as it was already modernized in previous steps or is consistent with the design */}
             <DialogHeader className="p-8 pb-0">
               <DialogTitle className="text-2xl font-black text-[#1B1818] tracking-tight">Add New Speaker</DialogTitle>

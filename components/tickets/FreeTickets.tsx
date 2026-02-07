@@ -2,10 +2,28 @@
 
 import Image from "next/image";
 import { IoAdd } from "react-icons/io5";
-import DataTable from "../ui/data-table";
+import DataTable, { FilterConfig } from "../ui/data-table";
 import soldTicketData, { SoldTicketType } from "@/lib/demo-data/sold-tickets";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
+
+
+const filters: FilterConfig[] = [
+  {
+    columnId: "ticketName",
+    label: "Ticket Type",
+    type: "select",
+    options: [
+      { label: "Standard Admission", value: "Standard Admission" },
+      { label: "Speaker Invite", value: "Speaker Invite" },
+    ],
+  },
+  {
+    columnId: "dateRegistered",
+    label: "Registration Date",
+    type: "date",
+  },
+];
 
 const columns: ColumnDef<SoldTicketType>[] = [
   {
@@ -54,6 +72,7 @@ const columns: ColumnDef<SoldTicketType>[] = [
     )
   },
   {
+    id: "ticketId",
     accessorKey: "ticketId",
     header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">ID</span>,
     cell: ({ row }) => <code className="text-[10px] font-bold text-[#EB5017] bg-[#EB5017]/5 px-1.5 py-0.5 rounded">#{String(row.getValue("ticketId")).slice(-6)}</code>
@@ -171,7 +190,7 @@ export default function FreeTickets({ addTicket }: { addTicket: () => void }) {
             </div>
           </div>
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <DataTable columns={columns} data={soldTicketData} isPagination />
+            <DataTable columns={columns} data={soldTicketData} isPagination filters={filters} />
           </div>
         </div>
       )}

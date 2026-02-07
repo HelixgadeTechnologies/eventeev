@@ -13,6 +13,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FilterConfig } from "../ui/data-table";
+
+const filters: FilterConfig[] = [
+  {
+    columnId: "checkedIn",
+    label: "Status",
+    type: "select",
+    options: [
+      { label: "Verified", value: "true" },
+      { label: "Pending", value: "false" },
+    ],
+  },
+];
 
 const columns: ColumnDef<AttendeesDataType>[] = [
   {
@@ -104,6 +117,10 @@ const columns: ColumnDef<AttendeesDataType>[] = [
         Status <ArrowUpDown size={12} className="group-hover:scale-110 transition-transform" />
       </button>
     ),
+    filterFn: (row, columnId, filterValue) => {
+      if (filterValue === "" || filterValue === undefined) return true;
+      return String(row.getValue(columnId)) === filterValue;
+    },
     cell: ({ row }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const [checked, setChecked] = useState(!!row.getValue("checkedIn"));
@@ -160,7 +177,7 @@ const columns: ColumnDef<AttendeesDataType>[] = [
 const AttendeesList = () => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 mt-10">
-      <DataTable columns={columns} data={checkInData.slice(0, 10)} isPagination />
+      <DataTable columns={columns} data={checkInData} isPagination filters={filters} />
     </div>
   );
 };

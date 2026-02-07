@@ -2,13 +2,98 @@
 
 import Image from "next/image";
 import { IoAdd } from "react-icons/io5";
+import DataTable, { FilterConfig } from "../ui/data-table";
+import soldTicketData, { SoldTicketType } from "@/lib/demo-data/sold-tickets";
+import { ColumnDef } from "@tanstack/react-table";
+import { Checkbox } from "../ui/check-box";
+
+const filters: FilterConfig[] = [
+  {
+    columnId: "ticketName",
+    label: "Donation Type",
+    type: "select",
+    options: [
+      { label: "Community Support", value: "Community Support" },
+    ],
+  },
+  {
+    columnId: "dateRegistered",
+    label: "Registration Date",
+    type: "date",
+  },
+];
+
+const columns: ColumnDef<SoldTicketType>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value: boolean) =>
+          table.toggleAllPageRowsSelected(!!value)
+        }
+        aria-label="select all"
+        className="border-gray-300 data-[state=checked]:bg-[#EB5017] data-[state=checked]:border-[#EB5017]"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+        arai-label="Select row"
+        className="border-gray-300 data-[state=checked]:bg-[#EB5017] data-[state=checked]:border-[#EB5017]"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Name</span>,
+    cell: ({ row }) => <span className="font-bold text-[#1B1818] uppercase tracking-tight text-xs">{row.getValue("name")}</span>
+  },
+  {
+    accessorKey: "email",
+    header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email</span>,
+    cell: ({ row }) => <span className="text-xs text-gray-500 font-medium">{row.getValue("email")}</span>
+  },
+  {
+    accessorKey: "ticketName",
+    header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Type</span>,
+    cell: ({ row }) => (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-gray-50 text-gray-600 border border-gray-100">
+        {row.getValue("ticketName")}
+      </span>
+    )
+  },
+  {
+    id: "ticketId",
+    accessorKey: "ticketId",
+    header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">ID</span>,
+    cell: ({ row }) => <code className="text-[10px] font-bold text-[#EB5017] bg-[#EB5017]/5 px-1.5 py-0.5 rounded">#{String(row.getValue("ticketId")).slice(-6)}</code>
+  },
+  {
+    accessorKey: "dateRegistered",
+    header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Registered</span>,
+    cell: ({ row }) => {
+      return (
+        <span className="text-[10px] font-black uppercase tracking-tighter text-[#AD3307] bg-[#FFECE5] px-2.5 py-1 rounded-full border border-[#FFECE5]">
+          {row.getValue("dateRegistered")}
+        </span>
+      );
+    },
+  },
+];
 
 export default function DonatedTickets({
   addTicket,
 }: {
   addTicket: () => void;
 }) {
-  const tickets: { id: string | number; name: string }[] = [];
+  const tickets: SoldTicketType[] = [];
   return (
     <section className="space-y-6">
       {tickets.length === 0 ? (
@@ -43,7 +128,7 @@ export default function DonatedTickets({
         </div>
       ) : (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-           {/* Placeholder for future donated tickets list */}
+          <DataTable columns={columns} data={tickets} isPagination filters={filters} />
         </div>
       )}
     </section>
