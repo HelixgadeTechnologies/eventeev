@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { HiOutlineVolumeUp, HiOutlineCog } from "react-icons/hi";
 
@@ -41,10 +42,7 @@ export default function CountdownPage() {
       {/* Header Area */}
       <header className="absolute top-0 left-0 right-0 p-8 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-white rotate-45 flex items-center justify-center">
-            <div className="w-4 h-4 bg-[#EB5017] -rotate-45" />
-          </div>
-          <span className="text-xl font-black text-white tracking-tight">Eventeev</span>
+          <Image src="/logo-white.svg" alt="Eventeev" width={140} height={45} priority />
         </div>
         <div className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full flex items-center gap-2 font-black text-xs uppercase tracking-widest border border-white/20">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse" />

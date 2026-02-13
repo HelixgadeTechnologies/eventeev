@@ -13,6 +13,7 @@ export default function GamePlayPage() {
   const params = useParams();
   const [timeLeft, setTimeLeft] = useState(20);
   const [answersCount] = useState(42);
+  const [showEndModal, setShowEndModal] = useState(false);
   const totalPlayers = 64;
   // totalPlayers is defined but not used, removing to fix lint error
   // const totalPlayers = 64;
@@ -30,10 +31,24 @@ export default function GamePlayPage() {
     }
   }, [timeLeft, params, router]);
 
+  const handleEndGame = () => {
+    setShowEndModal(true);
+  };
+
+  const confirmEndGame = () => {
+    const eventId = params._id;
+    router.push(`/events/${eventId}/games`);
+  };
+
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
+      {/* Eventeev Logo */}
+      <div className="w-full pt-4 px-6 flex justify-start shrink-0">
+        <Image src="/logo-black.svg" alt="Eventeev" width={130} height={42} priority />
+      </div>
+
       {/* Question Header - Reduced padding */}
-      <div className="w-full pt-8 pb-4 px-6 text-center shrink-0">
+      <div className="w-full pt-4 pb-4 px-6 text-center shrink-0">
         <h1 className="text-3xl md:text-4xl font-black text-[#1B1818] max-w-4xl mx-auto leading-tight uppercase font-feather">
           Which planet is known as the Red Planet?
         </h1>
@@ -148,7 +163,7 @@ export default function GamePlayPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="px-5 py-2 bg-gray-50 rounded-lg font-black text-[10px] uppercase tracking-widest text-[#667185] hover:bg-gray-100 transition-colors border border-gray-100">
+          <button onClick={handleEndGame} className="px-5 py-2 bg-gray-50 rounded-lg font-black text-[10px] uppercase tracking-widest text-[#667185] hover:bg-gray-100 transition-colors border border-gray-100">
             End Game
           </button>
           <button className="px-8 py-2.5 bg-[#EB5017] text-white rounded-lg font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-md shadow-[#EB5017]/10">
@@ -157,6 +172,39 @@ export default function GamePlayPage() {
           </button>
         </div>
       </footer>
+
+      {/* End Game Confirmation Modal */}
+      {showEndModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#EB1D44" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-black text-[#1B1818]">End Game?</h3>
+              <p className="text-sm text-[#667185]">Are you sure you want to end this game? All progress will be lost and players will be disconnected.</p>
+              <div className="flex gap-3 w-full mt-2">
+                <button
+                  onClick={() => setShowEndModal(false)}
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-[#667185] font-bold text-sm hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmEndGame}
+                  className="flex-1 px-4 py-3 rounded-xl bg-[#EB1D44] text-white font-bold text-sm hover:bg-[#d41a3d] transition-colors shadow-lg shadow-[#EB1D44]/20"
+                >
+                  Yes, End Game
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

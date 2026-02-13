@@ -55,4 +55,18 @@ export const services = [
     borderColor: "blue-500",
     href: "networking",
   },
+  {
+    name: "Links & Resources",
+    icon: "/icons/service-links.svg",
+    bg: "#F3E8FF",
+    borderColor: "purple-500",
+    href: "links",
+  },
+  {
+    name: "Calendar & Reminders",
+    icon: "/icons/service-calendar.svg",
+    bg: "#FEF3C7",
+    borderColor: "amber-500",
+    href: "calendar",
+  },
 ];

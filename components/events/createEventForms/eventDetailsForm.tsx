@@ -12,6 +12,7 @@ import {
 import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import DatePicker from "@/components/ui/DatePicker";
 
 const EventDetailsForm = () => {
   const router = useRouter();
@@ -99,11 +100,10 @@ const EventDetailsForm = () => {
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
-                  <input 
-                    type="date"
+                  <DatePicker 
                     value={field.value}
                     onChange={field.onChange}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                    placeholder="Set start date"
                   />
                 )}
               />
@@ -135,17 +135,25 @@ const EventDetailsForm = () => {
               <Controller
                 name="stopDate"
                 control={control}
-                rules={{ required: true }}
+                rules={{ 
+                  required: "Required",
+                  validate: (value) => {
+                    const startDate = control._formValues.startDate;
+                    if (startDate && value < startDate) {
+                      return "End date cannot be earlier than start date";
+                    }
+                    return true;
+                  }
+                }}
                 render={({ field }) => (
-                  <input 
-                    type="date"
+                  <DatePicker 
                     value={field.value}
                     onChange={field.onChange}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                    placeholder="Set end date"
                   />
                 )}
               />
-              {errors.stopDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
+              {errors.stopDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">{errors.stopDate.message as string}</p>}
             </div>
 
             <div className="space-y-1.5">

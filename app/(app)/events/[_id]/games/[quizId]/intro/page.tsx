@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { HiOutlineLightBulb, HiOutlineGlobeAlt, HiOutlinePresentationChartBar, HiOutlineBeaker } from "react-icons/hi";
 
@@ -29,10 +30,7 @@ export default function QuestionIntroPage() {
       {/* Header */}
       <header className="w-full p-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#EB5017] rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 bg-white transform rotate-45" />
-          </div>
-          <span className="text-2xl font-black text-[#1B1818] tracking-tight">Eventeev</span>
+          <Image src="/logo-black.svg" alt="Eventeev" width={140} height={45} priority />
         </div>
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-end">

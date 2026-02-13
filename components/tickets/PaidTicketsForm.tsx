@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import DatePicker from "../ui/DatePicker";
 
 const PaidTicketsForm = () => {
+  const [startDate, setStartDate] = useState("");
+  const [stopDate, setStopDate] = useState("");
+
   return (
     <form className="space-y-6">
       <div className="space-y-4">
@@ -63,10 +67,11 @@ const PaidTicketsForm = () => {
             >
               Sales Start Date
             </Label>
-            <Input
-              type="date"
-              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
-              id="startDate"
+            <DatePicker 
+              value={startDate}
+              onChange={setStartDate}
+              placeholder="Select date"
+              className="h-12"
             />
           </div>
           <div className="space-y-1.5 flex flex-col">
@@ -92,10 +97,11 @@ const PaidTicketsForm = () => {
             >
               Sales End Date
             </Label>
-            <Input
-              type="date"
-              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
-              id="stopDate"
+            <DatePicker 
+              value={stopDate}
+              onChange={setStopDate}
+              placeholder="Select date"
+              className="h-12"
             />
           </div>
           <div className="space-y-1.5 flex flex-col">

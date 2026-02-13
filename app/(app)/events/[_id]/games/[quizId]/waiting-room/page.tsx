@@ -87,6 +87,8 @@ export default function WaitingRoomPage() {
           <span className="text-sm uppercase tracking-wider">Leave Room</span>
         </button>
 
+        <Image src="/logo-black.svg" alt="Eventeev" width={130} height={42} priority />
+
         <div className="flex items-center gap-4">
           <div className="bg-white/80 backdrop-blur-sm text-[#EB5017] px-5 py-2.5 rounded-2xl flex items-center gap-2.5 font-black text-xs shadow-sm border border-gray-100">
             <div className="w-2 h-2 bg-[#EB5017] rounded-full animate-pulse" />
