@@ -63,5 +63,31 @@ export const breadcrumbMap = [
     subtitle: "",
     exact: true,
   },
+  {
+    pattern: "/events/:id/networking",
+    title: "Networking",
+    subtitle: "Connect with attendees based on shared interests and goals",
+  },
+  {
+    pattern: "/events/:id/links",
+    title: "Links & Resources",
+    subtitle: "Share important links, documents, and resources with attendees",
+  },
+  {
+    pattern: "/events/:id/calendar",
+    title: "Calendar & Reminders",
+    subtitle: "Track deadlines, milestones, and important reminders",
+  },
+  {
+    pattern: "/events/:id/polls",
+    title: "Polls",
+    subtitle: "Create polls, gather attendee feedback, and view real-time results",
+  },
+  {
+    pattern: "/events/notifications",
+    title: "Notifications",
+    subtitle: "Track all activity across your events",
+    exact: true,
+  },
 ];
 

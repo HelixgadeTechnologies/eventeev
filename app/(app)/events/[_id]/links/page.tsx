@@ -72,8 +72,6 @@ export default function LinksPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em]">Power-up</p>
-          <h2 className="text-3xl font-black text-[#1B1818] tracking-tight">Links & Resources</h2>
-          <p className="text-sm text-gray-400 font-medium">Share important links, documents, and resources with your attendees.</p>
         </div>
         <button className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-xl shadow-[#EB5017]/20 shrink-0">
           <HiOutlinePlus className="text-lg" />
