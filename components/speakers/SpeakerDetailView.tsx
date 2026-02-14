@@ -6,9 +6,11 @@ import { SpeakerDataType } from "@/lib/demo-data/speakers";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { FaTwitter, FaLinkedin, FaGlobe } from "react-icons/fa6";
 import { LuMic, LuCalendar, LuClock3, LuMapPin } from "react-icons/lu";
 
@@ -24,6 +26,15 @@ const SpeakerDetailView = ({ speaker, isOpen, onClose }: SpeakerDetailViewProps)
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[110rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-y-auto overflow-x-hidden font-sans border max-h-[90vh] custom-scrollbar selection:bg-[#EB5017]/10">
+        <VisuallyHidden>
+          <DialogHeader>
+            <DialogTitle>Speaker Profile: {speaker.name}</DialogTitle>
+            <DialogDescription>
+              Detailed information about speaker {speaker.name} from {speaker.company}.
+            </DialogDescription>
+          </DialogHeader>
+        </VisuallyHidden>
+
         <div className="relative h-48 w-full bg-[#EB5017]/10 overflow-hidden">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#EB5017] rounded-full blur-3xl" />
