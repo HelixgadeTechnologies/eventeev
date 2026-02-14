@@ -2,6 +2,7 @@
 
 import { HiOutlineLink, HiOutlineExternalLink, HiOutlineDocumentText, HiOutlineVideoCamera, HiOutlinePlus } from "react-icons/hi";
 import { useState } from "react";
+import ResourceUploadModal from "@/components/links/ResourceUploadModal";
 
 const MOCK_LINKS = [
   {
@@ -64,16 +65,35 @@ const typeBadgeColors: Record<string, string> = {
 };
 
 export default function LinksPage() {
-  const [links] = useState(MOCK_LINKS);
+  const [links, setLinks] = useState(MOCK_LINKS);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const handleUploadComplete = (data: { file: File, title: string, description: string }) => {
+    const newLink = {
+      id: links.length + 1,
+      title: data.title,
+      url: "#",
+      type: "document",
+      description: data.description,
+      addedBy: "You",
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    };
+    setLinks([newLink, ...links]);
+  };
 
   return (
     <section className="space-y-8 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
         <div className="space-y-1">
-          <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em]">Power-up</p>
+          <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em] mb-1">Power-up</p>
+          <h2 className="text-3xl font-black text-[#1B1818] tracking-tight">Resources & Assets</h2>
+          <p className="text-sm text-gray-400 font-medium leading-relaxed">Access and manage all shared documents, videos, and useful links for this event.</p>
         </div>
-        <button className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-xl shadow-[#EB5017]/20 shrink-0">
+        <button 
+          onClick={() => setIsUploadModalOpen(true)}
+          className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-xl shadow-[#EB5017]/30 shrink-0"
+        >
           <HiOutlinePlus className="text-lg" />
           Add Resource
         </button>
@@ -84,25 +104,29 @@ export default function LinksPage() {
         {links.map((link) => (
           <div
             key={link.id}
-            className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group"
+            className="bg-white border border-gray-100 rounded-3xl p-6 flex items-center gap-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
           >
             {/* Icon */}
-            <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              {typeIcons[link.type] || <HiOutlineLink className="text-lg text-gray-400" />}
+            <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-white group-hover:border-[#EB5017]/20 transition-all duration-500 shadow-sm">
+              {typeIcons[link.type] || <HiOutlineLink className="text-xl text-gray-400" />}
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-black text-sm text-[#1B1818] tracking-tight truncate">{link.title}</h4>
-                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${typeBadgeColors[link.type]}`}>
+              <div className="flex items-center gap-2 mb-1.5">
+                <h4 className="font-black text-base text-[#1B1818] tracking-tight truncate">{link.title}</h4>
+                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${typeBadgeColors[link.type]}`}>
                   {link.type}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 font-medium truncate">{link.description}</p>
-              <p className="text-[10px] text-gray-300 font-bold mt-1">
-                Added by <span className="text-gray-500">{link.addedBy}</span> · {link.date}
-              </p>
+              <p className="text-xs text-gray-400 font-medium truncate max-w-xl">{link.description}</p>
+              <div className="flex items-center gap-2 mt-2">
+                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+                    Added by <span className="text-[#EB5017]">{link.addedBy}</span>
+                 </p>
+                 <span className="w-1 h-1 rounded-full bg-gray-200" />
+                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{link.date}</p>
+              </div>
             </div>
 
             {/* Action */}
@@ -110,13 +134,19 @@ export default function LinksPage() {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 hover:bg-[#EB5017] hover:text-white hover:border-[#EB5017] transition-all text-gray-400"
+              className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 hover:bg-[#EB5017] hover:text-white hover:border-[#EB5017] hover:shadow-lg hover:shadow-[#EB5017]/20 transition-all text-gray-400 duration-300"
             >
-              <HiOutlineExternalLink className="text-lg" />
+              <HiOutlineExternalLink className="text-xl" />
             </a>
           </div>
         ))}
       </div>
+
+      <ResourceUploadModal 
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadComplete={handleUploadComplete}
+      />
     </section>
   );
 }

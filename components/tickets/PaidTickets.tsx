@@ -8,8 +8,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 
 
+import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+
 type Props = {
-  addTicket: () => void;
+  addTicket: (type: TicketTier["type"]) => void;
+  onEdit: (tier: TicketTier) => void;
 };
 
 const filters: FilterConfig[] = [
@@ -113,7 +116,7 @@ const columns: ColumnDef<SoldTicketType>[] = [
   },
 ];
 
-export default function PaidTickets({ addTicket }: Props) {
+export default function PaidTickets({ addTicket, onEdit }: Props) {
   const tickets = soldTicketData;
   return (
     <section className="space-y-6">
@@ -140,7 +143,7 @@ export default function PaidTickets({ addTicket }: Props) {
               Learn More
             </button>
             <button
-              onClick={addTicket}
+              onClick={() => addTicket("paid")}
               className="bg-[#EB5017] text-white px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-[#EB5017]/20 hover:scale-[1.02] active:scale-95 transition-all"
             >
               <IoAdd className="text-lg" /> Add Ticket
@@ -153,7 +156,16 @@ export default function PaidTickets({ addTicket }: Props) {
             {/* Early Bird Card */}
             <div className="relative group overflow-hidden rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500">
               <div className="absolute top-0 right-0 p-4">
-                 <button className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all">
+                 <button 
+                  onClick={() => onEdit({
+                    name: "Early Bird Tier",
+                    type: "paid",
+                    price: 12.50,
+                    quantity: 150,
+                    startDate: "2026-02-14"
+                  })}
+                  className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all"
+                >
                   Edit
                 </button>
               </div>
@@ -184,7 +196,16 @@ export default function PaidTickets({ addTicket }: Props) {
             {/* General Card */}
             <div className="relative group overflow-hidden rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500">
               <div className="absolute top-0 right-0 p-4">
-                 <button className="bg-[#1B1818] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-110 active:scale-95 transition-all">
+                 <button 
+                  onClick={() => onEdit({
+                    name: "General Admission",
+                    type: "paid",
+                    price: 25.00,
+                    quantity: 200,
+                    startDate: "2026-02-15"
+                  })}
+                  className="bg-[#1B1818] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-110 active:scale-95 transition-all"
+                >
                   Edit
                 </button>
               </div>
@@ -215,7 +236,16 @@ export default function PaidTickets({ addTicket }: Props) {
             {/* VIP Card */}
             <div className="relative group overflow-hidden rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500">
               <div className="absolute top-0 right-0 p-4">
-                 <button className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all">
+                 <button 
+                  onClick={() => onEdit({
+                    name: "V.I.P Experience",
+                    type: "paid",
+                    price: 150.00,
+                    quantity: 50,
+                    startDate: "2026-02-16"
+                  })}
+                  className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all"
+                >
                   Edit
                 </button>
               </div>

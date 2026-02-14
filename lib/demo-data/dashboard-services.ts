@@ -69,4 +69,11 @@ export const services = [
     borderColor: "amber-500",
     href: "calendar",
   },
+  {
+    name: "Event Checklist",
+    icon: "/icons/service-checklist.svg",
+    bg: "#F0FDF4",
+    borderColor: "green-500",
+    href: "checklist",
+  },
 ];

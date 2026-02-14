@@ -3,9 +3,11 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import DatePicker from "../ui/DatePicker";
 
-const DonatedTicketsForm = () => {
-  const [startDate, setStartDate] = useState("");
-  const [stopDate, setStopDate] = useState("");
+import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+
+const DonatedTicketsForm = ({ initialData }: { initialData?: TicketTier }) => {
+  const [startDate, setStartDate] = useState(initialData?.startDate || "");
+  const [stopDate, setStopDate] = useState(initialData?.stopDate || "");
 
   return (
     <form className="space-y-6">
@@ -21,6 +23,7 @@ const DonatedTicketsForm = () => {
             <Input
               type="text"
               placeholder="e.g. Bronze Supporter"
+              defaultValue={initialData?.name}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
               id="ticketName"
             />
@@ -35,6 +38,7 @@ const DonatedTicketsForm = () => {
             <Input
               type="number"
               placeholder="0 (Unlimited)"
+              defaultValue={initialData?.quantity}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
               id="ticketQuantity"
             />
@@ -53,6 +57,7 @@ const DonatedTicketsForm = () => {
             <Input
               type="number"
               placeholder="25.00"
+              defaultValue={initialData?.price}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all pl-8"
               id="price"
             />
@@ -83,6 +88,7 @@ const DonatedTicketsForm = () => {
             </Label>
             <Input
               type="time"
+              defaultValue={initialData?.startTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
               id="startTime"
             />
@@ -113,6 +119,7 @@ const DonatedTicketsForm = () => {
             </Label>
             <Input
               type="time"
+              defaultValue={initialData?.stopTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
               id="stopTime"
             />
@@ -131,7 +138,7 @@ const DonatedTicketsForm = () => {
           type="submit"
           className="flex-[2] bg-[#EB5017] text-white py-4 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#EB5017]/20 hover:scale-[1.02] active:scale-95 transition-all"
         >
-          Create Donation Tier
+          {initialData ? "Update Donation Tier" : "Create Donation Tier"}
         </button>
       </div>
     </form>

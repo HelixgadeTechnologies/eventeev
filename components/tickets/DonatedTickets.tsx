@@ -88,10 +88,14 @@ const columns: ColumnDef<SoldTicketType>[] = [
   },
 ];
 
+import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+
 export default function DonatedTickets({
   addTicket,
+  onEdit,
 }: {
-  addTicket: () => void;
+  addTicket: (type: TicketTier["type"]) => void;
+  onEdit: (tier: TicketTier) => void;
 }) {
   const tickets: SoldTicketType[] = [];
   return (
@@ -119,7 +123,7 @@ export default function DonatedTickets({
               Learn More
             </button>
             <button
-              onClick={addTicket}
+              onClick={() => addTicket("donation")}
               className="bg-[#EB5017] text-white px-8 py-3.5 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-[#EB5017]/20 hover:scale-[1.02] active:scale-95 transition-all"
             >
               <IoAdd className="text-lg" /> Add Donated Ticket
