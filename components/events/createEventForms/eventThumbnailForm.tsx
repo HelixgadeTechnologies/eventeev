@@ -51,23 +51,58 @@ const EventThumbnailForm = () => {
         </p>
       </div>
 
+      {/* Tip Box */}
+      <div className="bg-[#FFF4ED] border border-orange-50 rounded-xl p-3 mb-6">
+        <p className="text-[9px] font-medium text-[#C27E33] leading-relaxed">
+          <span className="font-bold text-[#F56630] uppercase tracking-wider mr-1">Pro Tip:</span>
+          High-resolution banners (1920x1080) tend to have 40% higher engagement rates.
+        </p>
+      </div>
+
       <form className="flex flex-col gap-y-5 flex-1" onSubmit={handleSubmit(onSubmit)}>
-        {/* Banner Upload */}
-        <div className="space-y-1.5">
-          <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner / Thumbnail</Label>
-          <Controller
-            name="thumbnail"
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#F56630]/30 transition-all bg-gray-50/30 overflow-hidden">
-                <FileInput onChange={(file) => field.onChange(file)} />
-              </div>
-            )}
-          />
-          {errors.thumbnail && (
-            <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Thumbnail is required</p>
-          )}
+        {/* Media Upload Section (30:70 Ratio) */}
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Thumbnail Upload (30%) */}
+          <div className="flex-[3] space-y-1.5">
+            <div className="flex justify-between items-end">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Thumbnail</Label>
+              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">1:1 (Ideal: 800x800px)</span>
+            </div>
+            <Controller
+              name="thumbnail"
+              control={control}
+              render={({ field }) => (
+                <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#F56630]/30 transition-all bg-gray-50/30 overflow-hidden h-[180px]">
+                  <FileInput 
+                    className="h-full border-none p-0" 
+                    defaultValue={field.value as string} 
+                    onChange={(file) => field.onChange(file)} 
+                  />
+                </div>
+              )}
+            />
+          </div>
+
+          {/* Banner Upload (70%) */}
+          <div className="flex-[7] space-y-1.5">
+            <div className="flex justify-between items-end">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner</Label>
+              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">16:9 (Ideal: 1920x1080px)</span>
+            </div>
+            <Controller
+              name="banner"
+              control={control}
+              render={({ field }) => (
+                <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#F56630]/30 transition-all bg-gray-50/30 overflow-hidden h-[180px]">
+                  <FileInput 
+                    className="h-full border-none p-0" 
+                    defaultValue={field.value as string} 
+                    onChange={(file) => field.onChange(file)} 
+                  />
+                </div>
+              )}
+            />
+          </div>
         </div>
 
         {/* Event Type & Category Row */}
@@ -77,7 +112,6 @@ const EventThumbnailForm = () => {
             <Controller
               name="eventType"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger className="w-full bg-white border border-gray-200 h-10 rounded-xl px-3 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630]">
@@ -91,7 +125,6 @@ const EventThumbnailForm = () => {
                 </Select>
               )}
             />
-            {errors.eventType && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Required</p>}
           </div>
 
           <div className="space-y-1.5">
@@ -99,7 +132,6 @@ const EventThumbnailForm = () => {
             <Controller
               name="category"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger className="w-full bg-white border border-gray-200 h-10 rounded-xl px-3 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630]">
@@ -115,7 +147,6 @@ const EventThumbnailForm = () => {
                 </Select>
               )}
             />
-            {errors.category && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Required</p>}
           </div>
         </div>
 
@@ -125,7 +156,6 @@ const EventThumbnailForm = () => {
           <Controller
             name="location"
             control={control}
-            rules={{ required: true }}
             render={({ field }) => (
               <div className="relative">
                 <input 
@@ -138,17 +168,8 @@ const EventThumbnailForm = () => {
               </div>
             )}
           />
-          {errors.location && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Location is required</p>}
         </div>
 
-        {/* Tip Box */}
-        <div className="bg-[#FFF4ED] border border-orange-50 rounded-xl p-3 mt-4">
-          <p className="text-[9px] font-medium text-[#C27E33] leading-relaxed">
-            <span className="font-bold text-[#F56630] uppercase tracking-wider mr-1">Pro Tip:</span>
-            High-resolution banners (1920x1080) tend to have 40% higher engagement rates.
-          </p>
-        </div>
-        
         {/* Navigation Buttons */}
         <div className="flex items-center gap-4 pt-4 mt-auto">
           <button

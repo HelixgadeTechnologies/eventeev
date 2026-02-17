@@ -9,6 +9,7 @@ import { formatDate, formatDay } from "@/lib/utils/configure-date";
 import { LuClock3 } from "react-icons/lu";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import Calendar from "@/components/ui/Calendar";
+import DashboardActionButtons from "@/components/events/DashboardActionButtons";
 
 interface EventDetailsProps {
   params: Promise<{
@@ -23,7 +24,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: EventDetailsProps) {
-  const { _id } = await params; // Await the params Promise
+  const { _id } = await params;
   const event = publishedEvents.find((events) => events._id === _id);
 
   return {
@@ -268,16 +269,10 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                </div>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Link href={`/events/${currentEvent._id}/settings/details`} className="w-full">
-                <button className="w-full bg-[#eb5017] text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/20">
-                  Edit Event Details
-                </button>
-              </Link>
-              <button className="w-full bg-white border border-gray-100 text-[#1B1818] py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all transform active:scale-95 shadow-sm">
-                Event Url
-              </button>
-            </div>
+            <DashboardActionButtons 
+              eventId={currentEvent._id} 
+              eventName={currentEvent.name} 
+            />
           </div>
         </div>
         
@@ -289,4 +284,3 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
     </section>
   );
 }
-

@@ -50,7 +50,6 @@ const EventDetailsForm = () => {
           <Controller
             name="name"
             control={control}
-            rules={{ required: true }}
             render={({ field }) => (
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Name</Label>
@@ -64,7 +63,6 @@ const EventDetailsForm = () => {
               </div>
             )}
           />
-          {errors.name && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Event name is required</p>}
         </div>
 
         {/* Description */}
@@ -72,7 +70,6 @@ const EventDetailsForm = () => {
           <Controller
             name="description"
             control={control}
-            rules={{ required: true }}
             render={({ field }) => (
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Description</Label>
@@ -87,7 +84,6 @@ const EventDetailsForm = () => {
               </div>
             )}
           />
-          {errors.description && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Description is required</p>}
         </div>
 
         {/* Dates & Times Grid */}
@@ -98,7 +94,6 @@ const EventDetailsForm = () => {
               <Controller
                 name="startDate"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <DatePicker 
                     value={field.value}
@@ -107,7 +102,6 @@ const EventDetailsForm = () => {
                   />
                 )}
               />
-              {errors.startDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -115,7 +109,6 @@ const EventDetailsForm = () => {
               <Controller
                 name="startTime"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <input 
                     type="time" 
@@ -125,7 +118,6 @@ const EventDetailsForm = () => {
                   />
                 )}
               />
-              {errors.startTime && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
             </div>
           </div>
 
@@ -135,16 +127,6 @@ const EventDetailsForm = () => {
               <Controller
                 name="stopDate"
                 control={control}
-                rules={{ 
-                  required: "Required",
-                  validate: (value) => {
-                    const startDate = control._formValues.startDate;
-                    if (startDate && value < startDate) {
-                      return "End date cannot be earlier than start date";
-                    }
-                    return true;
-                  }
-                }}
                 render={({ field }) => (
                   <DatePicker 
                     value={field.value}
@@ -153,7 +135,6 @@ const EventDetailsForm = () => {
                   />
                 )}
               />
-              {errors.stopDate && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">{errors.stopDate.message as string}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -161,7 +142,6 @@ const EventDetailsForm = () => {
               <Controller
                 name="stopTime"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <input 
                     type="time" 
@@ -171,7 +151,6 @@ const EventDetailsForm = () => {
                   />
                 )}
               />
-              {errors.stopTime && <p className="text-[9px] font-bold text-red-500 mt-1 uppercase">Required</p>}
             </div>
           </div>
         </div>

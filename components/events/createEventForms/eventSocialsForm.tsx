@@ -44,6 +44,13 @@ const EventSocialsForm = () => {
         </p>
       </div>
 
+      {/* Tip Box */}
+      <div className="bg-[#F9FAFB] border border-gray-100 rounded-xl p-3 mb-6">
+        <p className="text-[9px] font-medium text-gray-400 leading-relaxed italic">
+          &quot;Adding social links can boost your event&apos;s trust score by up to 65%.&quot; — Eventeev Insights
+        </p>
+      </div>
+
       <form className="flex flex-col gap-y-4 flex-1" onSubmit={handleSubmit(onSubmit)}>
         {/* Website */}
         <div className="space-y-1.5">
@@ -51,7 +58,6 @@ const EventSocialsForm = () => {
           <Controller
             name="website"
             control={control}
-            rules={{ required: true }}
             render={({ field }) => (
               <div className="flex bg-white border border-gray-200 rounded-xl overflow-hidden focus-within:ring-1 focus-within:ring-[#F56630]/20 focus-within:border-[#F56630] transition-all">
                 <span className="bg-gray-50 px-3 py-2 text-gray-400 font-bold text-[10px] border-r border-gray-100 flex items-center shrink-0 uppercase tracking-wider">https://</span>
@@ -65,7 +71,6 @@ const EventSocialsForm = () => {
               </div>
             )}
           />
-          {errors.website && <p className="text-[9px] font-bold text-red-500 uppercase tracking-wider">Required</p>}
         </div>
 
         {/* Social Handles Group */}
@@ -78,7 +83,6 @@ const EventSocialsForm = () => {
             <Controller
               name="facebookUrl"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <input 
                   type="text" 
@@ -98,7 +102,6 @@ const EventSocialsForm = () => {
               <Controller
                 name="instagramUrl"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <input 
                     type="text" 
@@ -115,7 +118,6 @@ const EventSocialsForm = () => {
               <Controller
                 name="xUrl"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <input 
                     type="text" 
@@ -139,12 +141,6 @@ const EventSocialsForm = () => {
           <Switch className="data-[state=checked]:bg-[#F56630] scale-90" />
         </div>
 
-        {/* Tip Box */}
-        <div className="bg-[#F9FAFB] border border-gray-100 rounded-xl p-3">
-          <p className="text-[9px] font-medium text-gray-400 leading-relaxed italic">
-            &quot;Adding social links can boost your event&apos;s trust score by up to 65%.&quot; — Eventeev Insights
-          </p>
-        </div>
         
         {/* Navigation Buttons */}
         <div className="flex items-center gap-4 pt-4 mt-auto">

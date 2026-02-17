@@ -10,6 +10,7 @@ const initialFormData: createEventData = {
   stopTime: "",
   recurrentEvent: false,
   thumbnail: null,
+  banner: null,
   eventType: "virtual",
   location: "",
   category: "conference",

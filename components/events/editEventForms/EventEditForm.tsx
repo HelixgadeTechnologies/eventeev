@@ -158,17 +158,46 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
           <h3 className="text-lg font-black text-[#1B1818] uppercase tracking-tight">Category & Media</h3>
         </div>
 
-        <div className="space-y-4">
-          <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner / Thumbnail</Label>
-          <Controller
-            name="thumbnail"
-            control={control}
-            render={({ field }) => (
-              <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#eb5017]/30 transition-all bg-gray-50/30 overflow-hidden">
-                <FileInput defaultValue={field.value} onChange={(file) => field.onChange(file)} />
-              </div>
-            )}
-          />
+        <div className="flex flex-col md:flex-row gap-6 pb-4">
+          <div className="flex-[3] space-y-4">
+            <div className="flex justify-between items-end">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Thumbnail</Label>
+              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">1:1 (Ideal: 800x800px)</span>
+            </div>
+            <Controller
+              name="thumbnail"
+              control={control}
+              render={({ field }) => (
+                <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#eb5017]/30 transition-all bg-gray-50/30 overflow-hidden h-[180px]">
+                  <FileInput 
+                    className="h-full border-none p-0" 
+                    defaultValue={field.value} 
+                    onChange={(file) => field.onChange(file)} 
+                  />
+                </div>
+              )}
+            />
+          </div>
+
+          <div className="flex-[7] space-y-4">
+            <div className="flex justify-between items-end">
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner</Label>
+              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">16:9 (Ideal: 1920x1080px)</span>
+            </div>
+            <Controller
+              name="banner"
+              control={control}
+              render={({ field }) => (
+                <div className="border-2 border-dashed border-gray-100 rounded-2xl hover:border-[#eb5017]/30 transition-all bg-gray-50/30 overflow-hidden h-[180px]">
+                  <FileInput 
+                    className="h-full border-none p-0" 
+                    defaultValue={field.value} 
+                    onChange={(file) => field.onChange(file)} 
+                  />
+                </div>
+              )}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
