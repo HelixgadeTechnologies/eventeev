@@ -25,7 +25,7 @@ const SpeakerDetailView = ({ speaker, isOpen, onClose }: SpeakerDetailViewProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[110rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-y-auto overflow-x-hidden font-sans border max-h-[90vh] custom-scrollbar selection:bg-[#EB5017]/10">
+      <DialogContent showCloseButton={false} className="max-w-[121rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-y-auto overflow-x-hidden font-sans border max-h-[90vh] custom-scrollbar selection:bg-[#EB5017]/10">
         <VisuallyHidden>
           <DialogHeader>
             <DialogTitle>Speaker Profile: {speaker.name}</DialogTitle>
@@ -71,90 +71,92 @@ const SpeakerDetailView = ({ speaker, isOpen, onClose }: SpeakerDetailViewProps)
             </div>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div className="lg:col-span-1 space-y-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#EB5017]" />
-                  <h3 className="text-sm font-black text-[#1B1818] uppercase tracking-widest">About Speaker</h3>
-                </div>
-                <p className="text-gray-500 font-medium leading-relaxed">
-                  {speaker.name} is a renowned expert in the field of {speaker.topic.split(' ').slice(-2).join(' ')}. With over a decade of experience at {speaker.company}, they have been at the forefront of innovation and industry leadership. Their work has consistently pushed boundaries and set new standards for excellence.
-                </p>
-                <div className="flex gap-4 pt-2">
-                  <a href={`https://x.com/${speaker.twitterHandle.replace('@', '')}`} target="_blank" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
-                    <FaTwitter size={18} />
-                  </a>
-                  <a href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
-                    <FaLinkedin size={18} />
-                  </a>
-                  <a href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
-                    <FaGlobe size={18} />
-                  </a>
-                </div>
+          <div className="mt-12 space-y-12">
+            {/* 1. About Speaker */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#EB5017]" />
+                <h3 className="text-sm font-black text-[#1B1818] uppercase tracking-widest">About Speaker</h3>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#EB5017]" />
-                  <h3 className="text-sm font-black text-[#1B1818] uppercase tracking-widest">Speaker Session</h3>
-                </div>
-                <div className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 group hover:border-[#EB5017]/30 transition-all duration-500">
-                   <div className="flex items-start gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-gray-100 group-hover:scale-110 transition-transform duration-500">
-                        <LuMic className="text-2xl text-[#EB5017]" />
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-lg font-black text-[#1B1818] tracking-tight leading-tight">{speaker.topic}</h4>
-                        <div className="flex flex-wrap gap-4 pt-1">
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                            <LuCalendar size={14} className="text-[#EB5017]" /> Oct 12, 2026
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                            <LuClock3 size={14} className="text-[#EB5017]" /> 10:30 AM - 11:30 AM
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                            <LuMapPin size={14} className="text-[#EB5017]" /> Grand Ballroom
-                          </div>
-                        </div>
-                      </div>
-                   </div>
-                </div>
+              <p className="text-gray-500 font-medium leading-relaxed max-w-3xl">
+                {speaker.name} is a renowned expert in the field of {speaker.topic.split(' ').slice(-2).join(' ')}. With over a decade of experience at {speaker.company}, they have been at the forefront of innovation and industry leadership. Their work has consistently pushed boundaries and set new standards for excellence.
+              </p>
+              <div className="flex gap-4 pt-2">
+                <a href={`https://x.com/${speaker.twitterHandle.replace('@', '')}`} target="_blank" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
+                  <FaTwitter size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
+                  <FaLinkedin size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-[#EB5017]/5 transition-all border border-gray-100">
+                  <FaGlobe size={18} />
+                </a>
               </div>
             </div>
 
-            <div className="lg:col-span-1 space-y-8">
-               <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-sm space-y-6">
-                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Contact Information</h4>
-                  <div className="space-y-6">
-                    <div className="space-y-1.5">
-                      <p className="text-[9px] font-black text-[#EB5017] uppercase tracking-widest leading-none">Official Website</p>
-                      <p className="text-sm font-bold text-[#1B1818] break-all leading-tight">
-                        www.{speaker.name.toLowerCase().replace(' ', '')}.com
-                      </p>
-                    </div>
-                    <div className="space-y-1.5">
-                      <p className="text-[9px] font-black text-[#EB5017] uppercase tracking-widest leading-none">Business Email</p>
-                      <p className="text-sm font-bold text-[#1B1818] break-all leading-tight">
-                        {speaker.name.toLowerCase().replace(' ', '.')}@{speaker.company.toLowerCase().replace(' ', '')}.com
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full bg-[#EB5017] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20 mt-4">
-                    Book a Meeting
-                  </button>
-               </div>
-
-               <div className="bg-gray-900 rounded-[32px] p-8 text-white space-y-4 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-                  <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">Next Session</p>
-                  <p className="text-sm font-bold leading-relaxed">
-                    Don't miss the Q&A workshop following the main keynote.
+            {/* 2. Contact Information */}
+            <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-sm space-y-6">
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Contact Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-black text-[#EB5017] uppercase tracking-widest leading-none">Official Website</p>
+                  <p className="text-sm font-bold text-[#1B1818] break-all leading-tight">
+                    www.{speaker.name.toLowerCase().replace(' ', '')}.com
                   </p>
-                  <div className="flex items-center gap-2 pt-2 text-[#EB5017] text-[10px] font-black uppercase tracking-widest cursor-pointer hover:translate-x-1 transition-transform">
-                    Add to Calendar <LuCalendar size={14} />
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-black text-[#EB5017] uppercase tracking-widest leading-none">Business Email</p>
+                  <p className="text-sm font-bold text-[#1B1818] break-all leading-tight">
+                    {speaker.name.toLowerCase().replace(' ', '.')}@{speaker.company.toLowerCase().replace(' ', '')}.com
+                  </p>
+                </div>
+              </div>
+              <button className="max-w-xs bg-[#EB5017] text-white py-4 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20 mt-4">
+                Book a Meeting
+              </button>
+            </div>
+
+            {/* 3. Speaker Session */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-[#EB5017]" />
+                <h3 className="text-sm font-black text-[#1B1818] uppercase tracking-widest">Speaker Session</h3>
+              </div>
+              <div className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 group hover:border-[#EB5017]/30 transition-all duration-500">
+                  <div className="flex items-start gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center shrink-0 border border-gray-100 group-hover:scale-110 transition-transform duration-500">
+                      <LuMic className="text-2xl text-[#EB5017]" />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-lg font-black text-[#1B1818] tracking-tight leading-tight">{speaker.topic}</h4>
+                      <div className="flex flex-wrap gap-4 pt-1">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          <LuCalendar size={14} className="text-[#EB5017]" /> Oct 12, 2026
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          <LuClock3 size={14} className="text-[#EB5017]" /> 10:30 AM - 11:30 AM
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          <LuMapPin size={14} className="text-[#EB5017]" /> Grand Ballroom
+                        </div>
+                      </div>
+                    </div>
                   </div>
-               </div>
+              </div>
+            </div>
+
+            {/* 4. Next Session */}
+            <div className="bg-gray-900 rounded-[32px] p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">Next Session</p>
+                <p className="text-sm font-bold leading-relaxed">
+                  Don't miss the Q&A workshop following the main keynote.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-[#EB5017] text-[10px] font-black uppercase tracking-widest cursor-pointer hover:translate-x-1 transition-transform bg-white/5 px-6 py-3 rounded-xl border border-white/10 shrink-0">
+                Add to Calendar <LuCalendar size={14} />
+              </div>
             </div>
           </div>
         </div>

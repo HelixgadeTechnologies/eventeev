@@ -32,6 +32,7 @@ interface Poll {
   title: string;
   questions: PollQuestion[];
   status: "active" | "ended";
+  type: "pre" | "post" | "live";
   createdAt: string;
 }
 
@@ -39,41 +40,31 @@ interface Poll {
 const INITIAL_POLLS: Poll[] = [
   {
     id: 1,
-    title: "Event Feedback & Preferences",
+    title: "Attendee Expectations",
     questions: [
       {
         id: "q1",
-        text: "Which session topic are you most excited about?",
+        text: "What are you most looking forward to in this event?",
         options: [
-          { text: "AI & Machine Learning", votes: 42 },
-          { text: "Web3 & Blockchain", votes: 28 },
-          { text: "Product Design", votes: 35 },
-          { text: "Growth Marketing", votes: 19 },
-        ],
-        totalVotes: 124,
-      },
-      {
-        id: "q2",
-        text: "How would you rate the event venue?",
-        options: [
-          { text: "⭐ Excellent", votes: 65 },
-          { text: "👍 Good", votes: 45 },
-          { text: "😐 Average", votes: 12 },
-          { text: "👎 Poor", votes: 2 },
+          { text: "Networking Opportunities", votes: 42 },
+          { text: "Keynote Speeches", votes: 28 },
+          { text: "Workshops", votes: 35 },
+          { text: "Exhibition Booths", votes: 19 },
         ],
         totalVotes: 124,
       }
     ],
     status: "active",
+    type: "pre",
     createdAt: "Feb 13, 2026",
   },
   {
     id: 2,
-    title: "General Satisfaction",
+    title: "Live Session Pulse",
     questions: [
       {
         id: "q1",
-        text: "How would you rate the event so far?",
+        text: "How would you rate the current presentation?",
         options: [
           { text: "⭐ Excellent", votes: 56 },
           { text: "👍 Good", votes: 34 },
@@ -84,44 +75,47 @@ const INITIAL_POLLS: Poll[] = [
       }
     ],
     status: "active",
+    type: "live",
     createdAt: "Feb 13, 2026",
   },
   {
     id: 3,
-    title: "Lunch Logistics",
+    title: "Post-Event Survey",
     questions: [
       {
         id: "q1",
-        text: "Preferred lunch option for Day 2?",
+        text: "How likely are you to recommend this event to a colleague?",
         options: [
-          { text: "Mediterranean Platter", votes: 44 },
-          { text: "Asian Fusion Bowl", votes: 38 },
-          { text: "Classic Burger & Sides", votes: 29 },
-          { text: "Vegan / Plant-based", votes: 17 },
+          { text: "Very Likely", votes: 44 },
+          { text: "Somewhat Likely", votes: 38 },
+          { text: "Neutral", votes: 29 },
+          { text: "Not Likely", votes: 17 },
         ],
         totalVotes: 128,
       }
     ],
     status: "ended",
+    type: "post",
     createdAt: "Feb 12, 2026",
   },
   {
     id: 4,
-    title: "Networking Schedule",
+    title: "Workshop Feedback",
     questions: [
       {
         id: "q1",
-        text: "What time should networking sessions start?",
+        text: "Was the workshop content practical?",
         options: [
-          { text: "4:00 PM", votes: 22 },
-          { text: "5:00 PM", votes: 41 },
-          { text: "6:00 PM", votes: 35 },
-          { text: "7:00 PM", votes: 15 },
+          { text: "Yes, very", votes: 22 },
+          { text: "Mostly", votes: 41 },
+          { text: "A bit", votes: 35 },
+          { text: "Not at all", votes: 15 },
         ],
         totalVotes: 113,
       }
     ],
     status: "ended",
+    type: "live",
     createdAt: "Feb 11, 2026",
   },
 ];
@@ -136,7 +130,28 @@ export default function PollsPage() {
 
   // Create poll form state
   const [pollTitle, setPollTitle] = useState("");
+  const [pollType, setPollType] = useState<"pre" | "post" | "live">("live");
   const [creationQuestions, setCreationQuestions] = useState([{ text: "", options: ["", ""] }]);
+
+  const handleTypeChange = (type: "pre" | "post" | "live") => {
+    setPollType(type);
+    if (type === "pre") {
+      setPollTitle("Attendee Expectations");
+      setCreationQuestions([{ 
+        text: "What are you most looking forward to in this event?", 
+        options: ["Networking", "Keynote Speeches", "Workshops", "Exhibitions"] 
+      }]);
+    } else if (type === "post") {
+      setPollTitle("Event Experience Survey");
+      setCreationQuestions([{ 
+        text: "How would you rate your overall experience?", 
+        options: ["⭐ Excellent", "👍 Good", "😐 Average", "👎 Poor"] 
+      }]);
+    } else {
+      setPollTitle("");
+      setCreationQuestions([{ text: "", options: ["", ""] }]);
+    }
+  };
 
   const filteredPolls = polls.filter((p) => {
     if (filter === "all") return true;
@@ -199,11 +214,13 @@ export default function PollsPage() {
         totalVotes: 0
       })),
       status: "active",
+      type: pollType,
       createdAt: "Just now",
     };
 
     setPolls([newPoll, ...polls]);
     setPollTitle("");
+    setPollType("live");
     setCreationQuestions([{ text: "", options: ["", ""] }]);
     setShowCreateModal(false);
   };
@@ -316,6 +333,13 @@ export default function PollsPage() {
                             <><HiOutlineClock className="text-xs" /> Ended</>
                           )}
                         </span>
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full ${
+                          poll.type === "pre" ? "bg-blue-50 text-blue-600" :
+                          poll.type === "post" ? "bg-purple-50 text-purple-600" :
+                          "bg-amber-50 text-amber-600"
+                        }`}>
+                          {poll.type === "pre" ? "Pre-Event" : poll.type === "post" ? "Post-Event" : "Session Poll"}
+                        </span>
                         <span className="text-[9px] font-bold text-gray-300">{poll.createdAt}</span>
                       </div>
                       <h3 className="font-black text-lg text-[#1B1818] tracking-tight">{poll.title}</h3>
@@ -423,7 +447,7 @@ export default function PollsPage() {
                 <p className="text-xs text-gray-400 font-medium mt-0.5">Define your questions and gathering options</p>
               </div>
               <button
-                onClick={() => { setShowCreateModal(false); setPollTitle(""); setCreationQuestions([{ text: "", options: ["", ""] }]); }}
+                onClick={() => { setShowCreateModal(false); setPollTitle(""); setPollType("live"); setCreationQuestions([{ text: "", options: ["", ""] }]); }}
                 className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all border border-gray-100"
               >
                 <HiOutlineX className="text-xl" />
@@ -431,6 +455,45 @@ export default function PollsPage() {
             </div>
 
             <div className="space-y-8">
+              {/* Poll Category Selector */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Poll Category</label>
+                <div className="grid grid-cols-3 gap-2 p-1.5 bg-gray-50 rounded-2xl border border-gray-100">
+                  <button
+                    onClick={() => handleTypeChange("pre")}
+                    className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all ${
+                      pollType === "pre" 
+                        ? "bg-white text-[#EB5017] shadow-sm ring-1 ring-gray-100" 
+                        : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-widest">Pre-Event</span>
+                    <span className="text-[8px] font-medium opacity-60">Expectations</span>
+                  </button>
+                  <button
+                    onClick={() => handleTypeChange("live")}
+                    className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all ${
+                      pollType === "live" 
+                        ? "bg-white text-[#EB5017] shadow-sm ring-1 ring-gray-100" 
+                        : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-widest">Live Poll</span>
+                    <span className="text-[8px] font-medium opacity-60">In-Session</span>
+                  </button>
+                  <button
+                    onClick={() => handleTypeChange("post")}
+                    className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all ${
+                      pollType === "post" 
+                        ? "bg-white text-[#EB5017] shadow-sm ring-1 ring-gray-100" 
+                        : "text-gray-400 hover:text-gray-600"
+                    }`}
+                  >
+                    <span className="text-[10px] font-black uppercase tracking-widest">Post-Event</span>
+                    <span className="text-[8px] font-medium opacity-60">Experience</span>
+                  </button>
+                </div>
+              </div>
               {/* Poll Title */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Poll Title</label>
@@ -531,7 +594,7 @@ export default function PollsPage() {
             {/* Actions */}
             <div className="flex gap-4 mt-10">
               <button
-                onClick={() => { setShowCreateModal(false); setPollTitle(""); setCreationQuestions([{ text: "", options: ["", ""] }]); }}
+                onClick={() => { setShowCreateModal(false); setPollTitle(""); setPollType("live"); setCreationQuestions([{ text: "", options: ["", ""] }]); }}
                 className="flex-1 px-6 py-4 rounded-2xl border-2 border-gray-100 text-gray-500 font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-all font-black"
               >
                 Cancel

@@ -65,7 +65,7 @@ const EventThumbnailForm = () => {
           {/* Thumbnail Upload (30%) */}
           <div className="flex-[3] space-y-1.5">
             <div className="flex justify-between items-end">
-              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Thumbnail</Label>
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Thumbnail</Label>
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">1:1 (Ideal: 800x800px)</span>
             </div>
             <Controller
@@ -86,7 +86,7 @@ const EventThumbnailForm = () => {
           {/* Banner Upload (70%) */}
           <div className="flex-[7] space-y-1.5">
             <div className="flex justify-between items-end">
-              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner</Label>
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Banner</Label>
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">16:9 (Ideal: 1920x1080px)</span>
             </div>
             <Controller

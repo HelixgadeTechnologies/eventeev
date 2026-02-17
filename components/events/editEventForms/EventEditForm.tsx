@@ -16,12 +16,16 @@ import DatePicker from "@/components/ui/DatePicker";
 import FileInput from "@/components/ui/FileInput";
 import { HiOutlineInformationCircle } from "react-icons/hi2";
 import { LuClock3, LuGlobe, LuFacebook, LuInstagram, LuTwitter } from "react-icons/lu";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 interface EventEditFormProps {
   initialData: any;
 }
 
 const EventEditForm = ({ initialData }: EventEditFormProps) => {
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+
   const {
     control,
     handleSubmit,
@@ -31,14 +35,23 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
     defaultValues: initialData,
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
+    setIsSaving(true);
     console.log("Saving event details:", data);
-    // In a real app, this would be an API call
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setIsSaving(false);
+    setShowConfirmModal(false);
     alert("Changes saved (simulated)");
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      setShowConfirmModal(true);
+    }} className="space-y-8 animate-in fade-in duration-500 pb-10">
       {/* Basic Details Section */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6">
         <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
@@ -161,7 +174,7 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
         <div className="flex flex-col md:flex-row gap-6 pb-4">
           <div className="flex-[3] space-y-4">
             <div className="flex justify-between items-end">
-              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Thumbnail</Label>
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Thumbnail</Label>
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">1:1 (Ideal: 800x800px)</span>
             </div>
             <Controller
@@ -181,7 +194,7 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
 
           <div className="flex-[7] space-y-4">
             <div className="flex justify-between items-end">
-              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Banner</Label>
+              <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Banner</Label>
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">16:9 (Ideal: 1920x1080px)</span>
             </div>
             <Controller
@@ -363,6 +376,15 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
           Save Changes
         </button>
       </div>
+      <ActionConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => !isSaving && setShowConfirmModal(false)}
+        onConfirm={handleSubmit(onSubmit)}
+        title="Save Changes?"
+        description="This will update the event details. Previous versions will be overwritten."
+        confirmLabel="Save Now"
+        isLoading={isSaving}
+      />
     </form>
   );
 };

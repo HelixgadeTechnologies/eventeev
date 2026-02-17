@@ -8,13 +8,16 @@ import {
   setPrevStep,
 } from "@/store/features/create-event/createEventSlice";
 import { createEventData } from "@/types/create-event";
-// import { formatFileSize, formatLastModified } from "@/lib/utils/file-utils";
 import document from "@/public/document.svg";
 import { Label } from "@/components/ui/label";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
   const { formData } = useAppSelector((state: RootState) => state.createEvent);
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [isPublishing, setIsPublishing] = React.useState(false);
+
   const { handleSubmit } = useForm({
     mode: "all",
     defaultValues: formData,
@@ -22,9 +25,15 @@ const EventFormPreview = () => {
 
   const handlePrevStep = () => dispatch(setPrevStep());
 
-  const onSubmit = (data: createEventData = formData) => {
+  const onSubmit = async (data: createEventData = formData) => {
+    setIsPublishing(true);
     console.log(data);
-    // Simulate a successful publish
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setIsPublishing(false);
+    setShowConfirmModal(false);
     alert("Event Published Successfully!");
     window.location.reload();
   };
@@ -117,13 +126,23 @@ const EventFormPreview = () => {
           Back to Edit
         </button>
         <button
-          type="submit"
-          onClick={handleSubmit(onSubmit)}
+          type="button"
+          onClick={() => setShowConfirmModal(true)}
           className="flex-[2] text-white bg-[#F56630] hover:bg-[#d64815] text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all shadow-xl shadow-[#F56630]/30 active:scale-95 border border-[#F56630]"
         >
           Publish & Go Live
         </button>
       </div>
+
+      <ActionConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => !isPublishing && setShowConfirmModal(false)}
+        onConfirm={handleSubmit(onSubmit)}
+        title="Publish Event?"
+        description="Once published, your event will be live and accessible to attendees. You can still edit details later."
+        confirmLabel="Publish Now"
+        isLoading={isPublishing}
+      />
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {

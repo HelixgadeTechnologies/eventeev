@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 
-const TableList = ({ data, onSpeakerClick }: { data: SpeakerDataType[], onSpeakerClick: (speaker: SpeakerDataType) => void }) => {
+const TableList = ({ data, onSpeakerClick, onEditClick }: { data: SpeakerDataType[], onSpeakerClick: (speaker: SpeakerDataType) => void, onEditClick: (speaker: SpeakerDataType) => void }) => {
   const columns: ColumnDef<SpeakerDataType>[] = [
     {
       id: "select",
@@ -128,7 +128,10 @@ const TableList = ({ data, onSpeakerClick }: { data: SpeakerDataType[], onSpeake
               <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
                 View Analytics
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
+              <DropdownMenuItem 
+                onClick={() => onEditClick(item)}
+                className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3"
+              >
                 Edit Profile
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">

@@ -7,7 +7,7 @@ import { FaTwitter } from "react-icons/fa6";
 
 
 
-const GridList = ({ data, onSpeakerClick }: { data: SpeakerDataType[], onSpeakerClick: (speaker: SpeakerDataType) => void }) => {
+const GridList = ({ data, onSpeakerClick, onEditClick }: { data: SpeakerDataType[], onSpeakerClick: (speaker: SpeakerDataType) => void, onEditClick: (speaker: SpeakerDataType) => void }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
       {data.map((speaker) => (
@@ -54,7 +54,13 @@ const GridList = ({ data, onSpeakerClick }: { data: SpeakerDataType[], onSpeaker
             </div>
           </div>
           
-          <button className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-gray-50/50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-white transition-all shadow-sm">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditClick(speaker);
+            }}
+            className="absolute bottom-6 right-6 z-20 w-10 h-10 rounded-full bg-gray-50/50 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:bg-white transition-all shadow-sm"
+          >
             <MoreCircle size="20" />
           </button>
         </div>
