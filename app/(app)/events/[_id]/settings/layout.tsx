@@ -7,6 +7,11 @@ import { HiOutlineCog, HiOutlinePuzzlePiece, HiOutlineChatBubbleLeftRight, HiOut
 
 const settingsNav = [
   {
+    name: "Event Details",
+    href: "/details",
+    icon: HiOutlineCog,
+  },
+  {
     name: "General Event",
     href: "",
     icon: HiOutlineCog,

@@ -269,9 +269,11 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
             </div>
 
             <div className="flex flex-col gap-3">
-              <button className="w-full bg-[#eb5017] text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/20">
-                Edit Event Details
-              </button>
+              <Link href={`/events/${currentEvent._id}/settings/details`} className="w-full">
+                <button className="w-full bg-[#eb5017] text-white py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/20">
+                  Edit Event Details
+                </button>
+              </Link>
               <button className="w-full bg-white border border-gray-100 text-[#1B1818] py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all transform active:scale-95 shadow-sm">
                 Event Url
               </button>
