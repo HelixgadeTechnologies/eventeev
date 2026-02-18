@@ -5,7 +5,7 @@ import { speakerData } from "@/lib/demo-data/speakers";
 import GridList from "./gridList";
 import TableList from "./tableList";
 import { RxDashboard } from "react-icons/rx";
-import { List, CirclePlus } from "lucide-react";
+import { List, CirclePlus, Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,32 @@ const Speakers = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const exportToCSV = () => {
+    const headers = ["Name", "Title", "Twitter", "Company", "Topic"];
+    const csvRows = filteredSpeakers.map(s => [
+      `"${s.name}"`,
+      `"${s.title}"`,
+      `"${s.twitterHandle}"`,
+      `"${s.company}"`,
+      `"${s.topic}"`
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvRows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `speakers-export-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSpeakerClick = (speaker: SpeakerDataType) => {
     setSelectedSpeaker(speaker);
@@ -104,6 +130,14 @@ const Speakers = () => {
             <List size={18} />
           </button>
         </div>
+
+        <button 
+          onClick={exportToCSV}
+          className="inline-flex items-center gap-2 bg-white border border-gray-100 text-[#1B1818] px-6 h-[54px] rounded-full font-black text-[10px] uppercase tracking-widest hover:border-[#EB5017] hover:text-[#EB5017] transition-all shadow-xl shadow-black/5 hover:shadow-md group active:scale-95"
+        >
+          <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />
+          Export CSV
+        </button>
 
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogTrigger asChild>

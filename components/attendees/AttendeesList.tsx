@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import Avatar from "../ui/Avatar";
 import DataTable from "../ui/data-table";
-import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2 } from "lucide-react";
+import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2, Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,32 @@ const AttendeesList = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingAttendee, setPendingAttendee] = useState<AttendeesDataType | null>(null);
   const [pendingStatus, setPendingStatus] = useState<boolean>(false);
+
+  const exportToCSV = () => {
+    // We export the current attendees state
+    const headers = ["Name", "Email", "Date Registered", "Status"];
+    const csvRows = attendees.map(a => [
+      a.name,
+      a.email,
+      a.dateRegistered,
+      a.checkedIn ? "Verified" : "Pending"
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...csvRows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `attendees-export-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleToggleCheckIn = (attendee: AttendeesDataType, status: boolean) => {
     // If we are checking IN, show confirmation. If unchecking, maybe just do it? 
@@ -209,6 +235,19 @@ const AttendeesList = () => {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 mt-10">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-xl font-black text-[#1B1818] uppercase tracking-tight">Attendees List</h2>
+          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Manage and track your event participants</p>
+        </div>
+        <button 
+          onClick={exportToCSV}
+          className="inline-flex items-center gap-2 bg-white border border-gray-100 text-[#1B1818] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:border-[#EB5017] hover:text-[#EB5017] transition-all shadow-sm hover:shadow-md group active:scale-95"
+        >
+          <Download size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+          Export CSV
+        </button>
+      </div>
       <DataTable columns={columns} data={attendees} isPagination filters={filters} />
       
       <Modal 
