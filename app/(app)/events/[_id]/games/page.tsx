@@ -1,174 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import { FiSearch } from "react-icons/fi";
-import { 
-  HiOutlineBeaker, 
-  HiOutlineQuestionMarkCircle, 
-  HiOutlineMusicNote, 
-  HiOutlineBookOpen, 
-  HiOutlineGlobeAlt,
-  HiOutlineFilm
-} from "react-icons/hi";
-import { RiInfinityLine } from "react-icons/ri";
-import { IoAdd } from "react-icons/io5";
-import { usePathname, useRouter } from "next/navigation";
-import QuizCard from "@/components/games/QuizCard";
+import { useParams, useRouter } from "next/navigation";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
+import { RiLoader4Line } from "react-icons/ri";
+import { FaAngleRight } from "react-icons/fa6";
 
-const categories = [
-  { id: "all", name: "All", icon: RiInfinityLine, active: true },
-  { id: "science", name: "Science", icon: HiOutlineBeaker },
-  { id: "trivia", name: "Trivia", icon: HiOutlineQuestionMarkCircle },
-  { id: "music", name: "Music", icon: HiOutlineMusicNote },
-  { id: "history", name: "History", icon: HiOutlineBookOpen },
-  { id: "geography", name: "Geography", icon: HiOutlineGlobeAlt },
-  { id: "pop-culture", name: "Pop Culture", icon: HiOutlineFilm },
-];
-
-const featuredQuizzes = [
-  {
-    id: "space-trivia",
-    title: "The Ultimate Space Trivia",
-    category: "Science",
-    questions: 15,
-    author: "SARAH J.",
-    thumbnail: "/thumbnails/space_trivia.png",
-  },
-  {
-    id: "modern-art",
-    title: "Modern Art Masterpieces",
-    category: "Art",
-    questions: 12,
-    author: "ALEX RIVERS",
-    thumbnail: "/thumbnails/modern_art.png",
-  },
-  {
-    id: "pop-hits",
-    title: "2000s Pop Hits Quiz",
-    category: "Music",
-    questions: 20,
-    author: "DJ MIKE",
-    thumbnail: "/thumbnails/pop_hits.png",
-  },
-  {
-    id: "mountain-ranges",
-    title: "Mountain Ranges World Tour",
-    category: "Geography",
-    questions: 10,
-    author: "EXPLORER SAM",
-    thumbnail: "/thumbnails/mountain_ranges.png",
-  },
-  {
-    id: "ancient-civilizations",
-    title: "Ancient Civilizations 101",
-    category: "History",
-    questions: 18,
-    author: "DR. HISTORY",
-    thumbnail: "/thumbnails/ancient_civilizations.png",
-  },
-  {
-    id: "video-game-lore",
-    title: "Video Game Lore Expert",
-    category: "Gaming",
-    questions: 25,
-    author: "GAMERTAG99",
-    thumbnail: "/thumbnails/video_game_lore.png",
-  },
-];
-
-// interface GamesPageProps {
-//   params?: Promise<{ _id: string }>;
-// }
-
-export default function GamesPage() {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const pathname = usePathname();
+export default function GamesSelectionPage() {
+  const { _id } = useParams();
   const router = useRouter();
 
-  const handleCreateQuiz = () => {
-    const pathSegments = pathname.split("/");
-    const eventId = pathSegments[2];
-    router.push(`/events/${eventId}/games/create`);
-  };
+  const gameTypes = [
+    {
+      id: "quiz",
+      title: "Quiz Game",
+      description: "Test your knowledge with trivia and multiple choice questions.",
+      icon: HiOutlineQuestionMarkCircle,
+      color: "#EB5017",
+      bgColor: "bg-[#EB5017]/5",
+      borderColor: "border-[#EB5017]/10",
+      link: `/events/${_id}/games/quiz`,
+    },
+    {
+      id: "rolling",
+      title: "Rolling Game",
+      description: "Spin the wheel and pick a winner from checked-in guests and speakers.",
+      icon: RiLoader4Line,
+      color: "#1B1818",
+      bgColor: "bg-gray-50",
+      borderColor: "border-gray-100",
+      link: `/events/${_id}/games/rolling`,
+    },
+  ];
 
   return (
-    <div className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-12 font-sans">
-      {/* Header with Create Button */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-[#1B1818] tracking-tight">Games</h1>
-          <p className="text-gray-500 text-sm mt-1 uppercase tracking-widest font-bold">Discover and create interactive quizzes</p>
-        </div>
-        <button 
-          onClick={handleCreateQuiz}
-          className="bg-[#eb5017] text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#eb5017]/30 whitespace-nowrap"
-        >
-          <IoAdd className="text-2xl" />
-          Create New Quiz
-        </button>
-      </div>
-      {/* Search Bar */}
-      <div className="w-full bg-white rounded-[40px] shadow-sm border border-gray-100 p-2 pl-6 flex items-center md:max-w-4xl mx-auto">
-        <FiSearch className="text-[#98A2B3] text-xl" />
-        <input 
-          type="text" 
-          placeholder="Find a quiz on science, history, or pop culture..."
-          className="flex-grow px-4 outline-none text-[#1B1818] text-base placeholder:text-[#98A2B3] font-normal"
-        />
-        <button className="bg-[#eb5017] text-white px-8 py-3.5 rounded-[32px] font-bold hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 ml-2">
-          Search
-        </button>
+    <div className="p-6 md:p-10 max-w-[1200px] mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl md:text-5xl font-black text-[#1B1818] tracking-tight">
+          Select Your Game
+        </h1>
+        <p className="text-gray-500 text-sm uppercase tracking-[0.2em] font-black">
+          Choose an interactive experience for your event
+        </p>
       </div>
 
-      {/* Category Filters */}
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        {categories.map((cat) => {
-          const Icon = cat.icon;
-          const isActive = activeCategory === cat.id;
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
+        {gameTypes.map((game) => {
+          const Icon = game.icon;
           return (
             <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ${
-                isActive 
-                  ? "bg-[#eb5017] text-white shadow-lg shadow-[#eb5017]/20 scale-105" 
-                  : "bg-white text-[#667185] border border-gray-100 hover:border-[#eb5017] hover:text-[#eb5017]"
-              }`}
+              key={game.id}
+              onClick={() => router.push(game.link)}
+              className={`group flex flex-col p-10 rounded-[40px] border-2 ${game.borderColor} ${game.bgColor} text-left transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/5 relative overflow-hidden active:scale-95`}
             >
-              <Icon className="text-lg" />
-              {cat.name}
+              <div 
+                className="absolute top-0 right-0 w-64 h-64 -mr-16 -mt-16 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500 scale-150"
+                style={{ color: game.color }}
+              >
+                <Icon size="100%" />
+              </div>
+
+              <div 
+                className="w-20 h-20 rounded-3xl flex items-center justify-center mb-8 shadow-xl bg-white group-hover:scale-110 transition-transform duration-500"
+                style={{ color: game.color }}
+              >
+                <Icon size={32} />
+              </div>
+
+              <div className="space-y-4 relative z-10">
+                <h2 className="text-3xl font-black text-[#1B1818] tracking-tight">
+                  {game.title}
+                </h2>
+                <p className="text-gray-500 font-medium leading-relaxed max-w-[280px]">
+                  {game.description}
+                </p>
+              </div>
+
+              <div className="mt-12 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1B1818] group-hover:gap-4 transition-all duration-500">
+                Play Game <FaAngleRight size={14} className="text-[#EB5017]" />
+              </div>
             </button>
           );
         })}
-      </div>
-
-      {/* Featured Quizzes Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl md:text-3xl font-black text-[#1B1818] tracking-tight font-sans">
-            Featured Quizzes
-          </h2>
-          <span className="bg-[#FFF2F0] text-[#FF4D4F] px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
-            NEW
-          </span>
-        </div>
-        <button className="text-[#eb5017] font-bold text-sm hover:underline flex items-center gap-1 group">
-          View All <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
-        </button>
-      </div>
-
-      {/* Quizzes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {featuredQuizzes.map((quiz, index) => (
-          <QuizCard key={index} {...quiz} />
-        ))}
-      </div>
-
-      {/* Load More */}
-      <div className="flex justify-center pt-8">
-        <button className="border-2 border-[#eb5017] text-[#eb5017] px-12 py-4 rounded-2xl font-black tracking-tight hover:bg-[#eb5017] hover:text-white transition-all transform active:scale-95">
-          Load More Quizzes
-        </button>
       </div>
     </div>
   );
