@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { checkInData } from "@/lib/demo-data/attendees";
-import { speakerData } from "@/lib/demo-data/speakers";
 import SpinningWheel from "@/components/games/SpinningWheel";
 import { HiOutlineTrophy } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,16 +39,14 @@ export default function RollingGamePage() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Combine checked-in attendees and all speakers
+  // Use checked-in attendees for the wheel
   const eligibleUsers = useMemo(() => {
     const checkedInAttendees = checkInData
       .filter(attendee => attendee.checkedIn)
       .map(attendee => attendee.name);
     
-    const speakers = speakerData.map(speaker => speaker.name);
-    
-    // Return combined names, randomized for the wheel
-    return [...checkedInAttendees, ...speakers].sort(() => Math.random() - 0.5);
+    // Return randomized names for the wheel
+    return checkedInAttendees.sort(() => Math.random() - 0.5);
   }, []);
 
   const handleWinner = (name: string) => {
@@ -109,7 +106,7 @@ export default function RollingGamePage() {
           The Lucky <span className="text-[#EB5017]">Roll</span>
         </h1>
         <p className="text-gray-500 font-medium text-xs md:text-sm leading-relaxed uppercase tracking-[0.1em]">
-          Spin the wheel for all checked-in attendees and speakers to pick a lucky winner!
+          Spin the wheel for all checked-in attendees to pick a lucky winner!
         </p>
       </header>
 
