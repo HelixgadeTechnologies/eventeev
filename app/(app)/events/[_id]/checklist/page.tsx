@@ -23,69 +23,77 @@ interface ChecklistTask {
   completed: boolean;
 }
 
-const DEFAULT_TASKS: ChecklistTask[] = [
-  {
-    id: "t1",
-    title: "Event Branding",
-    description: "Upload event banner, logo and set primary theme colors.",
-    category: "Setup",
-    completed: true,
-  },
-  {
-    id: "t2",
-    title: "Ticket Configuration",
-    description: "Set up free and paid ticket tiers with availability limits.",
-    category: "Setup",
-    completed: false,
-  },
-  {
-    id: "t3",
-    title: "Speaker Onboarding",
-    description: "Add profiles for all keynote and session speakers.",
-    category: "Logistics",
-    completed: false,
-  },
-  {
-    id: "t4",
-    title: "Social Promotion",
-    description: "Connect social media handles and schedule initial announcements.",
-    category: "Marketing",
-    completed: false,
-  },
-  {
-    id: "t5",
-    title: "Networking Focus",
-    description: "Configure categories and custom questions for attendee matching.",
-    category: "Engagement",
-    completed: false,
-  },
-  {
-    id: "t6",
-    title: "Resources & Handouts",
-    description: "Upload PDF documents and links for the resource hub.",
-    category: "Engagement",
-    completed: false,
-  },
-  {
-    id: "t7",
-    title: "Engagement Tools",
-    description: "Prepare session polls and interactive games.",
-    category: "Engagement",
-    completed: false,
-  },
-  {
-    id: "t8",
-    title: "Venue & Schedule",
-    description: "Finalize event location and detailed session timeline.",
-    category: "Logistics",
-    completed: true,
-  }
-];
+// Predefined templates for different event categories
+const EVENT_TEMPLATES: Record<string, ChecklistTask[]> = {
+  conference: [
+    { id: "c1", title: "Speaker Onboarding", description: "Add profiles for all keynote and session speakers.", category: "Setup", completed: true },
+    { id: "c2", title: "Ticketing & Tiers", description: "Set up early bird, standard, and VIP ticket tiers.", category: "Setup", completed: false },
+    { id: "c3", title: "Sponsor Packages", description: "Finalize sponsor logos and virtual booth setups.", category: "Marketing", completed: false },
+    { id: "c4", title: "Session Schedule", description: "Create detailed agenda with tracks and rooms.", category: "Logistics", completed: false },
+    { id: "c5", title: "Networking Hub", description: "Configure attendee matchmaking and networking lounges.", category: "Engagement", completed: false },
+  ],
+  concert: [
+    { id: "m1", title: "Artist Lineup", description: "Publish the performing artist lineup and set times.", category: "Setup", completed: false },
+    { id: "m2", title: "Merch Store", description: "Set up the online store for event merchandise.", category: "Setup", completed: false },
+    { id: "m3", title: "Teaser Campaign", description: "Launch artist teaser videos on social media.", category: "Marketing", completed: false },
+    { id: "m4", title: "Stage & AV Specs", description: "Finalize lighting, sound, and stage layout requirements.", category: "Logistics", completed: false },
+    { id: "m5", title: "Fan Q&A", description: "Set up live Q&A sessions or meet & greets.", category: "Engagement", completed: false },
+  ],
+  party: [
+    { id: "p1", title: "Guest List", description: "Import and finalize the VIP and general guest list.", category: "Setup", completed: false },
+    { id: "p2", title: "Theme & Decor", description: "Finalize the party theme, colors, and decorations.", category: "Setup", completed: false },
+    { id: "p3", title: "Digital Invitations", description: "Send out customized digital invites with RSVPs.", category: "Marketing", completed: false },
+    { id: "p4", title: "Catering & Menu", description: "Confirm food menu and drink selections.", category: "Logistics", completed: false },
+    { id: "p5", title: "Playlist & Games", description: "Curate the music playlist and prepare party games.", category: "Engagement", completed: false },
+  ],
+  wedding: [
+    { id: "w1", title: "Guest Accommodations", description: "Set up hotel blocks and travel information.", category: "Setup", completed: false },
+    { id: "w2", title: "Gift Registry", description: "Link the couple's gift registries.", category: "Setup", completed: false },
+    { id: "w3", title: "Wedding Website", description: "Publish the wedding story, schedule, and FAQs.", category: "Marketing", completed: false },
+    { id: "w4", title: "Seating Chart", description: "Finalize the seating arrangements for the reception.", category: "Logistics", completed: false },
+    { id: "w5", title: "Photo Booth & Hashtag", description: "Set up the photo booth and promote the wedding hashtag.", category: "Engagement", completed: false },
+  ],
+  default: [
+    { id: "t1", title: "Event Branding", description: "Upload event banner, logo and set primary theme colors.", category: "Setup", completed: true },
+    { id: "t2", title: "Ticket Configuration", description: "Set up free and paid ticket tiers with availability limits.", category: "Setup", completed: false },
+    { id: "t4", title: "Social Promotion", description: "Connect social media handles and schedule announcements.", category: "Marketing", completed: false },
+    { id: "t7", title: "Engagement Tools", description: "Prepare session polls and interactive games.", category: "Engagement", completed: false },
+    { id: "t8", title: "Venue & Schedule", description: "Finalize event location and detailed session timeline.", category: "Logistics", completed: true }
+  ]
+};
+
+// Map categories to templates
+const getTemplateForCategory = (category?: string) => {
+  if (!category) return EVENT_TEMPLATES.default;
+  const cat = category.toLowerCase();
+  if (cat.includes("music") || cat.includes("concert")) return EVENT_TEMPLATES.concert;
+  if (cat.includes("tech") || cat.includes("conference")) return EVENT_TEMPLATES.conference;
+  if (cat.includes("birthday") || cat.includes("party")) return EVENT_TEMPLATES.party;
+  if (cat.includes("wedding")) return EVENT_TEMPLATES.wedding;
+  
+  // Try exact match or fallback to default
+  return EVENT_TEMPLATES[cat] || EVENT_TEMPLATES.default;
+};
+
+import { publishedEvents, draftedEvents, completedEvents } from "@/lib/demo-data/events";
 
 export default function ChecklistPage() {
   const { _id } = useParams();
-  const [tasks, setTasks] = useState<ChecklistTask[]>(DEFAULT_TASKS);
+  
+  // Find the current event
+  const currentEvent = useMemo(() => {
+    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents];
+    return allEvents.find(e => e._id === _id);
+  }, [_id]);
+
+  const [tasks, setTasks] = useState<ChecklistTask[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+
+  // Initialize tasks based on event category
+  useMemo(() => {
+    const template = getTemplateForCategory(currentEvent?.category || currentEvent?.name);
+    setTasks(template);
+  }, [currentEvent]);
 
   const categories = ["All", "Setup", "Marketing", "Engagement", "Logistics"];
 
@@ -100,7 +108,7 @@ export default function ChecklistPage() {
   };
 
   const completedCount = tasks.filter(t => t.completed).length;
-  const progress = Math.round((completedCount / tasks.length) * 100);
+  const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
   const categoryProgress = useMemo(() => {
     return categories.slice(1).reduce((acc, cat) => {
