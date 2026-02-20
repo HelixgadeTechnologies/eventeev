@@ -13,6 +13,7 @@ import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import DatePicker from "@/components/ui/DatePicker";
+import TimePicker from "@/components/ui/TimePicker";
 
 const EventDetailsForm = () => {
   const router = useRouter();
@@ -53,8 +54,8 @@ const EventDetailsForm = () => {
             render={({ field }) => (
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Event Name</Label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={field.value}
                   onChange={field.onChange}
                   className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] transition-all outline-none placeholder:text-gray-300"
@@ -95,7 +96,7 @@ const EventDetailsForm = () => {
                 name="startDate"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker 
+                  <DatePicker
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Set start date"
@@ -110,11 +111,10 @@ const EventDetailsForm = () => {
                 name="startTime"
                 control={control}
                 render={({ field }) => (
-                  <input 
-                    type="time" 
+                  <TimePicker
                     value={field.value}
                     onChange={field.onChange}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                    className={errors.startTime ? "border-red-500 bg-red-50" : ""}
                   />
                 )}
               />
@@ -128,7 +128,7 @@ const EventDetailsForm = () => {
                 name="stopDate"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker 
+                  <DatePicker
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Set end date"
@@ -143,11 +143,10 @@ const EventDetailsForm = () => {
                 name="stopTime"
                 control={control}
                 render={({ field }) => (
-                  <input 
-                    type="time" 
+                  <TimePicker
                     value={field.value}
                     onChange={field.onChange}
-                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#F56630]/20 focus:border-[#F56630] outline-none"
+                    className={errors.stopTime ? "border-red-500 bg-red-50" : ""}
                   />
                 )}
               />

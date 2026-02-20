@@ -14,6 +14,7 @@ import {
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { HiOutlineBell, HiOutlineX, HiOutlineMail, HiOutlineCalendar } from "react-icons/hi";
+import TimePicker from "../ui/TimePicker";
 
 interface AddReminderModalProps {
   isOpen: boolean;
@@ -114,14 +115,12 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
                     className="w-full border border-gray-300 rounded-[6px] px-2 h-10 outline-none placeholder:text-gray-400 font-normal text-sm leading-6 focus:border-[#FA9874] transition duration-200"
                   />
                </div>
-               <div>
+                <div>
                   <label className="text-xs font-medium leading-6 block mb-1.5">Time</label>
-                  <input
-                    type="time"
-                    name="time"
+                  <TimePicker
                     value={formData.time}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-[6px] px-2 h-10 outline-none placeholder:text-gray-400 font-normal text-sm leading-6 focus:border-[#FA9874] transition duration-200"
+                    onChange={(time) => setFormData((prev) => ({ ...prev, time }))}
+                    className="h-10 border-gray-300 rounded-[6px]"
                   />
                </div>
             </div>

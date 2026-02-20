@@ -2,12 +2,15 @@ import React, { useState } from 'react'
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import DatePicker from "../ui/DatePicker";
+import TimePicker from "../ui/TimePicker";
 
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
 const DonatedTicketsForm = ({ initialData }: { initialData?: TicketTier }) => {
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
   const [stopDate, setStopDate] = useState(initialData?.stopDate || "");
+  const [startTime, setStartTime] = useState(initialData?.startTime || "");
+  const [stopTime, setStopTime] = useState(initialData?.stopTime || "");
 
   return (
     <form className="space-y-6">
@@ -86,11 +89,10 @@ const DonatedTicketsForm = ({ initialData }: { initialData?: TicketTier }) => {
             >
               Launch Time
             </Label>
-            <Input
-              type="time"
-              defaultValue={initialData?.startTime}
-              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
-              id="startTime"
+            <TimePicker
+              value={startTime}
+              onChange={setStartTime}
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl"
             />
           </div>
         </div>
@@ -117,11 +119,10 @@ const DonatedTicketsForm = ({ initialData }: { initialData?: TicketTier }) => {
             >
               Expiration Time
             </Label>
-            <Input
-              type="time"
-              defaultValue={initialData?.stopTime}
-              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-4"
-              id="stopTime"
+            <TimePicker
+              value={stopTime}
+              onChange={setStopTime}
+              className="h-12 border-gray-100 bg-white/50 rounded-2xl"
             />
           </div>
         </div>

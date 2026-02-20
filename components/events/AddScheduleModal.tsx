@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
+import TimePicker from '@/components/ui/TimePicker';
 
 export interface ScheduleItem {
   id: string;
-  time: string;
-  duration: string;
+  startTime: string;
+  endTime: string;
   title: string;
   description: string;
   speaker?: {
@@ -19,12 +20,14 @@ interface AddScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (schedule: ScheduleItem) => void;
+  onEdit?: (schedule: ScheduleItem) => void;
+  editItem?: ScheduleItem | null;
 }
 
-export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddScheduleModalProps) {
+export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editItem }: AddScheduleModalProps) {
   const [formData, setFormData] = useState({
-    time: "",
-    duration: "",
+    startTime: "",
+    endTime: "",
     title: "",
     description: "",
     type: "Activity" as ScheduleItem["type"],
@@ -32,12 +35,36 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddSchedule
     speakerRole: "",
   });
 
+  React.useEffect(() => {
+    if (editItem && isOpen) {
+      setFormData({
+        startTime: editItem.startTime,
+        endTime: editItem.endTime,
+        title: editItem.title,
+        description: editItem.description,
+        type: editItem.type,
+        speakerName: editItem.speaker?.name || "",
+        speakerRole: editItem.speaker?.role || "",
+      });
+    } else if (isOpen) {
+      setFormData({
+        startTime: "",
+        endTime: "",
+        title: "",
+        description: "",
+        type: "Activity",
+        speakerName: "",
+        speakerRole: "",
+      });
+    }
+  }, [editItem, isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newSchedule: ScheduleItem = {
       id: `s-${Date.now()}`,
-      time: formData.time,
-      duration: formData.duration,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
       title: formData.title,
       description: formData.description,
       type: formData.type,
@@ -48,10 +75,17 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddSchedule
         }
       })
     };
-    onAdd(newSchedule);
+    
+    if (editItem && onEdit) {
+      newSchedule.id = editItem.id;
+      onEdit(newSchedule);
+    } else {
+      onAdd(newSchedule);
+    }
+    
     setFormData({
-      time: "",
-      duration: "",
+      startTime: "",
+      endTime: "",
       title: "",
       description: "",
       type: "Activity",
@@ -79,8 +113,8 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddSchedule
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
               <div>
-                <h3 className="text-xl font-black text-[#1B1818] tracking-tight">Add New Schedule</h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Create an activity</p>
+                <h3 className="text-xl font-black text-[#1B1818] tracking-tight">{editItem ? "Edit Schedule" : "Add New Schedule"}</h3>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{editItem ? "Update this activity" : "Create an activity"}</p>
               </div>
               <button
                 onClick={onClose}
@@ -94,25 +128,17 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddSchedule
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Time (e.g., 09:00 AM)</label>
-                  <input
-                    required
-                    type="text"
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#EB5017]/20 focus:border-[#EB5017] transition-all"
-                    placeholder="10:00 AM"
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Start Time</label>
+                  <TimePicker
+                    value={formData.startTime}
+                    onChange={(time) => setFormData({ ...formData, startTime: time })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Duration (e.g., 45 mins)</label>
-                  <input
-                    required
-                    type="text"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#EB5017]/20 focus:border-[#EB5017] transition-all"
-                    placeholder="1 hr 30 mins"
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">End Time</label>
+                  <TimePicker
+                    value={formData.endTime}
+                    onChange={(time) => setFormData({ ...formData, endTime: time })}
                   />
                 </div>
               </div>
@@ -195,7 +221,7 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd }: AddSchedule
                   type="submit"
                   className="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#d64815] transition-all shadow-xl shadow-[#EB5017]/20 active:scale-95"
                 >
-                  Add Schedule
+                  {editItem ? "Save Changes" : "Add Schedule"}
                 </button>
               </div>
             </form>

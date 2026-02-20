@@ -71,11 +71,11 @@ export default function PreviewScheduleModal({ isOpen, onClose, schedules, event
                           <div className="space-y-4 flex-1">
                             <div className="flex flex-wrap items-center gap-3">
                               <span className="text-sm font-black text-[#EB5017] bg-[#EB5017]/10 px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-inner">
-                                {item.time}
+                                {item.startTime}
                               </span>
                               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full">
                                 <LuClock3 className="text-sm" />
-                                {item.duration}
+                                {item.endTime}
                               </div>
                               <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
                                   item.type === "Keynote" ? "bg-purple-50 text-purple-600 border-purple-100" :

@@ -17,6 +17,7 @@ import FileInput from "@/components/ui/FileInput";
 import { HiOutlineInformationCircle } from "react-icons/hi2";
 import { LuClock3, LuGlobe, LuFacebook, LuInstagram, LuTwitter } from "react-icons/lu";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
+import TimePicker from "@/components/ui/TimePicker";
 
 interface EventEditFormProps {
   initialData: any;
@@ -117,14 +118,7 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
                 name="startTime"
                 control={control}
                 render={({ field }) => (
-                  <div className="relative">
-                    <LuClock3 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      {...field}
-                      type="time"
-                      className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#eb5017]/20 focus:border-[#eb5017] outline-none"
-                    />
-                  </div>
+                  <TimePicker value={field.value} onChange={field.onChange} />
                 )}
               />
             </div>
@@ -147,14 +141,7 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
                 name="endTime"
                 control={control}
                 render={({ field }) => (
-                  <div className="relative">
-                    <LuClock3 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      {...field}
-                      type="time"
-                      className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs font-bold text-[#1B1818] focus:ring-1 focus:ring-[#eb5017]/20 focus:border-[#eb5017] outline-none"
-                    />
-                  </div>
+                  <TimePicker value={field.value} onChange={field.onChange} />
                 )}
               />
             </div>

@@ -10,21 +10,21 @@ import Avatar from "@/components/ui/Avatar";
 import { publishedEvents, draftedEvents, completedEvents } from "@/lib/demo-data/events";
 import AddScheduleModal, { ScheduleItem } from "@/components/events/AddScheduleModal";
 import PreviewScheduleModal from "@/components/events/PreviewScheduleModal";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 const SCHEDULE_DATA: ScheduleItem[] = [
   {
     id: "s1",
-    time: "09:00 AM",
-    duration: "45 mins",
+    startTime: "09:00",
+    endTime: "09:45",
     title: "Registration & Breakfast",
     description: "Check-in, grab your badge, and enjoy some morning refreshments before we kick off.",
     type: "Break"
   },
   {
     id: "s2",
-    time: "09:45 AM",
-    duration: "1 hr 15 mins",
+    startTime: "09:45",
+    endTime: "11:00",
     title: "Opening Keynote: The Future is Now",
     description: "A deep dive into upcoming trends and what to expect in the tech landscape.",
     speaker: {
@@ -35,8 +35,8 @@ const SCHEDULE_DATA: ScheduleItem[] = [
   },
   {
     id: "s3",
-    time: "11:00 AM",
-    duration: "1 hr",
+    startTime: "11:00",
+    endTime: "12:00",
     title: "Interactive Workshop: Building Scalable Systems",
     description: "Learn hands-on techniques for designing architectures that scale effortlessly.",
     speaker: {
@@ -47,16 +47,16 @@ const SCHEDULE_DATA: ScheduleItem[] = [
   },
   {
     id: "s4",
-    time: "12:00 PM",
-    duration: "1 hr 30 mins",
+    startTime: "12:00",
+    endTime: "13:30",
     title: "Lunch & Networking",
     description: "Connect with fellow attendees over a catered lunch.",
     type: "Networking"
   },
   {
     id: "s5",
-    time: "01:30 PM",
-    duration: "45 mins",
+    startTime: "13:30",
+    endTime: "14:15",
     title: "Panel Discussion: AI in the Modern Workplace",
     description: "Industry experts discuss the practical applications and ethical implications of AI.",
     speaker: {
@@ -67,16 +67,16 @@ const SCHEDULE_DATA: ScheduleItem[] = [
   },
   {
     id: "s6",
-    time: "02:15 PM",
-    duration: "1 hr",
+    startTime: "14:15",
+    endTime: "15:15",
     title: "Product Showcase & Demos",
     description: "Get a first look at new products and feature releases from our sponsors.",
     type: "Activity"
   },
   {
     id: "s7",
-    time: "03:15 PM",
-    duration: "30 mins",
+    startTime: "15:15",
+    endTime: "15:45",
     title: "Closing Remarks & Awards",
     description: "Wrapping up the event and recognizing outstanding contributions.",
     speaker: {
@@ -93,6 +93,7 @@ export default function SchedulePage() {
   const [schedules, setSchedules] = useState<ScheduleItem[]>(SCHEDULE_DATA);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<ScheduleItem | null>(null);
 
   // Find the current event
   const currentEvent = useMemo(() => {
@@ -161,8 +162,13 @@ export default function SchedulePage() {
 
       <AddScheduleModal 
         isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onAdd={(newSchedule) => setSchedules([...schedules, newSchedule])} 
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditItem(null);
+        }} 
+        onAdd={(newSchedule) => setSchedules([...schedules, newSchedule])}
+        onEdit={(updatedSchedule) => setSchedules(schedules.map(s => s.id === updatedSchedule.id ? updatedSchedule : s))}
+        editItem={editItem}
       />
 
       {/* Schedule List */}
@@ -182,11 +188,11 @@ export default function SchedulePage() {
                   <div className="space-y-4 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="text-sm font-black text-[#EB5017] bg-[#EB5017]/10 px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-inner">
-                        {item.time}
+                        {item.startTime}
                       </span>
                       <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full">
                         <LuClock3 className="text-sm" />
-                        {item.duration}
+                        {item.endTime}
                       </div>
                       <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
                           item.type === "Keynote" ? "bg-purple-50 text-purple-600 border-purple-100" :
@@ -221,6 +227,25 @@ export default function SchedulePage() {
                       </div>
                     </div>
                   )}
+                  
+                  {/* Actions (Edit / Delete) */}
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button
+                      onClick={() => {
+                        setEditItem(item);
+                        setIsAddModalOpen(true);
+                      }}
+                      className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-blue-500 hover:border-blue-100 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm"
+                    >
+                      <FiEdit2 className="text-sm" />
+                    </button>
+                    <button
+                      onClick={() => setSchedules(schedules.filter(s => s.id !== item.id))}
+                      className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm"
+                    >
+                      <FiTrash2 className="text-sm" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </Reorder.Item>
