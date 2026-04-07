@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 import { eventsService } from "@/lib/services/events.service";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner"; // Assuming sonner is used, or I'll use alert as fallback
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
