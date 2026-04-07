@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import EmailInput from "@/components/ui/EmailInput";
 import PasswordInput from "@/components/ui/PasswordInput";
@@ -10,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
 
 export default function SignInComponent() {
+  const router = useRouter();
   const { signIn } = useAuth();
   const [userData, setUserData] = useState({
     email: "",
@@ -46,8 +48,10 @@ export default function SignInComponent() {
       if (error) {
         setError(error.message);
         setLoading(false);
+      } else {
+        // On success, redirect to /events
+        router.push("/events");
       }
-      // On success, the useAuth hook will automatically redirect to /events
     } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
