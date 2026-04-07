@@ -6,6 +6,7 @@ import InputComponent from "@/components/ui/EmailInput";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
+import axiosInstance from "@/lib/axios";
 
 export default function OrganizationRegistrationForm() {
   const router = useRouter();
@@ -14,6 +15,9 @@ export default function OrganizationRegistrationForm() {
     orgWebsite: "",
     orgIndustry: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,19 +27,36 @@ export default function OrganizationRegistrationForm() {
     }));
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  //   change to MouseEvent<HTMLButtonElement> later or any that properly submits forms
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsModalOpen(true);
-    // window.open("https://mail.google.com", "_blank");
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Map frontend fields to backend PUT /api/auth/organisation payload
+      const payload = {
+        orgName: userData.orgName,
+        orgWebsite: userData.orgWebsite,
+        orgIndustry: userData.orgIndustry,
+      };
+
+      await axiosInstance.put("/api/auth/organisation", payload);
+      setIsModalOpen(true);
+    } catch (err: any) {
+      console.error("Failed to save organization details:", err);
+      setError(
+        err.response?.data?.message || "Failed to save organization details. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    router.push("/");
+    router.push("/events"); // Redirect to events instead of home
   };
+
   return (
     <>
       <div className="space-y-2 w-full md:w-[480px] m-4">
@@ -47,11 +68,7 @@ export default function OrganizationRegistrationForm() {
             Please tell us about your organisation
           </p>
         </div>
-        <form
-          action=""
-          className="space-y-2.5 md:space-y-5"
-          onSubmit={handleSubmit}
-        >
+        <form className="space-y-2.5 md:space-y-5" onSubmit={handleSubmit}>
           <InputComponent
             name="orgName"
             label="Organization Name"
@@ -74,8 +91,17 @@ export default function OrganizationRegistrationForm() {
             onChange={handleInputChange}
             placeholder=""
           />
+          
+          {error && (
+            <p className="text-red-500 text-sm mt-2 font-medium">{error}</p>
+          )}
+
           <div className="mt-5">
-            <Button content="Proceed" />
+            <Button 
+              content={loading ? "Saving..." : "Proceed"} 
+              type="submit"
+              disabled={loading}
+            />
           </div>
         </form>
         <section className="space-y-5 mt-5 mb-3">
@@ -93,15 +119,14 @@ export default function OrganizationRegistrationForm() {
 
       {isModalOpen && (
         <Modal isOpen={isModalOpen} onClose={handleModalClose}>
-          <h2 className="text-xl font-semibold mb-2 text-center">
-            Verify your email
+          <h2 className="text-xl font-semibold mb-2 text-center text-[#1B1818]">
+            Welcome to Eventeev!
           </h2>
           <p className="text-sm text-center text-black/70">
-            We sent a mail to your email address, click on the link to verify
-            your account
+            Your organization details have been saved successfully. You're all set to start creating amazing events!
           </p>
-          <div className="mt-6 flex justify-end gap-2">
-            <Button onClick={handleModalClose} content="Open email" />
+          <div className="mt-6 flex justify-center">
+            <Button onClick={handleModalClose} content="Get Started" />
           </div>
         </Modal>
       )}

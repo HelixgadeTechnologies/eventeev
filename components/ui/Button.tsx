@@ -11,6 +11,7 @@ type ButtonProps = {
   icon?: React.ReactNode;
   isLoading?: boolean;
   disabled?: boolean;
+  type?: "button" | "submit" | "reset";
 };
 
 export default function Button({ 
@@ -21,6 +22,7 @@ export default function Button({
     icon,
     isLoading,
     disabled,
+    type = "button",
 }: ButtonProps) {
   const isActuallyDisabled = disabled || isLoading;
   
@@ -37,6 +39,7 @@ export default function Button({
 
   return (
     <button 
+      type={type}
       onClick={!isActuallyDisabled ? onClick : undefined} 
       className={classes}
       disabled={isActuallyDisabled}

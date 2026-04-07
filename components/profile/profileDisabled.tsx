@@ -1,9 +1,13 @@
+"use client";
+
 import React from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Switch } from "../ui/switch";
+import { useAuth } from "@/context/AuthContext";
 
 const ProfileDisabled = () => {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col gap-y-10">
       <div className="space-y-8">
@@ -17,7 +21,8 @@ const ProfileDisabled = () => {
             </Label>
             <Input
               type="text"
-              placeholder="Esther"
+              placeholder="First Name"
+              value={user?.firstName || ""}
               id="fName"
               disabled
               className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
@@ -32,7 +37,8 @@ const ProfileDisabled = () => {
             </Label>
             <Input
               type="text"
-              placeholder="Tracy"
+              placeholder="Last Name"
+              value={user?.lastName || ""}
               id="lName"
               disabled
               className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
@@ -50,7 +56,8 @@ const ProfileDisabled = () => {
             </Label>
             <Input
               type="email"
-              placeholder="esthertracy@gmail.com"
+              placeholder="Email"
+              value={user?.email || ""}
               id="email"
               disabled
               className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"

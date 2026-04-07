@@ -54,19 +54,20 @@ export default function SignUpComponent() {
     }
 
     try {
-      const { error } = await signUp(userData.email, userData.password, {
-        full_name: `${userData.firstName} ${userData.lastName}`,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-      });
+      const { error: signUpError } = await signUp(
+        userData.firstName,
+        userData.lastName,
+        userData.email,
+        userData.password
+      );
 
-      if (error) {
-        setError(error.message);
+      if (signUpError) {
+        setError(signUpError.message || "An error occurred during sign up");
         setLoading(false);
       } else {
         setSuccess(true);
         setLoading(false);
-        // Redirect to organization registration after successful signup
+        // Redirect after successful signup
         setTimeout(() => {
           router.push("/sign-up/organization-registration");
         }, 2000);
@@ -86,12 +87,9 @@ export default function SignUpComponent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-semibold text-green-900 mb-2">Check Your Email!</h2>
+          <h2 className="text-2xl font-semibold text-green-900 mb-2">Registration Successful!</h2>
           <p className="text-green-700 mb-4">
-            We&apos;ve sent a confirmation email to <strong>{userData.email}</strong>
-          </p>
-          <p className="text-sm text-[#475367] flex items-center gap-2">
-            Already have an account?he link in the email to verify your account. Redirecting...
+            Your account has been created. Redirecting to organization setup...
           </p>
         </div>
       </div>
@@ -105,7 +103,7 @@ export default function SignUpComponent() {
       </h2>
       
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-center">
           <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
@@ -148,6 +146,7 @@ export default function SignUpComponent() {
           <Button
             content="Sign up"
             isLoading={loading}
+            type="submit"
           />
         </div>
       </form>

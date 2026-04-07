@@ -1,9 +1,14 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import ProfileDisabled from "./profileDisabled";
 import avatar from "@/public/avatar.png";
+import { useAuth } from "@/context/AuthContext";
 
 const ShowProfile = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="max-w-[800px] mx-auto">
       <div className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[24px] overflow-hidden">
@@ -23,10 +28,10 @@ const ShowProfile = () => {
             
             <div className="flex flex-col gap-y-1 mb-2">
               <h1 className="text-[#1D2739] font-sans font-bold text-2xl tracking-tight">
-                Esther Tracy
+                {user ? `${user.firstName} ${user.lastName}` : "Guest User"}
               </h1>
               <p className="text-base font-normal text-[#667185]">
-                esthertracy@gmail.com
+                {user?.email || "Not signed in"}
               </p>
             </div>
           </div>

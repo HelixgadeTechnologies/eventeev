@@ -1,179 +1,138 @@
 
-import { publishedEvents, draftedEvents, completedEvents } from '@/lib/demo-data/events'
+import axiosInstance from '@/lib/axios'
+
+export interface ApiEvent {
+  id: string
+  title: string
+  description?: string
+  category?: string
+  type?: string
+  date: string
+  status: string
+}
 
 export class EventsService {
   /**
-   * Get all published events
+   * Helper to map backend event to frontend format
    */
-  async getPublishedEvents(options?: {
-    limit?: number
-    offset?: number
-    category?: string
-    searchQuery?: string
-  }) {
-    let data = [...publishedEvents].map(event => ({
+  private mapEvent(event: ApiEvent) {
+    return {
       ...event,
-      id: event._id,
-      title: event.name,
+      _id: event.id,
+      name: event.title,
+      startDate: event.date ? new Date(event.date).toLocaleDateString() : 'N/A',
+      startTime: event.date ? new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
       is_published: event.status === 'published',
-      organizer_id: event.userId,
+      organizer_id: 'backend-user', // Backend currently doesn't return organizer in listing
       profiles: {
-        full_name: "Demo Organizer",
+        full_name: "Event Organizer",
         avatar_url: null
       }
-    }))
-
-    if (options?.category) {
-      data = data.filter(e => e.category === options.category)
     }
-
-    if (options?.searchQuery) {
-      const q = options.searchQuery.toLowerCase()
-      data = data.filter(e => 
-        e.title.toLowerCase().includes(q) || 
-        e.description.toLowerCase().includes(q)
-      )
-    }
-
-    if (options?.offset !== undefined && options?.limit !== undefined) {
-      data = data.slice(options.offset, options.offset + options.limit)
-    } else if (options?.limit) {
-      data = data.slice(0, options.limit)
-    }
-
-    return { data, error: null }
   }
 
   /**
-   * Get featured events
+   * Get all published events
+   */
+  async getPublishedEvents() {
+    try {
+      const response = await axiosInstance.get('/api/event/published')
+      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      return { data, error: null }
+    } catch (error: any) {
+      console.error('Failed to fetch published events:', error)
+      return { data: [], error: error.response?.data || { message: 'Failed to fetch events' } }
+    }
+  }
+
+  /**
+   * Get all draft events
+   */
+  async getDraftedEvents() {
+    try {
+      const response = await axiosInstance.get('/api/event/drafts')
+      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      return { data, error: null }
+    } catch (error: any) {
+      console.error('Failed to fetch draft events:', error)
+      return { data: [], error: error.response?.data || { message: 'Failed to fetch drafts' } }
+    }
+  }
+
+  /**
+   * Get all completed events
+   */
+  async getCompletedEvents() {
+    try {
+      const response = await axiosInstance.get('/api/event/completed')
+      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      return { data, error: null }
+    } catch (error: any) {
+      console.error('Failed to fetch completed events:', error)
+      return { data: [], error: error.response?.data || { message: 'Failed to fetch completed events' } }
+    }
+  }
+
+  /**
+   * Get featured events (Mocked as a subset of published)
    */
   async getFeaturedEvents(limit = 6) {
-    const { data } = await this.getPublishedEvents({ limit })
-    return { data, error: null }
+    const { data, error } = await this.getPublishedEvents()
+    return { data: data?.slice(0, limit) || [], error }
   }
 
   /**
-   * Get event by ID
+   * Create a new event
+   */
+  async createEvent(eventData: {
+    title: string
+    description: string
+    category: string
+    type: string
+    date: string
+    status?: string
+  }) {
+    try {
+      const response = await axiosInstance.post('/api/event/publish', {
+        ...eventData,
+        status: eventData.status || 'published'
+      })
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      console.error('Failed to create event:', error)
+      return { data: null, error: error.response?.data || { message: 'Failed to create event' } }
+    }
+  }
+
+  /**
+   * Get event statistics for organizer
+   */
+  async getEventStats(eventId: string) {
+    try {
+      const response = await axiosInstance.get(`/api/attendee/event/${eventId}/stats`)
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      console.error('Failed to fetch event stats:', error)
+      return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } }
+    }
+  }
+
+  /**
+   * Get event by ID (Falling back to local search if no direct endpoint)
    */
   async getEventById(eventId: string) {
-    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents]
-    const event = allEvents.find(e => e._id === eventId)
-
+    // If there was a GET /api/event/{id}, we'd use it. For now, check categories.
+    const { data: published } = await this.getPublishedEvents()
+    const { data: drafts } = await this.getDraftedEvents()
+    const { data: completed } = await this.getCompletedEvents()
+    
+    const event = [...published, ...drafts, ...completed].find(e => e._id === eventId)
+    
     if (!event) {
-      return { data: null, error: { message: "Event not found" } }
+       return { data: null, error: { message: "Event not found" } }
     }
-
-    const mappedEvent = {
-      ...event,
-      id: event._id,
-      title: event.name,
-      is_published: event.status === 'published',
-      organizer_id: event.userId,
-      profiles: {
-        full_name: "Demo Organizer",
-        avatar_url: null,
-        email: "organizer@demo.com"
-      },
-      tickets: [] // Mock tickets
-    }
-
-    return { data: mappedEvent, error: null }
-  }
-
-  /**
-   * Get events created by a specific user
-   */
-  async getUserEvents(userId: string) {
-    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents]
-    const userEvents = allEvents
-      .filter(e => e.userId === userId)
-      .map(event => ({
-        ...event,
-        id: event._id,
-        title: event.name,
-        is_published: event.status === 'published',
-        organizer_id: event.userId,
-        tickets: { count: 0 }
-      }))
-
-    return { data: userEvents, error: null }
-  }
-
-  /**
-   * Create a new event (Mock)
-   */
-  async createEvent(event: Record<string, unknown>) {
-    const newEvent = {
-      ...event,
-      id: "mock-new-id",
-      created_at: new Date().toISOString()
-    }
-    return { data: newEvent, error: null }
-  }
-
-  /**
-   * Update an event (Mock)
-   */
-  async updateEvent(eventId: string, updates: Record<string, unknown>) {
-    return { data: { id: eventId, ...updates }, error: null }
-  }
-
-  /**
-   * Delete an event (Mock)
-   */
-  async deleteEvent() {
-    return { error: null }
-  }
-
-  /**
-   * Publish an event (Mock)
-   */
-  async publishEvent(eventId: string) {
-    return this.updateEvent(eventId, { is_published: true })
-  }
-
-  /**
-   * Unpublish an event (Mock)
-   */
-  async unpublishEvent(eventId: string) {
-    return this.updateEvent(eventId, { is_published: false })
-  }
-
-  /**
-   * Get upcoming events
-   */
-  async getUpcomingEvents(limit = 10) {
-    return this.getPublishedEvents({ limit })
-  }
-
-  /**
-   * Get events by category
-   */
-  async getEventsByCategory(category: string, limit = 10) {
-    return this.getPublishedEvents({ category, limit })
-  }
-
-  /**
-   * Search events
-   */
-  async searchEvents(query: string, limit = 20) {
-    return this.getPublishedEvents({ searchQuery: query, limit })
-  }
-
-  /**
-   * Get event statistics for organizer (Mock)
-   */
-  async getEventStats() {
-    return {
-      data: {
-        totalTicketsSold: 120,
-        totalTicketsAvailable: 500,
-        totalRevenue: 4500,
-        totalAttendees: 115,
-        checkedInCount: 98,
-      },
-      error: null,
-    }
+    
+    return { data: event, error: null }
   }
 }
 

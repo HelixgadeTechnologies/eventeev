@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { checkInData, AttendeesDataType } from "@/lib/demo-data/attendees";
+import React, { useState, useMemo, useEffect } from "react";
+import { AttendeesDataType } from "@/lib/demo-data/attendees";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import Avatar from "../ui/Avatar";
 import DataTable from "../ui/data-table";
-import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2, Download } from "lucide-react";
+import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2, Download, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { FilterConfig } from "../ui/data-table";
 import Modal from "../ui/Modal";
+import { useParams } from "next/navigation";
+import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 
 const filters: FilterConfig[] = [
   {
@@ -31,10 +33,45 @@ const filters: FilterConfig[] = [
 ];
 
 const AttendeesList = () => {
-  const [attendees, setAttendees] = useState<AttendeesDataType[]>(checkInData);
+  const params = useParams();
+  const eventId = params?._id as string;
+  
+  const [attendees, setAttendees] = useState<AttendeesDataType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingAttendee, setPendingAttendee] = useState<AttendeesDataType | null>(null);
   const [pendingStatus, setPendingStatus] = useState<boolean>(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (eventId) {
+      fetchAttendees();
+    }
+  }, [eventId]);
+
+  const fetchAttendees = async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error: fetchError } = await attendeesService.getAttendees(eventId);
+    
+    if (fetchError) {
+      setError(fetchError.message || "Failed to load attendees");
+      setAttendees([]);
+    } else {
+      // Map ApiAttendee to AttendeesDataType
+      const mappedAttendees: AttendeesDataType[] = data.map((a: ApiAttendee) => ({
+        id: a.id,
+        name: a.name,
+        email: a.email,
+        dateRegistered: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+        checkedIn: a.isCheckedIn
+      }));
+      setAttendees(mappedAttendees);
+    }
+    setLoading(false);
+  };
 
   const exportToCSV = () => {
     // We export the current attendees state
@@ -63,28 +100,37 @@ const AttendeesList = () => {
   };
 
   const handleToggleCheckIn = (attendee: AttendeesDataType, status: boolean) => {
-    // If we are checking IN, show confirmation. If unchecking, maybe just do it? 
-    // The prompt says "when a user is checked it display a modal".
     if (status) {
       setPendingAttendee(attendee);
       setPendingStatus(status);
       setIsConfirmOpen(true);
     } else {
-      // Direct uncheck
-      updateAttendeeStatus(attendee.email, status);
+      // Direct uncheck or keep as is (Backend currently only has check-in endpoint)
+      // If we had a revert endpoint, we'd call it here.
+      // For now, we'll just show the confirm modal or ignore uncheck if not supported.
+      updateAttendeeStatus(attendee.id, status);
     }
   };
 
-  const updateAttendeeStatus = (email: string, status: boolean) => {
+  const updateAttendeeStatus = (id: string, status: boolean) => {
     setAttendees((prev) =>
-      prev.map((a) => (a.email === email ? { ...a, checkedIn: status } : a))
+      prev.map((a) => (a.id === id ? { ...a, checkedIn: status } : a))
     );
   };
 
-  const confirmCheckIn = () => {
-    if (pendingAttendee) {
-      updateAttendeeStatus(pendingAttendee.email, pendingStatus);
+  const confirmCheckIn = async () => {
+    if (!pendingAttendee) return;
+    
+    setIsActionLoading(true);
+    const { error: checkInError } = await attendeesService.checkInAttendee(pendingAttendee.id);
+    
+    if (checkInError) {
+      alert(checkInError.message || "Failed to check in attendee");
+    } else {
+      updateAttendeeStatus(pendingAttendee.id, pendingStatus);
     }
+    
+    setIsActionLoading(false);
     setIsConfirmOpen(false);
     setPendingAttendee(null);
   };
@@ -233,6 +279,33 @@ const AttendeesList = () => {
     },
   ], [handleToggleCheckIn]);
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-12 h-12 text-[#EB5017] animate-spin" />
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Loading attendees...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <div className="space-y-1">
+          <p className="text-gray-900 font-black uppercase tracking-tight text-lg">Failed to load attendees</p>
+          <p className="text-gray-500 text-xs font-medium">{error}</p>
+        </div>
+        <button 
+          onClick={fetchAttendees}
+          className="px-6 py-2.5 rounded-xl bg-[#EB5017] text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#AD3307] transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 mt-10">
       <div className="flex justify-between items-center mb-6">
@@ -270,15 +343,18 @@ const AttendeesList = () => {
           <div className="grid grid-cols-2 gap-3 pt-2">
             <button 
               onClick={() => setIsConfirmOpen(false)}
-              className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1B1818] hover:bg-gray-50 transition-all border border-gray-100"
+              disabled={isActionLoading}
+              className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1B1818] hover:bg-gray-50 transition-all border border-gray-100 disabled:opacity-50"
             >
               No, Cancel
             </button>
             <button 
               onClick={confirmCheckIn}
-              className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#AD3307] transition-all shadow-lg shadow-[#EB5017]/20"
+              disabled={isActionLoading}
+              className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#AD3307] transition-all shadow-lg shadow-[#EB5017]/20 flex items-center justify-center gap-2 disabled:opacity-80"
             >
-              Yes, Check In
+              {isActionLoading ? <Loader2 size={12} className="animate-spin" /> : null}
+              {isActionLoading ? "Processing..." : "Yes, Check In"}
             </button>
           </div>
         </div>

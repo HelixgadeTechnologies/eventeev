@@ -11,6 +11,9 @@ import { createEventData } from "@/types/create-event";
 import document from "@/public/document.svg";
 import { Label } from "@/components/ui/label";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
+import { eventsService } from "@/lib/services/events.service";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner"; // Assuming sonner is used, or I'll use alert as fallback
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
@@ -25,17 +28,38 @@ const EventFormPreview = () => {
 
   const handlePrevStep = () => dispatch(setPrevStep());
 
+  const router = useRouter();
+
   const onSubmit = async (data: createEventData = formData) => {
     setIsPublishing(true);
-    console.log(data);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsPublishing(false);
-    setShowConfirmModal(false);
-    alert("Event Published Successfully!");
-    window.location.reload();
+    try {
+      // Map frontend formData to backend expected format
+      const payload = {
+        title: formData.name,
+        description: formData.description,
+        category: formData.category,
+        type: formData.eventType,
+        date: new Date(`${formData.startDate} ${formData.startTime}`).toISOString(),
+        status: 'published'
+      };
+
+      const { data: result, error } = await eventsService.createEvent(payload);
+      
+      if (error) {
+        throw new Error(error.message || "Failed to publish event");
+      }
+
+      setShowConfirmModal(false);
+      // Using alert as per original code's style, but router.push is better
+      alert("Event Published Successfully!");
+      router.push("/events");
+    } catch (err: any) {
+      console.error("Publishing error:", err);
+      alert(err.message || "An error occurred while publishing the event.");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (

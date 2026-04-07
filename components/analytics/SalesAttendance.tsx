@@ -1,7 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useParams } from "next/navigation";
+import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { attendeesService } from "@/lib/services/attendees.service";
+import { Loader2 } from "lucide-react";
 
 const data = [
   { name: "Week 1", revenue: 4000 },
@@ -16,12 +20,12 @@ const data = [
 const ProgressBar = ({ label, percentage, color }: { label: string; percentage: number; color: string }) => (
   <div className="space-y-2">
     <div className="flex justify-between items-center text-xs font-bold text-[#1B1818]">
-      <span>{label}</span>
+      <span className="uppercase tracking-widest">{label}</span>
       <span>{percentage}%</span>
     </div>
     <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
       <div 
-        className="h-full rounded-full" 
+        className="h-full rounded-full transition-all duration-1000" 
         style={{ width: `${percentage}%`, backgroundColor: color }}
       />
     </div>
@@ -29,6 +33,55 @@ const ProgressBar = ({ label, percentage, color }: { label: string; percentage: 
 );
 
 const SalesAttendance = () => {
+  const params = useParams();
+  const eventId = params?._id as string;
+  
+  const [tickets, setTickets] = useState<ApiTicket[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (eventId) {
+      fetchAnalytics();
+    }
+  }, [eventId]);
+
+  const fetchAnalytics = async () => {
+    setLoading(true);
+    const [ticketsRes, statsRes] = await Promise.all([
+      ticketsService.getTickets(eventId),
+      attendeesService.getAttendeeStats(eventId)
+    ]);
+    
+    if (ticketsRes.data) setTickets(ticketsRes.data);
+    if (statsRes.data) setStats(statsRes.data);
+    setLoading(false);
+  };
+
+  const ticketStats = React.useMemo(() => {
+    if (!tickets.length || !stats) return { paid: 0, free: 0, donation: 0 };
+    
+    const total = stats.totalAttendees || 1; // Avoid division by zero
+    // Ideally we'd have attendee counts per tier. For now, we'll use the quantity distributed.
+    const paid = tickets.filter(t => t.type === 'paid').reduce((acc, t) => acc + (t.quantity || 0), 0);
+    const free = tickets.filter(t => t.type === 'free').reduce((acc, t) => acc + (t.quantity || 0), 0);
+    const donation = tickets.filter(t => t.type === 'donation').reduce((acc, t) => acc + (t.quantity || 0), 0);
+    
+    return {
+      paid: Math.round((paid / total) * 100),
+      free: Math.round((free / total) * 100),
+      donation: Math.round((donation / total) * 100),
+    };
+  }, [tickets, stats]);
+
+  if (loading) {
+    return (
+      <div className="bg-white border border-gray-100 rounded-[24px] p-12 shadow-sm flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+        <Loader2 className="w-10 h-10 text-[#EB5017] animate-spin" />
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Loading Analytics...</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-white border border-gray-100 rounded-[24px] p-6 shadow-sm">
       <div className="flex justify-between items-center mb-5">
@@ -78,11 +131,11 @@ const SalesAttendance = () => {
 
         {/* Ticket Types - Right Side */}
         <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-5 flex flex-col gap-5 pt-3">
-           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Ticket Types %</p>
+           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Ticket Distribution %</p>
            
-           <ProgressBar label="Paid" percentage={65} color="#EB5017" />
-           <ProgressBar label="Free" percentage={25} color="#E06C00" />
-           <ProgressBar label="Donation" percentage={10} color="#E3A021" />
+           <ProgressBar label="Paid" percentage={ticketStats.paid} color="#EB5017" />
+           <ProgressBar label="Free" percentage={ticketStats.free} color="#E06C00" />
+           <ProgressBar label="Donation" percentage={ticketStats.donation} color="#E3A021" />
         </div>
       </div>
     </div>

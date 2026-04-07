@@ -11,10 +11,12 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import Avatar from "@/components/ui/Avatar";
 import { LuLogOut } from "react-icons/lu";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { mobileOpen, closeMobile } = useSidebar();
+  const { user, signOut } = useAuth();
 
   const isEventRoute = (pathname: string) => {
     return pathname.startsWith("/events/") && pathname.split("/").length > 3;
@@ -26,6 +28,9 @@ export default function Sidebar() {
   const currentNavGroup = isEventRoute(pathname)
     ? topNavigations
     : eventNavigations;
+
+  const fullName = user ? `${user.firstName} ${user.lastName}` : "User";
+  const email = user?.email || "";
 
   return (
     <>
@@ -132,15 +137,19 @@ export default function Sidebar() {
         </section>
 
         {/* footer */}
-        <footer className="flex items-end gap-2">
-          <Avatar name="Richard Edem" />
-          <div>
-            <p className="text-[13px] font-semibold text-[#101928]">Richard Edem</p>
-            <p className="text-[11px] font-normal text-[#475367]">richardedem@gmail.com</p>
+        <footer className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100 w-full">
+          <Avatar name={fullName} />
+          <div className="flex-1 overflow-hidden">
+            <p className="text-[13px] font-semibold text-[#101928] truncate">{fullName}</p>
+            <p className="text-[11px] font-normal text-[#475367] truncate">{email}</p>
           </div>
-          <Link href={"/"}>
-            <LuLogOut className="text-xl" />
-          </Link>
+          <button 
+            onClick={() => signOut()}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Log out"
+          >
+            <LuLogOut className="text-xl text-gray-600" />
+          </button>
         </footer>
       </aside>
     </>
