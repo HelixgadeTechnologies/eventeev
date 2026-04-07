@@ -1,13 +1,15 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { IoAdd } from "react-icons/io5";
 import DataTable, { FilterConfig } from "../ui/data-table";
 import soldTicketData, { SoldTicketType } from "@/lib/demo-data/sold-tickets";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
-
-
+import { useParams } from "next/navigation";
+import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { Loader2, AlertCircle } from "lucide-react";
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
 type Props = {

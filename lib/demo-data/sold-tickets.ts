@@ -1,7 +1,7 @@
 export interface SoldTicketType {
   name: string;
   email: string;
-  ticketName: 'Early birds' | 'Regular' | 'Vip';
+  ticketName: string;
   dateRegistered: string;
   amountPaid: number;
   ticketId: string;

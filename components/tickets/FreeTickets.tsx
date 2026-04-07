@@ -172,7 +172,7 @@ export default function FreeTickets({
   }
   return (
     <section className="space-y-6">
-      {tickets.length === 0 ? (
+      {ticketTiers.length === 0 ? (
         <div className="flex flex-col min-h-[60vh] items-center justify-center text-center px-4">
           <div className="w-32 h-32 bg-gray-50/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-100 shadow-sm mb-8">
             <div className="relative w-16 h-16 opacity-20">

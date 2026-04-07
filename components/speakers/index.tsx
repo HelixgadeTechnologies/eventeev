@@ -29,7 +29,7 @@ const Speakers = () => {
   const params = useParams();
   const eventId = params?._id as string;
   
-  const [speakers, setSpeakers] = useState<ApiSpeaker[]>([]);
+  const [speakers, setSpeakers] = useState<SpeakerDataType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGrid, setIsGrid] = useState(true);
@@ -48,7 +48,17 @@ const Speakers = () => {
     if (error) {
       setError(error.message || "Failed to load speakers");
     } else {
-      setSpeakers(data || []);
+      // Map ApiSpeaker to SpeakerDataType for UI components
+      const mappedSpeakers: SpeakerDataType[] = data.map((s: ApiSpeaker) => ({
+        id: s.id,
+        name: s.name,
+        title: s.title,
+        company: s.company,
+        twitterHandle: s.twitterHandle || "@handle",
+        topic: s.topic || "General Discussion",
+        avatar: s.image || "/speaker-avatar.png",
+      }));
+      setSpeakers(mappedSpeakers);
       setError(null);
     }
     setLoading(false);
