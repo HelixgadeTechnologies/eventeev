@@ -36,6 +36,26 @@ export class TicketsService {
       return { data: [], error: error.response?.data || { message: 'Failed to fetch ticket attendees' } };
     }
   }
+
+  /**
+   * Create a new ticket tier
+   */
+  async createTicket(payload: {
+    eventId: string;
+    name: string;
+    type: string;
+    price: number;
+    quantity: number;
+    status: string;
+  }) {
+    try {
+      const response = await axiosInstance.post('/api/ticket/create', payload);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to create ticket:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to create ticket' } };
+    }
+  }
 }
 
 export const ticketsService = new TicketsService();

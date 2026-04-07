@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { speakerData } from "@/lib/demo-data/speakers";
+import React, { useEffect, useState } from "react";
 import GridList from "./gridList";
 import TableList from "./tableList";
 import { RxDashboard } from "react-icons/rx";
-import { List, CirclePlus, Download } from "lucide-react";
+import { List, CirclePlus, Download, Loader2, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,17 +21,44 @@ import SpeakerForm from "./SpeakerForm";
 import EditSpeakerModal from "./EditSpeakerModal";
 import { SpeakerDataType } from "@/lib/demo-data/speakers";
 import { HiOutlineCheckCircle } from "react-icons/hi2";
+import { speakersService, ApiSpeaker } from "@/lib/services/speakers.service";
+import { useParams } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Speakers = () => {
+  const params = useParams();
+  const eventId = params?._id as string;
+  
+  const [speakers, setSpeakers] = useState<ApiSpeaker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isGrid, setIsGrid] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerDataType | null>(null);
+  const [selectedSpeaker, setSelectedSpeaker] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [speakerToEdit, setSpeakerToEdit] = useState<SpeakerDataType | null>(null);
+  const [speakerToEdit, setSpeakerToEdit] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const fetchSpeakers = async () => {
+    setLoading(true);
+    const { data, error } = await speakersService.getSpeakers(eventId);
+    if (error) {
+      setError(error.message || "Failed to load speakers");
+    } else {
+      setSpeakers(data || []);
+      setError(null);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (eventId) {
+      fetchSpeakers();
+    }
+  }, [eventId]);
 
   const exportToCSV = () => {
     const headers = ["Name", "Title", "Twitter", "Company", "Topic"];
@@ -71,24 +97,39 @@ const Speakers = () => {
   };
 
   const handleUpdate = async (data: any) => {
+    if (!speakerToEdit?.id) return;
     setIsUpdating(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const { error } = await speakersService.updateSpeaker(speakerToEdit.id, data);
+    
+    if (error) {
+      alert(error.message || "Failed to update speaker");
+    } else {
+      await fetchSpeakers();
+      setIsEditModalOpen(false);
+      setShowSuccessModal(true);
+    }
     setIsUpdating(false);
-    setIsEditModalOpen(false);
-    setShowSuccessModal(true);
   };
 
   const handleAdd = async (data: any) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsAddModalOpen(false);
-    alert("Speaker added successfully!");
+    setIsUpdating(true); // Reuse as loading state for add
+    const { error } = await speakersService.createSpeaker({
+      ...data,
+      eventId
+    });
+    
+    if (error) {
+      alert(error.message || "Failed to add speaker");
+    } else {
+      await fetchSpeakers();
+      setIsAddModalOpen(false);
+    }
+    setIsUpdating(false);
   };
 
-  const filteredSpeakers = speakerData.filter((speaker) =>
+  const filteredSpeakers = speakers.filter((speaker) =>
     speaker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    speaker.topic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (speaker.topic || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
     speaker.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -164,21 +205,36 @@ const Speakers = () => {
         </Dialog>
       </div>
 
-      <div className="mt-4">
-        {isGrid ? (
-          <GridList 
-            data={filteredSpeakers} 
-            onSpeakerClick={handleSpeakerClick} 
-            onEditClick={handleEditClick}
-          />
-        ) : (
-          <TableList 
-            data={filteredSpeakers} 
-            onSpeakerClick={handleSpeakerClick} 
-            onEditClick={handleEditClick}
-          />
-        )}
-      </div>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center h-64 gap-3">
+          <Loader2 className="w-8 h-8 text-[#EB5017] animate-spin" />
+          <p className="text-gray-500 font-medium">Synchronizing speakers...</p>
+        </div>
+      ) : error ? (
+        <Alert variant="destructive" className="max-w-2xl mx-auto mt-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Speakers</AlertTitle>
+          <AlertDescription>
+            {error}. <button onClick={fetchSpeakers} className="underline font-bold ml-1">Try again</button>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <div className="mt-4">
+          {isGrid ? (
+            <GridList 
+              data={filteredSpeakers} 
+              onSpeakerClick={handleSpeakerClick} 
+              onEditClick={handleEditClick}
+            />
+          ) : (
+            <TableList 
+              data={filteredSpeakers} 
+              onSpeakerClick={handleSpeakerClick} 
+              onEditClick={handleEditClick}
+            />
+          )}
+        </div>
+      )}
 
       <SpeakerDetailView 
         speaker={selectedSpeaker} 

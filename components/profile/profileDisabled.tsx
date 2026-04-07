@@ -112,6 +112,60 @@ const ProfileDisabled = () => {
             />
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="orgName"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Organisation Name
+            </Label>
+            <Input
+              type="text"
+              placeholder="Organisation Name"
+              value={user?.orgName || ""}
+              id="orgName"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="orgWebsite"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Organisation Website
+            </Label>
+            <Input
+              type="text"
+              placeholder="https://example.com"
+              value={user?.orgWebsite || ""}
+              id="orgWebsite"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-y-2">
+            <Label
+              htmlFor="orgIndustry"
+              className="text-[#344054] font-sans text-sm font-medium ml-1"
+            >
+              Organisation Industry
+            </Label>
+            <Input
+              type="text"
+              placeholder="Organisation Industry"
+              value={user?.orgIndustry || ""}
+              id="orgIndustry"
+              disabled
+              className="h-12 border-[#D0D5DD] bg-[#F9FAFB]/50 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200"
+            />
+          </div>
+        </div>
       </div>
 
 
