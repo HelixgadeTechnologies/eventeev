@@ -5,6 +5,7 @@ import Image from "next/image";
 import ProfileDisabled from "./profileDisabled";
 import avatar from "@/public/avatar.png";
 import { useAuth } from "@/context/AuthContext";
+import Avatar from "../ui/Avatar";
 
 const ShowProfile = () => {
   const { user } = useAuth();
@@ -18,10 +19,12 @@ const ShowProfile = () => {
         <div className="px-8 pb-12 -mt-12">
           <div className="flex flex-col md:flex-row gap-6 items-end mb-10">
             <div className="relative group">
-              <div className="w-[120px] h-[120px] rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white">
-                <Image src={avatar} alt="profile picture" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-2xl cursor-pointer">
+               <Avatar 
+                src="" 
+                name={user ? `${user.firstName} ${user.lastName}` : "Guest User"} 
+                isBigger={true}
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-full cursor-pointer">
                 <span className="text-white text-xs font-medium">Change Photo</span>
               </div>
             </div>
