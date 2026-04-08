@@ -153,7 +153,7 @@ export default function SignUpComponent() {
       <section className="space-y-5 mt-5 mb-3">
         <p className="text-center text-sm text-black leading-6 space-x-2">
           <span>Already have an account?</span>
-          <Link href="/sign-in" className="text-[#eb5017] custom-underline font-semibold">
+          <Link href="/" className="text-[#eb5017] custom-underline font-semibold">
             Login
           </Link>
         </p>

@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('x-auth-token')
     setUser(null)
     setSession(null)
-    router.push('/sign-in')
+    router.push('/')
   }
 
   const resetPassword = async (email: string) => {

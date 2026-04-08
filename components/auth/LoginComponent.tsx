@@ -11,6 +11,8 @@ import Button from "@/components/ui/Button";
 import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
+import Modal from "@/components/ui/Modal";
+import { AlertCircle } from "lucide-react";
 
 export default function LoginComponent() {
   const router = useRouter();
@@ -21,6 +23,7 @@ export default function LoginComponent() {
     checkbox: false, // Default to checked
   });
   const [error, setError] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +51,7 @@ export default function LoginComponent() {
 
       if (signInError) {
         setError(signInError.message || "Invalid email or password");
+        setShowErrorModal(true);
         setLoading(false);
       } else {
         router.push("/events");
@@ -55,6 +59,7 @@ export default function LoginComponent() {
     } catch (err) {
       console.error("Login failed:", err);
       setError("An unexpected error occurred. Please try again.");
+      setShowErrorModal(true);
       setLoading(false);
     }
   };
@@ -78,11 +83,32 @@ export default function LoginComponent() {
         <ContinueWithGoogle />
         <Divider text="OR" />
         
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-xs text-center">
-            {error}
+        {/* Error Modal */}
+        <Modal 
+          isOpen={showErrorModal} 
+          onClose={() => setShowErrorModal(false)}
+          className="p-0 overflow-hidden max-w-sm"
+        >
+          <div className="p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2">
+              <AlertCircle size={32} className="text-red-500" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-[#1B1818] uppercase tracking-tight">Login Failed</h3>
+              <p className="text-sm text-gray-500 font-medium">
+                {error}
+              </p>
+            </div>
+
+            <button 
+              onClick={() => setShowErrorModal(false)}
+              className="w-full px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#1B1818] hover:bg-gray-900 transition-all shadow-lg active:scale-95"
+            >
+              Try Again
+            </button>
           </div>
-        )}
+        </Modal>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <EmailInput
@@ -105,7 +131,7 @@ export default function LoginComponent() {
               checked={userData.checkbox}
             />
             <Link
-              href="/sign-in/forgot-password"
+              href="/forgot-password"
               className="text-[#eb5017] custom-underline text-xs whitespace-nowrap"
             >
               Forgot Password?

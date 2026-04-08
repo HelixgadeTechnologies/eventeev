@@ -42,7 +42,7 @@ export default function AuthCodeError() {
 
         <div className="space-y-3">
           <Link
-            href="/sign-in"
+            href="/"
             className="block w-full rounded-lg bg-purple-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-purple-700"
           >
             Try Signing In Again

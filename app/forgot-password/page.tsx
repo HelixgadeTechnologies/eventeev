@@ -66,7 +66,7 @@ export default function ForgotPassword() {
 
             <p className="text-center md:text-start text-sm text-[#667185] font-medium pt-4">
                 <span>Remember your password?</span>
-                <Link href="/sign-in" className="text-[#eb5017] font-bold hover:underline ml-2">
+                <Link href="/" className="text-[#eb5017] font-bold hover:underline ml-2">
                     Log in
                 </Link>
             </p>
