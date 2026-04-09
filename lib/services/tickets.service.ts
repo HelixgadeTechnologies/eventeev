@@ -56,6 +56,45 @@ export class TicketsService {
       return { data: null, error: error.response?.data || { message: 'Failed to create ticket' } };
     }
   }
+
+  /**
+   * Update an existing ticket
+   */
+  async updateTicket(ticketId: string, payload: Partial<ApiTicket>) {
+    try {
+      const response = await axiosInstance.put(`/api/ticket/edit/${ticketId}`, payload);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to update ticket:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to update ticket' } };
+    }
+  }
+
+  /**
+   * Delete a ticket tier
+   */
+  async deleteTicket(ticketId: string) {
+    try {
+      const response = await axiosInstance.delete(`/api/ticket/${ticketId}`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to delete ticket:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to delete ticket' } };
+    }
+  }
+
+  /**
+   * Update ticket status (e.g., Active, Paused)
+   */
+  async updateTicketStatus(ticketId: string, status: string) {
+    try {
+      const response = await axiosInstance.patch(`/api/ticket/${ticketId}/status`, { status });
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to update ticket status:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to update ticket status' } };
+    }
+  }
 }
 
 export const ticketsService = new TicketsService();

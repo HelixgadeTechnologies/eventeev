@@ -134,6 +134,32 @@ export class EventsService {
     
     return { data: event, error: null }
   }
+
+  /**
+   * Publish a draft event
+   */
+  async publishDraft(eventId: string) {
+    try {
+      const response = await axiosInstance.post(`/api/event/drafttolive/${eventId}`)
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      console.error('Failed to publish draft:', error)
+      return { data: null, error: error.response?.data || { message: 'Failed to publish draft' } }
+    }
+  }
+
+  /**
+   * Delete an event
+   */
+  async deleteEvent(eventId: string) {
+    try {
+      const response = await axiosInstance.delete(`/api/event/${eventId}`)
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      console.error('Failed to delete event:', error)
+      return { data: null, error: error.response?.data || { message: 'Failed to delete event' } }
+    }
+  }
 }
 
 export const eventsService = new EventsService()

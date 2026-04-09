@@ -61,6 +61,45 @@ export class SpeakersService {
       return { data: null, error: error.response?.data || { message: 'Failed to update speaker' } };
     }
   }
+
+  /**
+   * Get a single speaker by ID
+   */
+  async getSpeaker(id: string) {
+    try {
+      const response = await axiosInstance.get(`/api/speaker/${id}`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to fetch speaker:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to fetch speaker' } };
+    }
+  }
+
+  /**
+   * Delete a speaker
+   */
+  async deleteSpeaker(id: string) {
+    try {
+      const response = await axiosInstance.delete(`/api/speaker/${id}`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to delete speaker:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to delete speaker' } };
+    }
+  }
+
+  /**
+   * Manage speaker sessions
+   */
+  async manageSessions(id: string, sessions: any[]) {
+    try {
+      const response = await axiosInstance.post(`/api/speaker/${id}/sessions`, { sessions });
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to manage sessions:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to manage sessions' } };
+    }
+  }
 }
 
 export const speakersService = new SpeakersService();
