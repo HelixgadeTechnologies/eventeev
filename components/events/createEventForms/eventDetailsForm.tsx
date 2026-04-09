@@ -132,9 +132,14 @@ const EventDetailsForm = () => {
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Set end date"
+                    className={errors.stopDate ? "border-red-500 bg-red-50" : ""}
                   />
                 )}
+                rules={{ required: "End date is required" }}
               />
+              {errors.stopDate && (
+                <p className="text-[8px] font-bold text-red-500 uppercase mt-1">End date is required</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -149,7 +154,11 @@ const EventDetailsForm = () => {
                     className={errors.stopTime ? "border-red-500 bg-red-50" : ""}
                   />
                 )}
+                rules={{ required: "End time is required" }}
               />
+              {errors.stopTime && (
+                <p className="text-[8px] font-bold text-red-500 uppercase mt-1">End time is required</p>
+              )}
             </div>
           </div>
         </div>

@@ -11,19 +11,18 @@ export interface ApiEvent {
   status: string
 }
 
-export class EventsService {
   /**
    * Helper to map backend event to frontend format
    */
-  private mapEvent(event: ApiEvent) {
+  private mapEvent(event: any) {
     return {
       ...event,
-      _id: event.id,
+      _id: event.id || event._id,
       name: event.title,
-      startDate: event.date ? new Date(event.date).toLocaleDateString() : 'N/A',
-      startTime: event.date ? new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-      is_published: event.status === 'published',
-      organizer_id: 'backend-user', // Backend currently doesn't return organizer in listing
+      startDate: event.startDate ? new Date(event.startDate).toLocaleDateString() : 'N/A',
+      startTime: event.startTime || 'N/A',
+      is_published: event.status === 'Published',
+      organizer_id: 'backend-user',
       profiles: {
         full_name: "Event Organizer",
         avatar_url: null
@@ -37,7 +36,7 @@ export class EventsService {
   async getPublishedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/published')
-      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       console.error('Failed to fetch published events:', error)
@@ -51,7 +50,7 @@ export class EventsService {
   async getDraftedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/drafts')
-      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       console.error('Failed to fetch draft events:', error)
@@ -65,7 +64,7 @@ export class EventsService {
   async getCompletedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/completed')
-      const data = response.data.map((event: ApiEvent) => this.mapEvent(event))
+      const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       console.error('Failed to fetch completed events:', error)
@@ -89,13 +88,24 @@ export class EventsService {
     description: string
     category: string
     type: string
-    date: string
+    startDate: string
+    endDate?: string
+    startTime: string
+    endTime?: string
+    location: string
     status?: string
+    bannerImage?: string
+    thumbnailImage?: string
+    website?: string
+    facebookUrl?: string
+    instagramUrl?: string
+    xUrl?: string
+    recurrentEvent?: boolean
   }) {
     try {
       const response = await axiosInstance.post('/api/event/publish', {
         ...eventData,
-        status: eventData.status || 'published'
+        status: eventData.status || 'Published'
       })
       return { data: response.data, error: null }
     } catch (error: any) {

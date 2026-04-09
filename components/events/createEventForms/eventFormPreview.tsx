@@ -29,7 +29,7 @@ const EventFormPreview = () => {
 
   const router = useRouter();
 
-  const onSubmit = async (data: createEventData = formData) => {
+  const onSubmit = async (status: 'Published' | 'Draft' = 'Published') => {
     setIsPublishing(true);
     
     try {
@@ -39,23 +39,30 @@ const EventFormPreview = () => {
         description: formData.description,
         category: formData.category,
         type: formData.eventType,
-        date: new Date(`${formData.startDate} ${formData.startTime}`).toISOString(),
-        status: 'published'
+        startDate: new Date(`${formData.startDate} ${formData.startTime}`).toISOString(),
+        endDate: formData.stopDate ? new Date(`${formData.stopDate} ${formData.stopTime}`).toISOString() : undefined,
+        startTime: formData.startTime,
+        location: formData.location || 'Online',
+        website: formData.website,
+        facebookUrl: formData.facebookUrl,
+        instagramUrl: formData.instagramUrl,
+        xUrl: formData.xUrl,
+        recurrentEvent: formData.recurrentEvent,
+        status: status
       };
 
       const { data: result, error } = await eventsService.createEvent(payload);
       
       if (error) {
-        throw new Error(error.message || "Failed to publish event");
+        throw new Error(error.message || `Failed to ${status === 'Draft' ? 'save draft' : 'publish event'}`);
       }
 
       setShowConfirmModal(false);
-      // Using alert as per original code's style, but router.push is better
-      alert("Event Published Successfully!");
+      alert(status === 'Draft' ? "Event Saved as Draft!" : "Event Published Successfully!");
       router.push("/events");
     } catch (err: any) {
-      console.error("Publishing error:", err);
-      alert(err.message || "An error occurred while publishing the event.");
+      console.error(`${status === 'Draft' ? 'Draft' : 'Publishing'} error:`, err);
+      alert(err.message || `An error occurred while ${status === 'Draft' ? 'saving the draft' : 'publishing the event'}.`);
     } finally {
       setIsPublishing(false);
     }
@@ -140,18 +147,28 @@ const EventFormPreview = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-4 pt-8 mt-auto">
+      <div className="flex flex-col md:flex-row items-center gap-3 pt-8 mt-auto">
         <button
           type="button"
           onClick={handlePrevStep}
-          className="flex-1 text-[#475367] border border-gray-200 hover:bg-gray-50 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all active:scale-95"
+          className="w-full md:flex-1 text-[#475367] border border-gray-200 hover:bg-gray-50 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all active:scale-95"
         >
           Back to Edit
         </button>
+        
+        <button
+          type="button"
+          disabled={isPublishing}
+          onClick={() => onSubmit('Draft')}
+          className="w-full md:flex-1 text-[#1B1818] border-2 border-gray-100 hover:border-[#F56630]/30 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+        >
+          {isPublishing ? 'Saving...' : 'Save as Draft'}
+        </button>
+
         <button
           type="button"
           onClick={() => setShowConfirmModal(true)}
-          className="flex-[2] text-white bg-[#F56630] hover:bg-[#d64815] text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all shadow-xl shadow-[#F56630]/30 active:scale-95 border border-[#F56630]"
+          className="w-full md:flex-[2] text-white bg-[#F56630] hover:bg-[#d64815] text-xs font-black uppercase tracking-widest py-3.5 rounded-xl cursor-pointer transition-all shadow-xl shadow-[#F56630]/30 active:scale-95 border border-[#F56630]"
         >
           Publish & Go Live
         </button>
@@ -160,7 +177,7 @@ const EventFormPreview = () => {
       <ActionConfirmationModal
         isOpen={showConfirmModal}
         onClose={() => !isPublishing && setShowConfirmModal(false)}
-        onConfirm={handleSubmit(onSubmit)}
+        onConfirm={() => onSubmit('Published')}
         title="Publish Event?"
         description="Once published, your event will be live and accessible to attendees. You can still edit details later."
         confirmLabel="Publish Now"

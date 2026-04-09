@@ -6,6 +6,9 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { SpeakerDataType } from "@/lib/demo-data/speakers";
 
+import { uploadService } from "@/lib/services/upload.service";
+import { Loader2 } from "lucide-react";
+
 interface SpeakerFormProps {
   initialData?: SpeakerDataType;
   onSubmit: (data: any) => void;
@@ -19,14 +22,35 @@ const SpeakerForm = ({
   onCancel,
   submitLabel = "Save Speaker",
 }: SpeakerFormProps) => {
-  // In a real app, we'd use react-hook-form here. 
-  // For now, I'll keep it consistent with the existing controlled/uncontrolled hybrid in index.tsx 
-  // but pre-fill it if initialData is provided.
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [photoUrl, setPhotoUrl] = React.useState(initialData?.avatar || "");
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const { data, error } = await uploadService.uploadImage(file);
+    setIsUploading(false);
+
+    if (data?.url) {
+      setPhotoUrl(data.url);
+    } else {
+      console.error("Upload error:", error);
+      alert("Failed to upload image. Please try again.");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real implementation, we'd gather form data here
-    onSubmit({});
+    
+    // In a real implementation, we'd gather all form fields. 
+    // Here we'll ensure photoUrl is included.
+    const formElement = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(formElement);
+    const data = Object.fromEntries(formData.entries());
+    
+    onSubmit({ ...data, photo: photoUrl });
   };
 
   return (
@@ -42,24 +66,34 @@ const SpeakerForm = ({
         <div className="flex-1 flex items-center gap-6">
           <div className="relative group">
             <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-50 ring-1 ring-gray-100 flex items-center justify-center">
-              {initialData?.avatar ? (
-                <img src={initialData.avatar} alt={initialData.name} className="w-full h-full object-cover" />
+              {isUploading ? (
+                <Loader2 className="w-8 h-8 animate-spin text-[#EB5017]" />
+              ) : photoUrl ? (
+                <img src={photoUrl} alt="Speaker" className="w-full h-full object-cover" />
               ) : (
                 <User className="w-12 h-12 text-gray-300" />
               )}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <span className="text-[10px] text-white font-bold uppercase tracking-widest">Change</span>
-              </div>
+              {!isUploading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <span className="text-[10px] text-white font-bold uppercase tracking-widest">Change</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <label className="cursor-pointer bg-white border border-gray-200 text-[#1B1818] px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition-all shadow-sm active:scale-95 text-center">
-              Upload New
-              <input type="file" className="hidden" />
+              {isUploading ? "Uploading..." : "Upload New"}
+              <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={isUploading} />
             </label>
-            <button type="button" className="text-red-500 text-[10px] font-bold uppercase tracking-wider hover:underline text-left px-4">
-              Remove
-            </button>
+            {photoUrl && !isUploading && (
+              <button 
+                type="button" 
+                onClick={() => setPhotoUrl("")}
+                className="text-red-500 text-[10px] font-bold uppercase tracking-wider hover:underline text-left px-4"
+              >
+                Remove
+              </button>
+            )}
           </div>
         </div>
       </section>

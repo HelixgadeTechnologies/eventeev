@@ -11,6 +11,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
+import { profileService } from "@/lib/services/profile.service";
+import ActionConfirmationModal from "../ui/ActionConfirmationModal";
+import { Loader2 } from "lucide-react";
 
 const GENDERS = ["Male", "Female", "I rather not say"];
 
@@ -62,6 +65,8 @@ const ProfileDisabled = () => {
     orgWebsite: "",
     orgIndustry: ""
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Sync with user data when it changes
   useEffect(() => {
@@ -100,13 +105,43 @@ const ProfileDisabled = () => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const toggleEdit = (e: React.MouseEvent) => {
+  const toggleEdit = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!isEditing) {
-      e.preventDefault();
       setIsEditing(true);
     } else {
-      // Logic for saving would go here
-      setIsEditing(false);
+      setIsSaving(true);
+      try {
+        if (!user?.id) throw new Error("User ID not found");
+
+        // 1. Update general profile fields
+        const profileResult = await profileService.updateUserProfile(user.id, {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          gender: formData.gender,
+          tZone: formData.tZone,
+          country: formData.country
+        });
+
+        if (profileResult.error) throw new Error(profileResult.error.message || "Failed to update profile");
+
+        // 2. Update organisation details
+        const orgResult = await profileService.updateOrganisationDetails({
+          orgName: formData.orgName,
+          orgWebsite: formData.orgWebsite,
+          orgIndustry: formData.orgIndustry
+        });
+
+        if (orgResult.error) throw new Error(orgResult.error.message || "Failed to update organisation details");
+
+        setShowSuccessModal(true);
+        setIsEditing(false);
+      } catch (error: any) {
+        console.error("Save error:", error);
+        alert(error.message || "An error occurred while saving profile data.");
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -330,11 +365,28 @@ const ProfileDisabled = () => {
         <button
           type={isEditing ? "submit" : "button"}
           onClick={toggleEdit}
-          className="w-full sm:w-2/3 h-12 flex justify-center items-center text-white font-semibold text-base bg-gradient-to-r from-[#eb5017] to-[#F56630] rounded-xl hover:opacity-90 transition-all duration-200 shadow-md shadow-[#eb5017]/20"
+          disabled={isSaving}
+          className="w-full sm:w-2/3 h-12 flex justify-center items-center text-white font-semibold text-base bg-gradient-to-r from-[#eb5017] to-[#F56630] rounded-xl hover:opacity-90 transition-all duration-200 shadow-md shadow-[#eb5017]/20 disabled:opacity-50"
         >
-          {isEditing ? "Save" : "Edit Profile"}
+          {isSaving ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isEditing ? (
+            "Save Changes"
+          ) : (
+            "Edit Profile"
+          )}
         </button>
       </div>
+
+      <ActionConfirmationModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onConfirm={() => setShowSuccessModal(false)}
+        title="Success!"
+        description="Profile data saved successfully. Your information has been updated across the platform."
+        confirmLabel="Great!"
+        cancelLabel="Close"
+      />
     </form>
   );
 };

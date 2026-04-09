@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import img from "@/public/file-upload.svg";
+import { uploadService } from "@/lib/services/upload.service";
+import { Loader2 } from "lucide-react";
 
 interface FileInputProps {
   onChange: (file: File | null) => void;
@@ -10,20 +12,33 @@ interface FileInputProps {
 }
 
 const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
+  const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(defaultValue || null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
+    if (!selectedFile) return;
+
     setFile(selectedFile);
-    onChange?.(selectedFile);
     
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(selectedFile);
+    // Preview local file immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(selectedFile);
+
+    // Trigger Cloudinary upload
+    setIsUploading(true);
+    const { data, error } = await uploadService.uploadImage(selectedFile);
+    setIsUploading(false);
+
+    if (data?.url) {
+      onChange?.(data.url);
+    } else {
+      console.error("Upload error:", error);
+      alert("Failed to upload image. Please try again.");
     }
   };
   return (
@@ -40,7 +55,12 @@ const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
         htmlFor="file-upload"
         className="cursor-pointer text-[#EB5017] font-medium flex flex-col justify-center items-center gap-y-2 w-full h-full z-10"
       >
-        {preview ? (
+        {isUploading ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <Loader2 className="w-8 h-8 animate-spin text-[#EB5017]" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#EB5017]">Uploading...</span>
+          </div>
+        ) : preview ? (
           <div className="absolute inset-0 w-full h-full bg-white">
             <Image src={preview} alt="preview" fill className="object-cover" />
             {/* Hover overlay to show upload text */}
