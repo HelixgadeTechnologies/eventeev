@@ -1,9 +1,10 @@
+import axiosInstance from "../axios"
 
 export interface SignUpData {
+  firstName: string
+  lastName: string
   email: string
   password: string
-  fullName?: string
-  phoneNumber?: string
 }
 
 export interface SignInData {
@@ -13,129 +14,123 @@ export interface SignInData {
 
 export class AuthService {
   /**
-   * Sign up a new user (Mock)
+   * Sign up a new user
    */
   async signUp(data: SignUpData) {
-    const { email, fullName } = data
-    
-    // Mock successful signup
-    const user = {
-      id: "mock-user-id",
-      email,
-      user_metadata: {
-        full_name: fullName,
+    try {
+      const response = await axiosInstance.post('/api/auth/register', data);
+      const { user, token } = response.data;
+      
+      if (token) {
+        localStorage.setItem('x-auth-token', token);
       }
+      
+      return { user, error: null }
+    } catch (error: any) {
+      return { user: null, error: error.response?.data?.message || 'Registration failed' }
     }
-
-    return { user, error: null }
   }
 
   /**
-   * Sign in an existing user (Mock)
+   * Sign in an existing user
    */
   async signIn(data: SignInData) {
-    const { email } = data
+    try {
+      const response = await axiosInstance.post('/api/auth/login', data);
+      const { user, token } = response.data;
+      
+      if (token) {
+        localStorage.setItem('x-auth-token', token);
+      }
 
-    // Mock successful signin
-    const user = {
-      id: "mock-user-id",
-      email,
+      return { user, session: { access_token: token, user }, error: null }
+    } catch (error: any) {
+      return { user: null, session: null, error: error.response?.data?.message || 'Login failed' }
     }
-    const session = {
-      access_token: "mock-token",
-      user,
-    }
-
-    return { user, session, error: null }
   }
 
   /**
-   * Sign out the current user (Mock)
+   * Sign out the current user
    */
   async signOut() {
+    localStorage.removeItem('x-auth-token');
     return { error: null }
   }
 
   /**
-   * Send password reset email (Mock)
+   * Send password reset email
    */
-  async resetPassword() {
-    return { error: null }
+  async resetPassword(email: string) {
+    try {
+      await axiosInstance.post('/api/auth/forgotpassword', { email });
+      return { error: null }
+    } catch (error: any) {
+      return { error: error.response?.data?.message || 'Failed to send reset email' }
+    }
   }
 
   /**
-   * Update user password (Mock)
+   * Update user password
    */
-  async updatePassword() {
-    return { error: null }
+  async updatePassword(token: string, password: string) {
+    try {
+      await axiosInstance.put(`/api/auth/resetpassword/${token}`, { password });
+      return { error: null }
+    } catch (error: any) {
+      return { error: error.response?.data?.message || 'Failed to update password' }
+    }
   }
 
   /**
-   * Get current user (Mock)
+   * Get current user
    */
   async getCurrentUser() {
-    const user = {
-      id: "mock-user-id",
-      email: "demo@eventeev.com",
-      user_metadata: {
-        full_name: "Demo User",
-      }
+    try {
+      const response = await axiosInstance.get('/api/user/me');
+      return { user: response.data, error: null }
+    } catch (error: any) {
+      return { user: null, error: error.response?.data?.message || 'Failed to get current user' }
     }
-    return { user, error: null }
   }
 
   /**
-   * Get current session (Mock)
+   * Get current session
    */
   async getSession() {
-    const session = {
-      access_token: "mock-token",
-      user: {
-        id: "mock-user-id",
-        email: "demo@eventeev.com",
-      }
+    const token = localStorage.getItem('x-auth-token');
+    if (!token) return { session: null, error: 'No session' };
+    
+    try {
+      const { user, error } = await this.getCurrentUser();
+      if (error) return { session: null, error };
+      return { session: { access_token: token, user }, error: null };
+    } catch (error: any) {
+      return { session: null, error: 'Failed to get session' };
     }
-    return { session, error: null }
   }
 
   /**
-   * Sign in with OAuth provider (Mock)
+   * Update user profile
    */
-  async signInWithOAuth() {
-    return { data: { url: '#' }, error: null }
-  }
-
-  /**
-   * Update user profile (Mock)
-   */
-  async updateProfile(userId: string, updates: Partial<{
-    full_name: string
-    phone_number: string
-    avatar_url: string
-  }>) {
-    const data = {
-      id: userId,
-      ...updates,
-      updated_at: new Date().toISOString(),
+  async updateProfile(userId: string, updates: any) {
+    try {
+      const response = await axiosInstance.put(`/api/user/updateuser/${userId}`, updates);
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      return { data: null, error: error.response?.data?.message || 'Update failed' }
     }
-
-    return { data, error: null }
   }
 
   /**
-   * Get user profile (Mock)
+   * Get user profile
    */
   async getProfile(userId: string) {
-    const data = {
-      id: userId,
-      email: "demo@eventeev.com",
-      full_name: "Demo User",
-      phone_number: "+1234567890",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+    try {
+      const response = await axiosInstance.get(`/api/user/${userId}`);
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      return { data: null, error: error.response?.data?.message || 'Failed to get profile' }
     }
-
-    return { data, error: null }
   }
 }
 

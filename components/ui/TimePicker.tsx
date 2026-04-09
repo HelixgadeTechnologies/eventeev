@@ -1,51 +1,50 @@
+"use client"
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LuClock3 } from "react-icons/lu";
+import { Switch } from "./switch";
+import { Label } from "./label";
 
 interface TimePickerProps {
-  value: string; // "HH:MM AM/PM" format or "HH:MM" 24h
+  value: string; // Internal state always stores 24h "HH:MM"
   onChange: (time: string) => void;
   className?: string;
 }
 
-const HOURS = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const HOURS_24 = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 const PERIODS = ['AM', 'PM'];
 
 export default function TimePicker({ value, onChange, className = '' }: TimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [is24h, setIs24h] = useState(false);
   
-  // Parse initial value or default to 12:00 AM
   const [selectedHour, setSelectedHour] = useState('12');
   const [selectedMinute, setSelectedMinute] = useState('00');
   const [selectedPeriod, setSelectedPeriod] = useState('AM');
   
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  // Parse initial 24h value from parent
   useEffect(() => {
     if (value) {
-      // Basic parser for "HH:MM AM/PM" or "HH:MM"
-      const timeRegex = /^(\d{1,2}):(\d{2})(?:\s?(AM|PM))?$/i;
-      const match = value.match(timeRegex);
-      if (match) {
-        let [, h, m, p] = match;
-        
-        let hr = parseInt(h, 10);
-        if (!p) {
-          // It's 24 hr time
-          p = hr >= 12 ? 'PM' : 'AM';
-          if (hr > 12) hr -= 12;
-          if (hr === 0) hr = 12;
-        } else {
-          p = p.toUpperCase();
-        }
-        
-        setSelectedHour(hr.toString().padStart(2, '0'));
-        setSelectedMinute(m.padStart(2, '0'));
-        setSelectedPeriod(p);
+      const [h, m] = value.split(':');
+      let hr = parseInt(h, 10);
+      
+      if (is24h) {
+        setSelectedHour(h.padStart(2, '0'));
+      } else {
+        const period = hr >= 12 ? 'PM' : 'AM';
+        let displayHr = hr % 12;
+        if (displayHr === 0) displayHr = 12;
+        setSelectedHour(displayHr.toString().padStart(2, '0'));
+        setSelectedPeriod(period);
       }
+      setSelectedMinute(m ? m.padStart(2, '0') : '00');
     }
-  }, [value, isOpen]);
+  }, [value, is24h]);
 
   // Handle outside click to close
   useEffect(() => {
@@ -64,12 +63,13 @@ export default function TimePicker({ value, onChange, className = '' }: TimePick
   }, [isOpen]);
 
   const handleSave = () => {
-    // Note: Always returns in "HH:MM AM/PM" format or 24-hr if needed. 
-    // We'll format to 24-hour style "HH:MM" as standard input[type=time] normally returns 24h.
     let hr24 = parseInt(selectedHour, 10);
-    if (selectedPeriod === 'PM' && hr24 !== 12) hr24 += 12;
-    if (selectedPeriod === 'AM' && hr24 === 12) hr24 = 0;
+    if (!is24h) {
+      if (selectedPeriod === 'PM' && hr24 !== 12) hr24 += 12;
+      if (selectedPeriod === 'AM' && hr24 === 12) hr24 = 0;
+    }
     
+    // Always emit 24h format HH:MM
     const formatted24 = `${hr24.toString().padStart(2, '0')}:${selectedMinute}`;
     onChange(formatted24);
     setIsOpen(false);
@@ -119,7 +119,7 @@ export default function TimePicker({ value, onChange, className = '' }: TimePick
         {items.map((item) => (
           <div 
             key={item} 
-            className={`h-[40px] flex items-center justify-center snap-center text-lg font-medium transition-colors cursor-pointer ${
+            className={`h-[40px] flex items-center justify-center snap-center text-lg font-bold transition-colors cursor-pointer ${
               selectedValue === item ? 'text-[#1B1818]' : 'text-gray-300'
             }`}
             onClick={() => {
@@ -137,20 +137,21 @@ export default function TimePicker({ value, onChange, className = '' }: TimePick
     );
   };
 
-  // Convert current value to 12h AM/PM for display on button
+  // Convert 24h value to user-friendly display based on is24h
   const displayTime = () => {
     if (!value) return "Select time";
-    const timeRegex = /^(\d{1,2}):(\d{2})/;
-    const match = value.match(timeRegex);
-    if (match) {
-      let hr = parseInt(match[1], 10);
-      const min = match[2];
-      const ampm = hr >= 12 ? 'PM' : 'AM';
-      if (hr > 12) hr -= 12;
-      if (hr === 0) hr = 12;
-      return `${hr.toString().padStart(2, '0')}:${min} ${ampm}`;
+    
+    const [h, m] = value.split(':');
+    let hr = parseInt(h, 10);
+    
+    if (is24h) {
+      return value;
+    } else {
+      const period = hr >= 12 ? 'PM' : 'AM';
+      let displayHr = hr % 12;
+      if (displayHr === 0) displayHr = 12;
+      return `${displayHr.toString().padStart(2, '0')}:${m} ${period}`;
     }
-    return value;
   };
 
   return (
@@ -158,12 +159,12 @@ export default function TimePicker({ value, onChange, className = '' }: TimePick
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm font-medium text-left transition-all ${
-           isOpen ? 'ring-2 ring-[#EB5017]/20 border-[#EB5017]' : 'hover:border-gray-300 hover:bg-white'
-        } ${!value ? 'text-gray-400' : 'text-[#1B1818]'} ${className}`}
+        className={`w-full bg-white border border-gray-200 rounded-xl pl-12 pr-4 py-2.5 text-xs font-bold text-left transition-all ${
+           isOpen ? 'ring-2 ring-[#F56630]/20 border-[#F56630]' : 'hover:border-gray-300'
+        } ${!value ? 'text-gray-300' : 'text-[#1B1818]'} ${className}`}
       >
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-          <LuClock3 className="text-lg" />
+          <LuClock3 className="text-base" />
         </div>
         {displayTime()}
       </button>
@@ -175,50 +176,62 @@ export default function TimePicker({ value, onChange, className = '' }: TimePick
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 mt-2 z-50 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 p-6 w-[280px]"
+            className="absolute top-full left-0 mt-2 z-50 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 p-6 w-[300px]"
           >
-            <div className="text-center mb-6">
-              <h4 className="text-[#1B1818] font-bold text-lg">Select time</h4>
+            <div className="flex justify-between items-center mb-6">
+              <h4 className="text-[#1B1818] font-black text-base tracking-tight">Select time</h4>
+              <div className="flex items-center gap-2">
+                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">24h</Label>
+                <Switch 
+                  checked={is24h} 
+                  onCheckedChange={setIs24h} 
+                  className="data-[state=checked]:bg-[#F56630] scale-75"
+                />
+              </div>
             </div>
 
-            <div className="relative flex justify-center items-center gap-1 mb-6">
-              {/* Highlight Box over the center row */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[40px] border border-gray-100 bg-gray-50/50 rounded-2xl pointer-events-none z-0" />
+            <div className="relative flex justify-center items-center gap-1 mb-8">
+              {/* Highlight Box */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[40px] bg-gray-50 rounded-xl pointer-events-none z-0" />
               
-              <div className="flex gap-2 relative z-10 items-center">
+              <div className="flex gap-1 relative z-10 items-center">
                 <ScrollWheel 
-                  items={HOURS} 
+                  items={is24h ? HOURS_24 : HOURS_12} 
                   selectedValue={selectedHour} 
                   onChange={setSelectedHour} 
                 />
-                <span className="text-gray-300 font-bold text-xl pb-1">:</span>
+                <span className="text-[#1B1818] font-black text-xl pb-1 mx-1">:</span>
                 <ScrollWheel 
                   items={MINUTES} 
                   selectedValue={selectedMinute} 
                   onChange={setSelectedMinute} 
                 />
-                <div className="w-2" /> {/* Spacer */}
-                <ScrollWheel 
-                  items={PERIODS} 
-                  selectedValue={selectedPeriod} 
-                  onChange={setSelectedPeriod} 
-                  width="w-16"
-                />
+                {!is24h && (
+                  <>
+                    <div className="w-2" />
+                    <ScrollWheel 
+                      items={PERIODS} 
+                      selectedValue={selectedPeriod} 
+                      onChange={setSelectedPeriod} 
+                      width="w-14"
+                    />
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="flex justify-between items-center gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-[#1B1818] hover:bg-gray-100 transition-colors"
+                className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest text-[#1B1818] bg-white border border-gray-200 hover:bg-gray-50 transition-all active:scale-95"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSave}
-                className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-white bg-[#1B1818] hover:bg-black transition-colors shadow-md"
+                className="px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest text-white bg-[#F56630] hover:bg-[#d64815] transition-all active:scale-95 shadow-lg shadow-[#F56630]/20"
               >
                 Save
               </button>
