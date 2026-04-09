@@ -3,7 +3,50 @@
 import React, { useState, useEffect } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { useAuth } from "@/context/AuthContext";
+
+const GENDERS = ["Male", "Female", "I rather not say"];
+
+const INDUSTRIES = [
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "Education",
+  "Entertainment",
+  "Marketing",
+  "Real Estate",
+  "Hospitality",
+  "Retail",
+  "Energy",
+  "Manufacturing",
+  "Legal",
+  "Other"
+];
+
+const COUNTRIES = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+  "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+  "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+  "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+  "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan",
+  "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+  "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
+  "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
+  "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+  "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
+const TIMEZONES = Intl.supportedValuesOf('timeZone');
 
 const ProfileDisabled = () => {
   const { user } = useAuth();
@@ -27,9 +70,9 @@ const ProfileDisabled = () => {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
-        gender: "Female",
-        tZone: "GMT +1",
-        country: "Nigeria",
+        gender: user.gender || "Female",
+        tZone: user.tZone || "Africa/Lagos",
+        country: user.country || "Nigeria",
         orgName: user.orgName || "",
         orgWebsite: user.orgWebsite || "",
         orgIndustry: user.orgIndustry || ""
@@ -39,23 +82,22 @@ const ProfileDisabled = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    // Map IDs to state keys if different
     const fieldMap: { [key: string]: string } = {
       fName: "firstName",
       lName: "lastName",
       email: "email",
-      gender: "gender",
-      tZone: "tZone",
-      country: "country",
       orgName: "orgName",
-      orgWebsite: "orgWebsite",
-      orgIndustry: "orgIndustry"
+      orgWebsite: "orgWebsite"
     };
 
     const stateKey = fieldMap[id];
     if (stateKey) {
       setFormData(prev => ({ ...prev, [stateKey]: value }));
     }
+  };
+
+  const handleSelectChange = (id: string, value: string) => {
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const toggleEdit = (e: React.MouseEvent) => {
@@ -133,15 +175,24 @@ const ProfileDisabled = () => {
             >
               Gender
             </Label>
-            <Input
-              type="text"
-              placeholder="Female"
-              value={formData.gender}
-              onChange={handleChange}
-              id="gender"
+            <Select 
+              value={formData.gender} 
+              onValueChange={(val) => handleSelectChange("gender", val)}
               disabled={!isEditing}
-              className={`h-12 border-[#D0D5DD] rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white"}`}
-            />
+            >
+              <SelectTrigger 
+                className={`h-12 w-full border-[#D0D5DD] rounded-xl px-4 focus:ring-2 focus:ring-[#eb5017]/20 focus:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white text-gray-900"}`}
+              >
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#D0D5DD] rounded-xl shadow-lg">
+                {GENDERS.map((gender) => (
+                  <SelectItem key={gender} value={gender} className="focus:bg-orange-50 focus:text-[#eb5017] cursor-pointer py-3">
+                    {gender}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -153,15 +204,24 @@ const ProfileDisabled = () => {
             >
               Time Zone
             </Label>
-            <Input
-              type="text"
-              placeholder="GMT +1"
-              value={formData.tZone}
-              onChange={handleChange}
-              id="tZone"
+            <Select 
+              value={formData.tZone} 
+              onValueChange={(val) => handleSelectChange("tZone", val)}
               disabled={!isEditing}
-              className={`h-12 border-[#D0D5DD] rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white"}`}
-            />
+            >
+              <SelectTrigger 
+                className={`h-12 w-full border-[#D0D5DD] rounded-xl px-4 focus:ring-2 focus:ring-[#eb5017]/20 focus:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white text-gray-900"}`}
+              >
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#D0D5DD] rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                {TIMEZONES.map((tz) => (
+                  <SelectItem key={tz} value={tz} className="focus:bg-orange-50 focus:text-[#eb5017] cursor-pointer py-2">
+                    {tz}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col gap-y-2">
             <Label
@@ -170,15 +230,24 @@ const ProfileDisabled = () => {
             >
               Country
             </Label>
-            <Input
-              type="text"
-              placeholder="Nigeria"
-              value={formData.country}
-              onChange={handleChange}
-              id="country"
+            <Select 
+              value={formData.country} 
+              onValueChange={(val) => handleSelectChange("country", val)}
               disabled={!isEditing}
-              className={`h-12 border-[#D0D5DD] rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white"}`}
-            />
+            >
+              <SelectTrigger 
+                className={`h-12 w-full border-[#D0D5DD] rounded-xl px-4 focus:ring-2 focus:ring-[#eb5017]/20 focus:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white text-gray-900"}`}
+              >
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#D0D5DD] rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                {COUNTRIES.map((country) => (
+                  <SelectItem key={country} value={country} className="focus:bg-orange-50 focus:text-[#eb5017] cursor-pointer py-2">
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -227,15 +296,24 @@ const ProfileDisabled = () => {
             >
               Organisation Industry
             </Label>
-            <Input
-              type="text"
-              placeholder="Organisation Industry"
-              value={formData.orgIndustry}
-              onChange={handleChange}
-              id="orgIndustry"
+            <Select 
+              value={formData.orgIndustry} 
+              onValueChange={(val) => handleSelectChange("orgIndustry", val)}
               disabled={!isEditing}
-              className={`h-12 border-[#D0D5DD] rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-[#eb5017]/20 focus-visible:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white"}`}
-            />
+            >
+              <SelectTrigger 
+                className={`h-12 w-full border-[#D0D5DD] rounded-xl px-4 focus:ring-2 focus:ring-[#eb5017]/20 focus:border-[#eb5017] transition-all duration-200 ${!isEditing ? "bg-[#F9FAFB]/50" : "bg-white text-gray-900"}`}
+              >
+                <SelectValue placeholder="Select industry" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#D0D5DD] rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                {INDUSTRIES.map((industry) => (
+                  <SelectItem key={industry} value={industry} className="focus:bg-orange-50 focus:text-[#eb5017] cursor-pointer py-2">
+                    {industry}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
