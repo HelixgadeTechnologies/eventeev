@@ -1,14 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   HiOutlineShieldCheck
 } from "react-icons/hi2";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useParams } from "next/navigation";
+import { eventsService } from "@/lib/services/events.service";
+import { Loader2 } from "lucide-react";
 
 export default function ChatSettings() {
+  const params = useParams();
+  const _id = params?._id as string;
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [eventData, setEventData] = useState<any>(null);
+
   const [enableLiveChat, setEnableLiveChat] = useState(true);
+  const [profanityFilter, setProfanityFilter] = useState("Medium");
   const [autoBlockLinks, setAutoBlockLinks] = useState(false);
   const [allowPrivateMessaging, setAllowPrivateMessaging] = useState(true);
   const [allowEmojiReactions, setAllowEmojiReactions] = useState(true);
@@ -16,14 +27,82 @@ export default function ChatSettings() {
   const [theme, setTheme] = useState("standard");
   const [fontSize, setFontSize] = useState("medium");
 
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!_id) return;
+      setLoading(true);
+      const { data, error } = await eventsService.getEventById(_id);
+      if (!error && data) {
+        setEventData(data);
+        const chat = data.settings?.chat || {};
+        setEnableLiveChat(chat.enabled ?? true);
+        setProfanityFilter(chat.filterStrength || "Medium");
+        setAutoBlockLinks(chat.blockLinks ?? false);
+        setAllowPrivateMessaging(chat.allowPM ?? true);
+        setAllowEmojiReactions(chat.allowReactions ?? true);
+        setAllowFileSharing(chat.allowFiles ?? false);
+        setTheme(chat.theme || "standard");
+        setFontSize(chat.fontSize || "medium");
+      }
+      setLoading(false);
+    };
+
+    fetchEvent();
+  }, [_id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updatePayload = {
+      settings: {
+        ...eventData?.settings,
+        chat: {
+          enabled: enableLiveChat,
+          filterStrength: profanityFilter,
+          blockLinks: autoBlockLinks,
+          allowPM: allowPrivateMessaging,
+          allowReactions: allowEmojiReactions,
+          allowFiles: allowFileSharing,
+          theme,
+          fontSize,
+        }
+      }
+    };
+
+    const { error } = await eventsService.updateEvent(_id, updatePayload);
+    setSaving(false);
+    if (error) {
+      alert("Failed to save chat settings: " + (error.message || "Unknown error"));
+    } else {
+      alert("Chat settings updated successfully!");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full space-y-4 bg-white">
+        <Loader2 className="w-10 h-10 text-[#eb5017] animate-spin" />
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Chat Settings...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden p-4 md:p-6 bg-white select-none">
       {/* Header */}
-      <header className="mb-4">
-        <h1 className="text-xl font-bold text-[#1B1818] leading-tight tracking-tight">Chat Settings</h1>
-        <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90 leading-relaxed max-w-2xl">
-          Configure moderation rules, permissions, and appearance for the live event chat experience.
-        </p>
+      <header className="mb-4 flex justify-between items-start">
+        <div>
+          <h1 className="text-xl font-bold text-[#1B1818] leading-tight tracking-tight">Chat Settings</h1>
+          <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90 leading-relaxed max-w-2xl">
+            Configure moderation rules, permissions, and appearance for the live event chat experience.
+          </p>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-[#eb5017] text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save Rules"}
+        </button>
       </header>
 
       {/* Main Content Areas */}

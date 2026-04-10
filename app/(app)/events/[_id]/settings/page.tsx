@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   HiOutlineInformationCircle,
 } from "react-icons/hi2";
@@ -14,23 +14,94 @@ import {
 } from "@/components/ui/select";
 import Calendar from "@/components/ui/Calendar";
 import { Label } from "@/components/ui/label";
+import { useParams } from "next/navigation";
+import { eventsService } from "@/lib/services/events.service";
+import { Loader2 } from "lucide-react";
 
 export default function GeneralSettings() {
-  const [eventName, setEventName] = useState("Summer Gala 2024");
-  const [customUrl, setCustomUrl] = useState("summer-gala-2024");
+  const params = useParams();
+  const _id = params?._id as string;
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [eventData, setEventData] = useState<any>(null);
+
+  const [eventName, setEventName] = useState("");
+  const [customUrl, setCustomUrl] = useState("");
   const [visibility, setVisibility] = useState("public");
   const [showLeaderboard, setShowLeaderboard] = useState(true);
   const [enableChat, setEnableChat] = useState(false);
   const [theme, setTheme] = useState("modern-sunset");
 
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!_id) return;
+      setLoading(true);
+      const { data, error } = await eventsService.getEventById(_id);
+      if (!error && data) {
+        setEventData(data);
+        setEventName(data.name || "");
+        setCustomUrl(data.slug || data._id);
+        setVisibility(data.visibility || "public");
+        setShowLeaderboard(data.settings?.showLeaderboard ?? true);
+        setEnableChat(data.settings?.enableChat ?? false);
+        setTheme(data.settings?.theme || "modern-sunset");
+      }
+      setLoading(false);
+    };
+
+    fetchEvent();
+  }, [_id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updatePayload = {
+      name: eventName,
+      slug: customUrl,
+      visibility,
+      settings: {
+        ...eventData?.settings,
+        showLeaderboard,
+        enableChat,
+        theme,
+      }
+    };
+
+    const { error } = await eventsService.updateEvent(_id, updatePayload);
+    setSaving(false);
+    if (error) {
+      alert("Failed to save settings: " + (error.message || "Unknown error"));
+    } else {
+      alert("Settings updated successfully!");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full space-y-4 bg-white">
+        <Loader2 className="w-10 h-10 text-[#eb5017] animate-spin" />
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading General Settings...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden p-4 md:p-6 bg-white select-none">
       {/* Compact Header */}
-      <header className="mb-4">
-        <h1 className="text-xl font-bold text-[#1B1818] leading-tight tracking-tight">General Event Settings</h1>
-        <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90 leading-relaxed max-w-2xl">
-          Manage the high-level configuration for your upcoming event. Changes here will propagate instantly to all active sessions.
-        </p>
+      <header className="mb-4 flex justify-between items-start">
+        <div>
+          <h1 className="text-xl font-bold text-[#1B1818] leading-tight tracking-tight">General Event Settings</h1>
+          <p className="text-[10px] font-medium text-[#C27E33] mt-0.5 opacity-90 leading-relaxed max-w-2xl">
+            Manage the high-level configuration for your upcoming event. Changes here will propagate instantly to all active sessions.
+          </p>
+        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-[#eb5017] text-white px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save Config"}
+        </button>
       </header>
 
       {/* Main Content Rows */}

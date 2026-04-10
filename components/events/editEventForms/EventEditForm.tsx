@@ -19,6 +19,8 @@ import { LuClock3, LuGlobe, LuFacebook, LuInstagram, LuTwitter } from "react-ico
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 import TimePicker from "@/components/ui/TimePicker";
 
+import { eventsService } from "@/lib/services/events.service";
+
 interface EventEditFormProps {
   initialData: any;
 }
@@ -38,14 +40,16 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
 
   const onSubmit = async (data: any) => {
     setIsSaving(true);
-    console.log("Saving event details:", data);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await eventsService.updateEvent(initialData._id, data);
     
     setIsSaving(false);
     setShowConfirmModal(false);
-    alert("Changes saved (simulated)");
+
+    if (error) {
+      alert("Failed to save changes: " + (error.message || "Unknown error"));
+    } else {
+      alert("Changes saved successfully!");
+    }
   };
 
   return (
