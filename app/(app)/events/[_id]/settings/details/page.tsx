@@ -1,20 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import EventEditForm from "@/components/events/editEventForms/EventEditForm";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
 import { eventsService } from "@/lib/services/events.service";
+import { useParams } from "next/navigation";
 
-interface PageProps {
-  params: Promise<{
-    _id: string;
-  }>;
-}
-
-export default function EventDetailsSettings({ params }: PageProps) {
-  const { _id } = use(params);
+export default function EventDetailsSettings() {
+  const params = useParams();
+  const _id = params?._id as string;
   const [currentEvent, setCurrentEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

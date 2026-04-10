@@ -16,12 +16,15 @@ export class EventsService {
    * Helper to map backend event to frontend format
    */
   private mapEvent(event: any) {
+    if (!event) return null;
     return {
       ...event,
       _id: event.id || event._id,
       name: event.title,
-      startDate: event.startDate ? new Date(event.startDate).toLocaleDateString() : 'N/A',
+      startDate: event.startDate, // Keep raw ISO for DatePicker
+      endDate: event.endDate,     // Keep raw ISO for DatePicker
       startTime: event.startTime || 'N/A',
+      endTime: event.endTime || 'N/A',
       is_published: event.status === 'Published',
       organizer_id: 'backend-user',
       profiles: {
