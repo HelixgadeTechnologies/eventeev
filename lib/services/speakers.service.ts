@@ -101,6 +101,7 @@ export class SpeakersService {
       console.error('Failed to manage sessions:', error);
       return { data: null, error: error.response?.data || { message: 'Failed to manage sessions' } };
     }
+  }
   /**
    * Get speaker statistics for an event
    */
