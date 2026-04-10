@@ -2,6 +2,7 @@ import axiosInstance from '@/lib/axios';
 
 export interface ApiTicket {
   id: string;
+  _id?: string; // Backend identifier
   name: string;
   price: number;
   quantity: number;
@@ -23,7 +24,11 @@ export class TicketsService {
   async getTickets(eventId: string) {
     try {
       const response = await axiosInstance.get(`/api/ticket/event/${eventId}`);
-      return { data: response.data as ApiTicket[], error: null };
+      const tickets = (response.data as any[]).map(t => ({
+        ...t,
+        id: t.id || t._id // Ensure id is always populated for frontend consistency
+      }));
+      return { data: tickets as ApiTicket[], error: null };
     } catch (error: any) {
       console.error('Failed to fetch tickets:', error);
       return { data: [], error: error.response?.data || { message: 'Failed to fetch tickets' } };
