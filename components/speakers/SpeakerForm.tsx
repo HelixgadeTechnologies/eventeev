@@ -44,13 +44,14 @@ const SpeakerForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real implementation, we'd gather all form fields. 
-    // Here we'll ensure photoUrl is included.
     const formElement = e.currentTarget as HTMLFormElement;
     const formData = new FormData(formElement);
     const data = Object.fromEntries(formData.entries());
     
-    onSubmit({ ...data, photo: photoUrl });
+    onSubmit({ 
+      ...data, 
+      photo: photoUrl 
+    });
   };
 
   return (
@@ -107,18 +108,22 @@ const SpeakerForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-1.5">
-            <Label htmlFor="fName" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">First Name</Label>
+            <Label htmlFor="firstName" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">First Name</Label>
             <Input
-              id="fName"
+              id="firstName"
+              name="firstName"
+              required
               defaultValue={initialData?.name.split(" ")[0]}
               placeholder="e.g. Sarah"
               className="bg-gray-50/50 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="lName" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Last Name</Label>
+            <Label htmlFor="lastName" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Last Name</Label>
             <Input
-              id="lName"
+              id="lastName"
+              name="lastName"
+              required
               defaultValue={initialData?.name.split(" ").slice(1).join(" ")}
               placeholder="e.g. Jenkins"
               className="bg-gray-50/50 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
@@ -131,15 +136,17 @@ const SpeakerForm = ({
             <Label htmlFor="title" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Professional Title</Label>
             <Input
               id="title"
+              name="title"
               defaultValue={initialData?.title}
               placeholder="e.g. Senior UI Designer"
               className="bg-gray-50/50 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cpName" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Company / Organization</Label>
+            <Label htmlFor="company" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Company / Organization</Label>
             <Input
-              id="cpName"
+              id="company"
+              name="company"
               defaultValue={initialData?.company}
               placeholder="e.g. TechFlow Inc."
               className="bg-gray-50/50 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
@@ -151,6 +158,7 @@ const SpeakerForm = ({
           <Label htmlFor="bio" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Short Bio</Label>
           <textarea
             id="bio"
+            name="bio"
             placeholder="Tell us about the speaker's background..."
             rows={3}
             className="w-full bg-gray-50/50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all outline-none resize-none"
@@ -169,6 +177,7 @@ const SpeakerForm = ({
           <Label htmlFor="topic" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Presentation Topic</Label>
           <Input
             id="topic"
+            name="topic"
             defaultValue={initialData?.topic}
             placeholder="e.g. The Future of Generative AI in Creative Industries"
             className="bg-gray-50/50 border-gray-100 rounded-xl px-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
@@ -177,11 +186,12 @@ const SpeakerForm = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-1.5">
-            <Label htmlFor="twHandle" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Speaker X (Twitter)</Label>
+            <Label htmlFor="twitter" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Speaker X (Twitter)</Label>
             <div className="relative flex items-center">
               <span className="absolute left-4 text-xs font-bold text-gray-400">@</span>
               <Input
-                id="twHandle"
+                id="twitter"
+                name="twitter"
                 defaultValue={initialData?.twitterHandle.replace("@", "")}
                 placeholder="username"
                 className="bg-gray-50/50 border-gray-100 rounded-xl pl-8 pr-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
@@ -189,11 +199,12 @@ const SpeakerForm = ({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="cpTwHandle" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Company X (Twitter)</Label>
+            <Label htmlFor="companyTwitter" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Company X (Twitter)</Label>
             <div className="relative flex items-center">
               <span className="absolute left-4 text-xs font-bold text-gray-400">@</span>
               <Input
-                id="cpTwHandle"
+                id="companyTwitter"
+                name="companyTwitter"
                 placeholder="company_x"
                 className="bg-gray-50/50 border-gray-100 rounded-xl pl-8 pr-4 py-3 text-sm font-medium focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] transition-all"
               />

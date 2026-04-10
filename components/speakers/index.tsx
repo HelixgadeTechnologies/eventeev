@@ -49,14 +49,14 @@ const Speakers = () => {
       setError(error.message || "Failed to load speakers");
     } else {
       // Map ApiSpeaker to SpeakerDataType for UI components
-      const mappedSpeakers: SpeakerDataType[] = data.map((s: ApiSpeaker) => ({
-        id: s.id,
-        name: s.name,
+      const mappedSpeakers: SpeakerDataType[] = data.map((s: any) => ({
+        id: s._id || s.id,
+        name: s.firstName && s.lastName ? `${s.firstName} ${s.lastName}` : (s.name || "Unknown Speaker"),
         title: s.title,
         company: s.company,
-        twitterHandle: s.twitterHandle || "@handle",
+        twitterHandle: s.socialLinks?.twitter || s.twitterHandle || "@handle",
         topic: s.topic || "General Discussion",
-        avatar: s.image || "/speaker-avatar.png",
+        avatar: s.photo || s.image || "/speaker-avatar.png",
       }));
       setSpeakers(mappedSpeakers);
       setError(null);

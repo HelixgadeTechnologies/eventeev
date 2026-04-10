@@ -32,13 +32,15 @@ export class SpeakersService {
    */
   async createSpeaker(payload: {
     eventId: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     title: string;
     company: string;
     bio: string;
-    twitterHandle?: string;
+    twitter?: string;
+    companyTwitter?: string;
     topic?: string;
-    image?: string;
+    photo?: string;
   }) {
     try {
       const response = await axiosInstance.post('/api/speaker/create', payload);
