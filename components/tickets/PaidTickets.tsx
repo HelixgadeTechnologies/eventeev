@@ -189,7 +189,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
     try {
       const { error } = await ticketsService.deleteTicket(ticketToDelete);
       if (error) throw error;
-      fetchTicketData(); // Refresh list
+      await fetchTicketData(); // Refresh list before closing
       setIsDeleteModalOpen(false);
       setTicketToDelete(null);
     } catch (err: any) {

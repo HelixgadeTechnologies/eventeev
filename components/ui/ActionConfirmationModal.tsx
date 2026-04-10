@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Trash2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ActionConfirmationModalProps {
@@ -34,12 +35,17 @@ const ActionConfirmationModal = ({
   isLoading = false,
   variant = "primary",
 }: ActionConfirmationModalProps) => {
+  const Icon = variant === "danger" ? Trash2 : AlertTriangle;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] bg-white rounded-3xl border-none shadow-2xl p-8 h-fit overflow-hidden">
         <DialogHeader className="space-y-3 text-center sm:text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-2">
-            <div className="w-2 h-2 rounded-full bg-[#eb5017] animate-pulse" />
+          <div className={cn(
+            "mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 animate-in zoom-in duration-300",
+            variant === "danger" ? "bg-red-50 text-red-500" : "bg-orange-50 text-[#eb5017]"
+          )}>
+            <Icon className="w-5 h-5" />
           </div>
           <DialogTitle className="text-xl font-black text-[#1B1818] tracking-tight">
             {title}
