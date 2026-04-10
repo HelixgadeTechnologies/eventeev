@@ -162,7 +162,16 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
               email: a.email,
               ticketName: tier.name,
               ticketId: a.id, // Using attendee registration ID as ticket ID for now
-              dateRegistered: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+              dateRegistered: (a.registrationDate || a.createdAt) 
+                ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })
+                : 'N/A',
               amountPaid: tier.price
             });
           });

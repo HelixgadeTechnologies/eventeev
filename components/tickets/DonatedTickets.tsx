@@ -144,7 +144,16 @@ export default function DonatedTickets({
               email: a.email,
               ticketName: tier.name,
               ticketId: a.id,
-              dateRegistered: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+               dateRegistered: (a.registrationDate || a.createdAt) 
+                ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })
+                : 'N/A',
               amountPaid: a.amountPaid || 0
             });
           });

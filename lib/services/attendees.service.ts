@@ -7,6 +7,7 @@ export interface ApiAttendee {
   email: string;
   isCheckedIn: boolean;
   status: string;
+  registrationDate?: string;
   createdAt?: string;
 }
 

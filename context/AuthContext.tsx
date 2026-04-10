@@ -13,6 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any | null }>
   updatePassword: (token: string, newPassword: string) => Promise<{ error: any | null }>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -87,6 +88,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const refreshUser = async () => {
+    const { user: updatedUser, error } = await authService.getCurrentUser()
+    if (!error && updatedUser) {
+      setUser(updatedUser)
+    }
+  }
+
   const value = {
     user,
     session,
@@ -96,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resetPassword,
     updatePassword,
+    refreshUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

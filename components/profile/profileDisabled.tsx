@@ -52,7 +52,7 @@ const COUNTRIES = [
 const TIMEZONES = Intl.supportedValuesOf('timeZone');
 
 const ProfileDisabled = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -143,7 +143,10 @@ const ProfileDisabled = () => {
         });
 
         if (orgResult.error) throw new Error(orgResult.error.message || "Failed to update organisation details");
-
+        
+        // Refresh the global auth state to sync UI
+        await refreshUser();
+        
         setStatusModal({
           isOpen: true,
           title: "Profile Updated!",

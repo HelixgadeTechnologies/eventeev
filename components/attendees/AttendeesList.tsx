@@ -65,7 +65,16 @@ const AttendeesList = () => {
         id: a.id,
         name: a.name,
         email: a.email,
-        dateRegistered: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+        dateRegistered: (a.registrationDate || a.createdAt) 
+          ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: true
+            })
+          : 'N/A',
         checkedIn: a.isCheckedIn
       }));
       setAttendees(mappedAttendees);
