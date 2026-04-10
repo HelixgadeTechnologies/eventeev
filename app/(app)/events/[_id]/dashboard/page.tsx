@@ -1,5 +1,7 @@
+"use client";
+
+import { useState, useEffect, use } from "react";
 import AnalyticsCard from "@/components/display/AnalyticsCard";
-import { publishedEvents } from "@/lib/demo-data/events";
 import Link from "next/link";
 import Avatar from "@/components/ui/Avatar";
 import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
@@ -10,6 +12,8 @@ import { LuClock3 } from "react-icons/lu";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import Calendar from "@/components/ui/Calendar";
 import DashboardActionButtons from "@/components/events/DashboardActionButtons";
+import { eventsService } from "@/lib/services/events.service";
+import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 
 interface EventDetailsProps {
   params: Promise<{
@@ -17,36 +21,65 @@ interface EventDetailsProps {
   }>;
 }
 
-export async function generateStaticParams() {
-  return publishedEvents.map((events) => ({
-    _id: events._id,
-  }));
-}
+export default function EventsDashboard({ params }: EventDetailsProps) {
+  const resolvedParams = use(params);
+  const _id = resolvedParams._id;
 
-export async function generateMetadata({ params }: EventDetailsProps) {
-  const { _id } = await params;
-  const event = publishedEvents.find((events) => events._id === _id);
+  const [event, setEvent] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [attendees, setAttendees] = useState<ApiAttendee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  return {
-    title: event ? `${event.name} | Dashboard - Eventeev` : "Dashboard - Eventeev",
-    description: event?.description || "Explore and manage your events on Eventeev.",
-  };
-}
+  useEffect(() => {
+    async function loadDashboardData() {
+      setLoading(true);
+      try {
+        const [eventRes, statsRes, attendeesRes] = await Promise.all([
+          eventsService.getEventById(_id),
+          attendeesService.getAttendeeStats(_id),
+          attendeesService.getAttendees(_id)
+        ]);
 
-export default async function EventsDashboard({ params }: EventDetailsProps) {
-  const { _id } = await params;
-  const currentEvent = publishedEvents.find((eve) => eve._id === _id);
+        if (eventRes.error) {
+          setError(eventRes.error.message);
+        } else {
+          setEvent(eventRes.data);
+          setStats(statsRes.data);
+          setAttendees(attendeesRes.data.slice(0, 8));
+        }
+      } catch (err) {
+        console.error("Dashboard data load error:", err);
+        setError("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  if (!currentEvent) {
+    loadDashboardData();
+  }, [_id]);
+
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-        <div className="w-24 h-24 bg-gray-50/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-100 shadow-sm animate-pulse">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb5017]"></div>
+        <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Loading Dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+        <div className="w-24 h-24 bg-gray-50/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-100 shadow-sm">
           <Image src="/logo-black.svg" alt="Eventeev" width={48} height={48} className="opacity-10" />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-[#1B1818] tracking-tight mb-2">Event Not Found</h2>
-          <p className="text-gray-400 font-medium max-w-sm mx-auto uppercase text-[10px] tracking-widest">
-            The requested event ID &quot;{_id}&quot; does not exist in our database.
+          <h2 className="text-3xl font-black text-[#1B1818] tracking-tight mb-2">
+            {error === "Event not found" ? "Event Not Found" : "Connection Issue"}
+          </h2>
+          <p className="text-gray-400 font-medium max-w-sm mx-auto uppercase text-[10px] tracking-widest leading-relaxed">
+            {error || "We encountered an issue retrieving the dashboard information."}
           </p>
         </div>
         <Link 
@@ -62,27 +95,27 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
   const analytics = [
     {
       title: "Expected RSVP",
-      value: 1240,
-      percentage: 12,
+      value: stats?.totalAttendees || 0,
+      percentage: Math.min(100, Math.floor((stats?.totalAttendees / 1000) * 100)) || 0, // Mock comparison if no target exists
       icon: "/icons/thermometer.svg",
-      text: "Trending Up",
+      text: "Total Registered",
       isCurrency: false,
     },
     {
       title: "Actual Check-ins",
-      value: 856,
-      percentage: 8,
+      value: stats?.verifiedAccess || 0,
+      percentage: stats?.totalAttendees > 0 ? Math.floor((stats.verifiedAccess / stats.totalAttendees) * 100) : 0,
       icon: "/icons/3d.svg",
-      text: "Stable Flow",
+      text: "Verified Peeps",
       isCurrency: false,
     },
     {
-      title: "Revenue Forecast",
-      value: 450000,
-      percentage: 15,
+      title: "Recent Activity",
+      value: stats?.recentActivity || 0,
+      percentage: stats?.recentActivity > 0 ? 10 : 0, // Mock growth
       icon: "/icons/sun.svg",
-      text: "Growth Phase",
-      isCurrency: true,
+      text: "Last 30 Mins",
+      isCurrency: false,
     },
   ];
 
@@ -96,7 +129,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                   className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
               >
                   <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
-                  Back to event page
+                  Back to events
               </Link>
           </div>
       </div>
@@ -127,7 +160,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
             </div>
             <Link
               className="text-[10px] font-black primary flex items-center gap-1 uppercase tracking-widest group hover:translate-x-1 transition-transform"
-              href={`/events/${currentEvent._id}/attendees`}
+              href={`/events/${event._id}/attendees`}
             >
               See all attendees
               <FaAngleRight className="text-lg" />
@@ -135,7 +168,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           </div>
           <div className="relative group">
             <div className="h-44 w-full rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 shadow-sm flex items-center overflow-hidden">
-              {currentEvent.attendees.length === 0 ? (
+              {attendees.length === 0 ? (
                 <div className="w-full text-center space-y-2">
                   <p className="font-extrabold text-[#1B1818] text-sm uppercase tracking-wider">Empty Horizon</p>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
@@ -144,25 +177,24 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                 </div>
               ) : (
                 <div className="flex gap-8 items-center overflow-x-auto w-full px-8 py-4 custom-scrollbar">
-                  {currentEvent.attendees.slice(0, 8).map((attendee) => (
+                  {attendees.map((attendee) => (
                     <div
                       key={attendee.id}
                       className="flex flex-col shrink-0 items-center justify-center space-y-3 group/item cursor-pointer"
                     >
                       <div className="relative">
                         <div className="absolute inset-0 bg-[#eb5017] rounded-full scale-0 group-hover/item:scale-110 transition-transform duration-300 opacity-20" />
-                        <Avatar name={attendee.username} isBigger={true} />
+                        <Avatar name={attendee.name} isBigger={true} />
                       </div>
                       <div className="text-center">
-                        <p className="font-black text-[11px] text-[#1B1818] uppercase tracking-tight truncate w-20">
-                          {attendee.username}
+                        <p className="font-black text-[11px] text-[#1B1818] uppercase tracking-tight truncate w-24">
+                          {attendee.name}
                         </p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter w-20 truncate">
-                          Peep #{attendee.id.toString().slice(-4)}
+                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter w-24 truncate">
+                          {attendee.email}
                         </p>
                       </div>
                     </div>
-
                   ))}
                 </div>
               )}
@@ -179,7 +211,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {services.map((service, idx) => (
               <Link
-                href={`/events/${currentEvent._id}/${service.href}`}
+                href={`/events/${event._id}/${service.href}`}
                 key={idx}
                 className="group relative overflow-hidden rounded-[28px] h-40 bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               >
@@ -217,11 +249,11 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
           <div className="p-8 space-y-8">
             <div className="flex items-center gap-6">
               <div className="h-14 w-14 rounded-2xl bg-[#eb5017]/10 flex flex-col items-center justify-center border border-[#eb5017]/20 shrink-0">
-                <span className="text-xl font-black text-[#eb5017]">{formatDay(currentEvent.startDate)}</span>
+                <span className="text-xl font-black text-[#eb5017]">{event.startDate !== 'N/A' ? formatDay(event.startDate) : '--'}</span>
               </div>
               <div>
                 <h4 className="font-black text-[#1B1818] tracking-tight text-lg leading-tight uppercase">
-                  {formatDate(currentEvent.startDate)}
+                  {event.startDate !== 'N/A' ? formatDate(event.startDate) : 'Date Pending'}
                 </h4>
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
                   Main Event Day
@@ -237,7 +269,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                 <div>
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Duration</p>
                   <p className="text-[10px] font-black text-[#1B1818] uppercase tracking-tighter">
-                    {currentEvent.startTime} — {currentEvent.endTime}
+                    {event.startTime} — {event.endTime || 'Late'}
                   </p>
                 </div>
               </div>
@@ -249,7 +281,7 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
                 <div>
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Venue</p>
                   <p className="text-[10px] font-black text-[#1B1818] uppercase tracking-tighter truncate w-full">
-                    {currentEvent.location}
+                    {event.location || 'Multiple Venues'}
                   </p>
                 </div>
               </div>
@@ -257,27 +289,27 @@ export default async function EventsDashboard({ params }: EventDetailsProps) {
 
             <div className="pt-4 border-t border-gray-50">
                <div className="flex items-center justify-center gap-4">
-                  <Avatar name={"Richard Edem"} isBigger={true} />
+                  <Avatar name={event.organizer_name || "Host"} isBigger={true} />
                   <div>
                     <p className="font-black text-sm text-[#1B1818] uppercase tracking-tighter leading-none">
-                      Dr. Richard Edem
+                      {event.organizer_name || "Event Organiser"}
                     </p>
                     <p className="text-[10px] text-[#eb5017] font-black uppercase tracking-widest mt-1">
-                      Event Organiser
+                      Verified Host
                     </p>
                   </div>
                </div>
             </div>
 
             <DashboardActionButtons 
-              eventId={currentEvent._id} 
-              eventName={currentEvent.name} 
+              eventId={event._id} 
+              eventName={event.name} 
             />
           </div>
         </div>
         
-        <div className="rounded-[32px] overflow-hidden shadow-sm border border-gray-100 bg-white p-2">
-            <Calendar eventDate={currentEvent.startDate} />
+        <div className="rounded-[32px] overflow-hidden shadow-sm border border-gray-100 bg-white p-2 text-center py-10">
+            <Calendar eventDate={event.startDate !== 'N/A' ? event.startDate : new Date().toISOString()} />
         </div>
         </div>
       </div>

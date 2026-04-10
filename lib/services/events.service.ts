@@ -129,21 +129,17 @@ export class EventsService {
   }
 
   /**
-   * Get event by ID (Falling back to local search if no direct endpoint)
+   * Get event by ID
    */
   async getEventById(eventId: string) {
-    // If there was a GET /api/event/{id}, we'd use it. For now, check categories.
-    const { data: published } = await this.getPublishedEvents()
-    const { data: drafts } = await this.getDraftedEvents()
-    const { data: completed } = await this.getCompletedEvents()
-    
-    const event = [...published, ...drafts, ...completed].find(e => e._id === eventId)
-    
-    if (!event) {
-       return { data: null, error: { message: "Event not found" } }
+    try {
+      const response = await axiosInstance.get(`/api/event/${eventId}`)
+      const data = this.mapEvent(response.data)
+      return { data, error: null }
+    } catch (error: any) {
+      console.error('Failed to fetch event by ID:', error)
+      return { data: null, error: error.response?.data || { message: 'Failed to fetch event' } }
     }
-    
-    return { data: event, error: null }
   }
 
   /**
