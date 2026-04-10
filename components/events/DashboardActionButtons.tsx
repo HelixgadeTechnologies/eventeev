@@ -7,13 +7,14 @@ import ShareEventModal from "./ShareEventModal";
 interface DashboardActionButtonsProps {
   eventId: string;
   eventName: string;
+  publicUrl?: string;
 }
 
-const DashboardActionButtons = ({ eventId, eventName }: DashboardActionButtonsProps) => {
+const DashboardActionButtons = ({ eventId, eventName, publicUrl }: DashboardActionButtonsProps) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  // In a real app, this would be the actual public URL of the event
-  const eventUrl = `https://eventeev.com/events/${eventId}`;
+  // Use the actual public URL from the backend, or fallback to the previous format if missing
+  const eventUrl = publicUrl || `https://eventeev.com/events/${eventId}`;
 
   return (
     <>

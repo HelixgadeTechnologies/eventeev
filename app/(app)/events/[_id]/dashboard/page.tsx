@@ -8,7 +8,7 @@ import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
 import { services } from "@/lib/demo-data/dashboard-services";
 import Image from "next/image";
 import { formatDate, formatDay } from "@/lib/utils/configure-date";
-import { LuClock3 } from "react-icons/lu";
+import { LuClock3, LuGlobe } from "react-icons/lu";
 import { IoCalendarClearOutline } from "react-icons/io5";
 import Calendar from "@/components/ui/Calendar";
 import DashboardActionButtons from "@/components/events/DashboardActionButtons";
@@ -131,6 +131,20 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
                   <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
                   Back to events
               </Link>
+              {event.publicUrl && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Public Link:</span>
+                  <a 
+                    href={event.publicUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-bold text-[#eb5017] hover:underline flex items-center gap-1"
+                  >
+                    {event.publicUrl}
+                    <LuGlobe className="text-xs" />
+                  </a>
+                </div>
+              )}
           </div>
       </div>
 
@@ -304,6 +318,7 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
             <DashboardActionButtons 
               eventId={event._id} 
               eventName={event.name} 
+              publicUrl={event.publicUrl}
             />
           </div>
         </div>
