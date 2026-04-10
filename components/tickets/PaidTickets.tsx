@@ -13,8 +13,9 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
 type Props = {
-  addTicket: (type: TicketTier["type"]) => void;
-  onEdit: (tier: TicketTier) => void;
+  addTicket: (tierOrType?: TicketTier | TicketTier["type"]) => void;
+  onEdit: (tierOrType?: TicketTier | TicketTier["type"]) => void;
+  refreshKey?: number;
 };
 
 const filters: FilterConfig[] = [

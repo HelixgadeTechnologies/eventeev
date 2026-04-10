@@ -98,8 +98,9 @@ export default function FreeTickets({
   onEdit,
   refreshKey,
 }: {
-  addTicket: (type: TicketTier["type"]) => void,
-  onEdit: (tier: TicketTier) => void,
+}: {
+  addTicket: (tierOrType?: TicketTier | TicketTier["type"]) => void,
+  onEdit: (tierOrType?: TicketTier | TicketTier["type"]) => void,
   refreshKey?: number
 }) {
   const params = useParams();
