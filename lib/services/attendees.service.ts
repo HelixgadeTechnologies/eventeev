@@ -18,7 +18,11 @@ export class AttendeesService {
   async getAttendees(eventId: string) {
     try {
       const response = await axiosInstance.get(`/api/attendee/event/${eventId}`);
-      return { data: response.data as ApiAttendee[], error: null };
+      const mappedData = (response.data as any[]).map(a => ({
+        ...a,
+        id: a.id || a._id
+      }));
+      return { data: mappedData as ApiAttendee[], error: null };
     } catch (error: any) {
       console.error('Failed to fetch attendees:', error);
       return { data: [], error: error.response?.data || { message: 'Failed to fetch attendees' } };

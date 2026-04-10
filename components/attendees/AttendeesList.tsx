@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 import { FilterConfig } from "../ui/data-table";
 import Modal from "../ui/Modal";
 import { useParams } from "next/navigation";
@@ -44,6 +45,18 @@ const AttendeesList = () => {
   const [pendingAttendee, setPendingAttendee] = useState<AttendeesDataType | null>(null);
   const [pendingStatus, setPendingStatus] = useState<boolean>(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: "success" | "error";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "success",
+  });
 
   useEffect(() => {
     if (eventId) {
@@ -134,9 +147,20 @@ const AttendeesList = () => {
     const { error: checkInError } = await attendeesService.checkInAttendee(pendingAttendee.id);
     
     if (checkInError) {
-      alert(checkInError.message || "Failed to check in attendee");
+      setStatusModal({
+        isOpen: true,
+        title: "Check-in Failed",
+        description: checkInError.message || "Failed to check in attendee. Please try again.",
+        variant: "error"
+      });
     } else {
       updateAttendeeStatus(pendingAttendee.id, pendingStatus);
+      setStatusModal({
+        isOpen: true,
+        title: "Check-in Successful!",
+        description: `${pendingAttendee.name} has been verified and checked in.`,
+        variant: "success"
+      });
     }
     
     setIsActionLoading(false);
@@ -368,6 +392,17 @@ const AttendeesList = () => {
           </div>
         </div>
       </Modal>
+
+      <ActionConfirmationModal
+        isOpen={statusModal.isOpen}
+        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        title={statusModal.title}
+        description={statusModal.description}
+        confirmLabel="Understood"
+        hideCancelButton={true}
+        variant={statusModal.variant}
+      />
     </div>
   );
 };
