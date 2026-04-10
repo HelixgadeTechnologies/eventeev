@@ -1,11 +1,16 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { IoAdd } from "react-icons/io5";
 import DataTable, { FilterConfig } from "../ui/data-table";
-import soldTicketData, { SoldTicketType } from "@/lib/demo-data/sold-tickets";
+import { SoldTicketType } from "@/lib/demo-data/sold-tickets";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
+import { useParams } from "next/navigation";
+import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { Loader2, AlertCircle } from "lucide-react";
+import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
 const filters: FilterConfig[] = [
   {
@@ -88,19 +93,89 @@ const columns: ColumnDef<SoldTicketType>[] = [
   },
 ];
 
-import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
-
 export default function DonatedTickets({
   addTicket,
   onEdit,
+  refreshKey,
 }: {
   addTicket: (type: TicketTier["type"]) => void;
   onEdit: (tier: TicketTier) => void;
+  refreshKey?: number;
 }) {
-  const tickets: SoldTicketType[] = [];
+  const params = useParams();
+  const eventId = params?._id as string;
+  
+  const [ticketTiers, setTicketTiers] = useState<ApiTicket[]>([]);
+  const [soldTickets, setSoldTickets] = useState<SoldTicketType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (eventId) {
+      fetchTicketData();
+    }
+  }, [eventId, refreshKey]);
+
+  const fetchTicketData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: tiers, error: tiersError } = await ticketsService.getTickets(eventId);
+      
+      if (tiersError) throw tiersError;
+      
+      const donationTiers = tiers.filter(t => t.type?.toLowerCase() === 'donation' || t.type?.toLowerCase() === 'donated');
+      setTicketTiers(donationTiers);
+
+      // Fetch attendees for each donation tier
+      const soldRecords: SoldTicketType[] = [];
+      await Promise.all(donationTiers.map(async (tier) => {
+        const { data: attendees } = await ticketsService.getTicketAttendees(tier.id);
+        if (attendees && Array.isArray(attendees)) {
+          attendees.forEach((a: any) => {
+            soldRecords.push({
+              name: a.name,
+              email: a.email,
+              ticketName: tier.name,
+              ticketId: a.id,
+              dateRegistered: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A',
+              amountPaid: a.amountPaid || 0
+            });
+          });
+        }
+      }));
+      setSoldTickets(soldRecords);
+    } catch (err: any) {
+      console.error("Failed to fetch donation tickets:", err);
+      setError(err.message || "Failed to load donation data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-12 h-12 text-[#EB5017] animate-spin" />
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Loading donations...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-500" />
+        <p className="text-gray-900 font-black uppercase tracking-tight text-lg">Failed to load content</p>
+        <p className="text-gray-500 text-xs font-medium max-w-xs">{error}</p>
+        <button onClick={fetchTicketData} className="px-6 py-2 bg-[#EB5017] text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Retry</button>
+      </div>
+    );
+  }
+
   return (
     <section className="space-y-6">
-      {tickets.length === 0 ? (
+      {ticketTiers.length === 0 ? (
         <div className="flex flex-col min-h-[60vh] items-center justify-center text-center px-4">
           <div className="w-32 h-32 bg-gray-50/50 backdrop-blur-sm rounded-full flex items-center justify-center border border-gray-100 shadow-sm mb-8">
             <div className="relative w-16 h-16 opacity-20">
@@ -131,11 +206,57 @@ export default function DonatedTickets({
           </div>
         </div>
       ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <DataTable columns={columns} data={tickets} isPagination filters={filters} />
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {ticketTiers.map((tier) => {
+              const tierArrivals = soldTickets.filter(s => s.ticketName === tier.name);
+              const percentage = (tierArrivals.length / (tier.quantity || 1)) * 100;
+              
+              return (
+                <div key={tier.id} className="relative group overflow-hidden rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500">
+                  <div className="absolute top-0 right-0 p-4">
+                    <button 
+                      onClick={() => onEdit({
+                        name: tier.name,
+                        type: "donation",
+                        quantity: tier.quantity,
+                        startDate: "" 
+                      })}
+                      className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">{tier.name}</p>
+                      <p className="text-3xl font-black text-[#1B1818] tracking-tighter leading-none">DONATION</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-black text-[#EB5017] uppercase tracking-widest border border-[#EB5017]/10 bg-[#EB5017]/5 px-2 py-1 rounded-lg">
+                          {tier.quantity - tierArrivals.length} Spots Left
+                        </span>
+                        <span className="text-[10px] font-black text-[#1B1818] bg-gray-100 px-2 py-1 rounded-lg">Limit: {tier.quantity}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#EB5017] transition-all duration-1000" style={{ width: `${Math.min(percentage, 100)}%` }} />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-tight">{tierArrivals.length} Donors</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            <DataTable columns={columns} data={soldTickets} isPagination filters={filters} />
+          </div>
         </div>
       )}
     </section>
   );
 }
-

@@ -118,7 +118,7 @@ const columns: ColumnDef<SoldTicketType>[] = [
   },
 ];
 
-export default function PaidTickets({ addTicket, onEdit }: Props) {
+export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
   const params = useParams();
   const eventId = params?._id as string;
   
@@ -131,7 +131,7 @@ export default function PaidTickets({ addTicket, onEdit }: Props) {
     if (eventId) {
       fetchTicketData();
     }
-  }, [eventId]);
+  }, [eventId, refreshKey]);
 
   const fetchTicketData = async () => {
     setLoading(true);
@@ -141,7 +141,7 @@ export default function PaidTickets({ addTicket, onEdit }: Props) {
       
       if (tiersError) throw tiersError;
       
-      const paidTiers = tiers.filter(t => t.type === 'paid');
+      const paidTiers = tiers.filter(t => t.type?.toLowerCase() === 'paid');
       setTicketTiers(paidTiers);
 
       // Fetch attendees for each paid tier to build the sold tickets list

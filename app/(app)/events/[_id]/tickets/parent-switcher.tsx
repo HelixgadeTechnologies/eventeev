@@ -32,6 +32,7 @@ export default function TicketParentSwitcher() {
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
   const [editingTier, setEditingTier] = useState<TicketTier | null>(null);
   const [defaultType, setDefaultType] = useState<TicketTier["type"]>("paid");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleOpen = (tierOrType?: TicketTier | TicketTier["type"]) => {
     if (typeof tierOrType === "object" && tierOrType !== null) {
@@ -50,6 +51,11 @@ export default function TicketParentSwitcher() {
     setDefaultType("paid");
   };
 
+  const handleSuccess = () => {
+    handleClose();
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <>
         <TabComponent
@@ -60,12 +66,13 @@ export default function TicketParentSwitcher() {
             <PaidTickets 
             addTicket={handleOpen} 
             onEdit={handleOpen}
+            refreshKey={refreshKey}
             />
             );
             } else if (tabId === 2) {
-            return <FreeTickets addTicket={handleOpen} onEdit={handleOpen} />;
+            return <FreeTickets addTicket={handleOpen} onEdit={handleOpen} refreshKey={refreshKey} />;
             } else {
-            return <DonatedTickets addTicket={handleOpen} onEdit={handleOpen} />;
+            return <DonatedTickets addTicket={handleOpen} onEdit={handleOpen} refreshKey={refreshKey} />;
             }
         }}
         />
@@ -74,6 +81,7 @@ export default function TicketParentSwitcher() {
             <AddTickets
             isOpen={openAddTicketModal}
             onClose={handleClose}
+            onSuccess={handleSuccess}
             initialData={editingTier || undefined}
             defaultType={defaultType}
             />

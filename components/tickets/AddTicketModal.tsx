@@ -10,11 +10,12 @@ import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 type AddProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   initialData?: TicketTier;
   defaultType?: TicketTier["type"];
 };
 
-export default function AddTickets({ isOpen, onClose, initialData, defaultType }: AddProps) {
+export default function AddTickets({ isOpen, onClose, onSuccess, initialData, defaultType }: AddProps) {
   const isEditing = !!initialData;
   const defaultTab = initialData?.type || defaultType || "paid";
 
@@ -63,13 +64,22 @@ export default function AddTickets({ isOpen, onClose, initialData, defaultType }
             
             <div className="mt-0 focus-visible:outline-none">
               <TabsContent value="paid" className="mt-0 focus-visible:outline-none ring-0 outline-none">
-                <PaidTicketsForm initialData={initialData?.type === "paid" ? initialData : undefined} />
+                <PaidTicketsForm 
+                  initialData={initialData?.type === "paid" ? initialData : undefined} 
+                  onSuccess={onSuccess}
+                />
               </TabsContent>
               <TabsContent value="free" className="mt-0 focus-visible:outline-none ring-0 outline-none">
-                <FreeTicketsForm initialData={initialData?.type === "free" ? initialData : undefined} />
+                <FreeTicketsForm 
+                  initialData={initialData?.type === "free" ? initialData : undefined} 
+                  onSuccess={onSuccess}
+                />
               </TabsContent>
               <TabsContent value="donation" className="mt-0 focus-visible:outline-none ring-0 outline-none">
-                <DonatedTicketsForm initialData={initialData?.type === "donation" ? initialData : undefined} />
+                <DonatedTicketsForm 
+                  initialData={initialData?.type === "donation" ? initialData : undefined}
+                  onSuccess={onSuccess}
+                />
               </TabsContent>
             </div>
           </Tabs>

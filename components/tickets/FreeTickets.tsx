@@ -96,9 +96,11 @@ const columns: ColumnDef<SoldTicketType>[] = [
 export default function FreeTickets({
   addTicket,
   onEdit,
+  refreshKey,
 }: {
   addTicket: (type: TicketTier["type"]) => void,
-  onEdit: (tier: TicketTier) => void
+  onEdit: (tier: TicketTier) => void,
+  refreshKey?: number
 }) {
   const params = useParams();
   const eventId = params?._id as string;
@@ -112,7 +114,7 @@ export default function FreeTickets({
     if (eventId) {
       fetchTicketData();
     }
-  }, [eventId]);
+  }, [eventId, refreshKey]);
 
   const fetchTicketData = async () => {
     setLoading(true);
@@ -122,7 +124,7 @@ export default function FreeTickets({
       
       if (tiersError) throw tiersError;
       
-      const freeTiers = tiers.filter(t => t.type === 'free');
+      const freeTiers = tiers.filter(t => t.type?.toLowerCase() === 'free');
       setTicketTiers(freeTiers);
 
       // Fetch attendees for each free tier
