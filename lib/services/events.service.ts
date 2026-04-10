@@ -156,6 +156,20 @@ export class EventsService {
   }
 
   /**
+   * Update an existing event
+   */
+  async updateEvent(eventId: string, payload: any) {
+    try {
+      const response = await axiosInstance.put(`/api/event/${eventId}`, payload);
+      const data = this.mapEvent(response.data);
+      return { data, error: null };
+    } catch (error: any) {
+      console.error('Failed to update event:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to update event' } };
+    }
+  }
+
+  /**
    * Delete an event
    */
   async deleteEvent(eventId: string) {
