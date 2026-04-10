@@ -29,7 +29,11 @@ const AttendeesSummary = () => {
     setLoading(true);
     const { data, error } = await attendeesService.getAttendeeStats(eventId);
     if (!error && data) {
-      setStats(data);
+      setStats({
+        totalAttendees: data.totalAttendees || 0,
+        checkedInCount: data.verifiedAccess || 0,
+        pendingCount: (data.totalAttendees || 0) - (data.verifiedAccess || 0)
+      });
     }
     setLoading(false);
   };
