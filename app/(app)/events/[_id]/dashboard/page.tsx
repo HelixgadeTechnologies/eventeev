@@ -48,9 +48,9 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
           setStats(statsRes.data);
           setAttendees(attendeesRes.data.slice(0, 8));
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Dashboard data load error:", err);
-        setError("Failed to load dashboard data");
+        setError(err.response?.data?.message || err.message || "Failed to establish constant connection with the backend server.");
       } finally {
         setLoading(false);
       }
