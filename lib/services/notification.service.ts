@@ -1,15 +1,10 @@
-import axiosInstance from '@/lib/axios';
-import { io, Socket } from 'socket.io-client';
+import axiosInstance from "../axios";
 
-export interface Notification {
+export interface ApiNotification {
   _id: string;
   recipient: string;
-  sender?: {
-    _id: string;
-    name: string;
-    avatar?: string;
-  };
-  type: 'info' | 'success' | 'warning' | 'error' | 'message' | 'event' | 'ticket';
+  sender?: string;
+  type: "info" | "success" | "warning" | "error" | "message" | "event" | "ticket";
   title: string;
   message: string;
   link?: string;
@@ -17,53 +12,48 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface PaginatedNotifications {
+  notifications: ApiNotification[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
 class NotificationService {
-  private socket: Socket | null = null;
-
   /**
-   * Initialize socket connection for real-time notifications
+   * Fetch paginated notifications for the logged-in user
    */
-  initSocket(userId: string) {
-    if (this.socket) return;
-
-    this.socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
-
-    this.socket.on('connect', () => {
-      console.log('Connected to notification socket');
-      this.socket?.emit('join_user_notifications', userId);
-    });
-
-    return this.socket;
-  }
-
-  /**
-   * Listen for new notifications
-   */
-  onNewNotification(callback: (notification: Notification) => void) {
-    this.socket?.on('new_notification', callback);
-  }
-
-  /**
-   * Get all notifications for the current user
-   */
-  async getNotifications() {
+  async getNotifications(page = 1, limit = 50) {
     try {
-      const response = await axiosInstance.get('/api/notification');
-      return { data: response.data as Notification[], error: null };
+      const response = await axiosInstance.get<PaginatedNotifications>(
+        `/api/notification?page=${page}&limit=${limit}`
+      );
+      return { data: response.data, error: null };
     } catch (error: any) {
-      return { data: null, error: error.response?.data || { message: 'Failed to fetch notifications' } };
+      console.error("Failed to fetch notifications:", error);
+      return {
+        data: null,
+        error: error.response?.data || { message: "Failed to fetch notifications" },
+      };
     }
   }
 
   /**
-   * Mark a notification as read
+   * Mark a specific notification as read
    */
   async markAsRead(id: string) {
     try {
       const response = await axiosInstance.put(`/api/notification/${id}/read`);
       return { data: response.data, error: null };
     } catch (error: any) {
-      return { data: null, error: error.response?.data || { message: 'Failed to mark as read' } };
+      console.error("Failed to mark notification as read:", error);
+      return {
+        data: null,
+        error: error.response?.data || { message: "Failed to mark as read" },
+      };
     }
   }
 
@@ -72,31 +62,31 @@ class NotificationService {
    */
   async markAllAsRead() {
     try {
-      const response = await axiosInstance.put('/api/notification/read-all');
+      const response = await axiosInstance.put("/api/notification/read-all");
       return { data: response.data, error: null };
     } catch (error: any) {
-      return { data: null, error: error.response?.data || { message: 'Failed to mark all as read' } };
+      console.error("Failed to mark all as read:", error);
+      return {
+        data: null,
+        error: error.response?.data || { message: "Failed to mark all as read" },
+      };
     }
   }
 
   /**
-   * Delete a notification
+   * Permanently delete a notification
    */
   async deleteNotification(id: string) {
     try {
       const response = await axiosInstance.delete(`/api/notification/${id}`);
       return { data: response.data, error: null };
     } catch (error: any) {
-      return { data: null, error: error.response?.data || { message: 'Failed to delete notification' } };
+      console.error("Failed to delete notification:", error);
+      return {
+        data: null,
+        error: error.response?.data || { message: "Failed to delete notification" },
+      };
     }
-  }
-
-  /**
-   * Cleanup socket connection
-   */
-  disconnect() {
-    this.socket?.disconnect();
-    this.socket = null;
   }
 }
 
