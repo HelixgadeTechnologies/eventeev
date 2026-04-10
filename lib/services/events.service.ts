@@ -11,6 +11,7 @@ export interface ApiEvent {
   status: string
 }
 
+export class EventsService {
   /**
    * Helper to map backend event to frontend format
    */
