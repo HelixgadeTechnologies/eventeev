@@ -31,8 +31,25 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
     try {
       if (initialData?.id) {
-        // Handle update if service implemented
-        alert("Updating ticket tiers is under development. Please check back soon.");
+        const { error } = await ticketsService.updateTicket(initialData.id, {
+          name,
+          type: "Paid",
+          price: isNaN(price) ? 0 : price,
+          quantity: isNaN(quantity) ? 0 : quantity,
+          startDate,
+          endDate,
+          startTime,
+          endTime
+        } as any);
+
+        if (error) throw error;
+        
+        alert("Ticket tier successfully updated!");
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          window.location.reload();
+        }
       } else {
         const { error } = await ticketsService.createTicket({
           eventId,

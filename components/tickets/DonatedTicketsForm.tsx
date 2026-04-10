@@ -31,7 +31,25 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
 
     try {
       if (initialData?.id) {
-        alert("Updating ticket tiers is under development.");
+        const { error } = await ticketsService.updateTicket(initialData.id, {
+          name,
+          type: "Donation",
+          price: isNaN(price) ? 0 : price,
+          quantity: isNaN(quantity) ? 0 : quantity,
+          startDate,
+          endDate,
+          startTime,
+          endTime
+        } as any);
+
+        if (error) throw error;
+        
+        alert("Donation tier successfully updated!");
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          window.location.reload();
+        }
       } else {
         const { error } = await ticketsService.createTicket({
           eventId,

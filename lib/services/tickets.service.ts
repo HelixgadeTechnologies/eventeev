@@ -8,6 +8,12 @@ export interface ApiTicket {
   type: string; // 'paid', 'free', 'donation'
   soldOut: boolean;
   eventId: string;
+  startDate?: string;
+  startTime?: string;
+  endDate?: string;
+  endTime?: string;
+  description?: string;
+  status?: string;
 }
 
 export class TicketsService {

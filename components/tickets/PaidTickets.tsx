@@ -236,11 +236,16 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
                   <div className="absolute top-0 right-0 p-4">
                     <button 
                       onClick={() => onEdit({
+                        id: tier.id,
                         name: tier.name,
                         type: "paid",
                         price: tier.price,
                         quantity: tier.quantity,
-                        startDate: "" 
+                        startDate: tier.startDate,
+                        startTime: tier.startTime,
+                        stopDate: tier.endDate,
+                        stopTime: tier.endTime,
+                        description: tier.description
                       })}
                       className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all"
                     >

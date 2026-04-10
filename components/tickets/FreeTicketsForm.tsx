@@ -30,7 +30,25 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
     try {
       if (initialData?.id) {
-        alert("Updating ticket tiers is under development.");
+        const { error } = await ticketsService.updateTicket(initialData.id, {
+          name,
+          type: "Free",
+          price: 0,
+          quantity: isNaN(quantity) ? 0 : quantity,
+          startDate,
+          endDate,
+          startTime,
+          endTime
+        } as any);
+
+        if (error) throw error;
+        
+        alert("Free ticket tier successfully updated!");
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          window.location.reload();
+        }
       } else {
         const { error } = await ticketsService.createTicket({
           eventId,
