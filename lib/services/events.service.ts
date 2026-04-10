@@ -173,6 +173,19 @@ export class EventsService {
   }
 
   /**
+   * Get public event details by slug (Unauthenticated)
+   */
+  async getPublicEventBySlug(slug: string) {
+    try {
+      const response = await axiosInstance.get(`/api/event/public/${slug}`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to fetch public event by slug:', error);
+      return { data: null, error: error.response?.data || { message: 'Event not found' } };
+    }
+  }
+
+  /**
    * Delete an event
    */
   async deleteEvent(eventId: string) {

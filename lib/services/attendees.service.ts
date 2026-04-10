@@ -25,7 +25,20 @@ export class AttendeesService {
   }
 
   /**
-   * Create a new attendee (Register for event)
+   * Public registration for an event (Unauthenticated)
+   */
+  async publicRegister(payload: { eventId: string; name: string; email: string; ticketId?: string }) {
+    try {
+      const response = await axiosInstance.post('/api/attendee/register', payload);
+      return { data: response.data as ApiAttendee, error: null };
+    } catch (error: any) {
+      console.error('Public registration failed:', error);
+      return { data: null, error: error.response?.data || { message: 'Registration failed' } };
+    }
+  }
+
+  /**
+   * Create a new attendee (Manual registration via Admin)
    */
   async createAttendee(payload: { eventId: string; name: string; email: string; status?: string }) {
     try {
