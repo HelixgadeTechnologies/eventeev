@@ -16,9 +16,9 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
-  const [stopDate, setStopDate] = useState(initialData?.stopDate || "");
+  const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
-  const [stopTime, setStopTime] = useState(initialData?.stopTime || "");
+  const [endTime, setEndTime] = useState(initialData?.stopTime || "");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,14 +35,14 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
         const { error } = await ticketsService.createTicket({
           eventId,
           name,
-          type: "free",
+          type: "Free",
           price: 0,
           quantity: isNaN(quantity) ? 0 : quantity,
-          status: "Published",
+          status: "Active",
           startDate,
-          stopDate,
+          endDate,
           startTime,
-          stopTime
+          endTime
         });
 
         if (error) throw error;
@@ -141,8 +141,8 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
               Sales End Date
             </Label>
             <DatePicker 
-              value={stopDate}
-              onChange={setStopDate}
+              value={endDate}
+              onChange={setEndDate}
               placeholder="Select date"
               className="h-12"
             />
@@ -155,8 +155,8 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
               Sales End Time
             </Label>
             <TimePicker
-              value={stopTime}
-              onChange={setStopTime}
+              value={endTime}
+              onChange={setEndTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl"
             />
           </div>

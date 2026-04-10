@@ -16,9 +16,9 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
 
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
-  const [stopDate, setStopDate] = useState(initialData?.stopDate || "");
+  const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
-  const [stopTime, setStopTime] = useState(initialData?.stopTime || "");
+  const [endTime, setEndTime] = useState(initialData?.stopTime || "");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,14 +36,14 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
         const { error } = await ticketsService.createTicket({
           eventId,
           name,
-          type: "donation",
+          type: "Donation",
           price: isNaN(price) ? 0 : price,
           quantity: isNaN(quantity) ? 0 : quantity,
-          status: "Published",
+          status: "Active",
           startDate,
-          stopDate,
+          endDate,
           startTime,
-          stopTime
+          endTime
         });
 
         if (error) throw error;
@@ -163,8 +163,8 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
               Expiration Date
             </Label>
             <DatePicker 
-              value={stopDate}
-              onChange={setStopDate}
+              value={endDate}
+              onChange={setEndDate}
               placeholder="Select date"
               className="h-12"
             />
@@ -177,8 +177,8 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
               Expiration Time
             </Label>
             <TimePicker
-              value={stopTime}
-              onChange={setStopTime}
+              value={endTime}
+              onChange={setEndTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl"
             />
           </div>

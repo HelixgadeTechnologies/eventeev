@@ -48,32 +48,36 @@ export class TicketsService {
     quantity: number;
     status: string;
     startDate?: string;
-    stopDate?: string;
+    endDate?: string;
     startTime?: string;
-    stopTime?: string;
+    endTime?: string;
+    description?: string;
   }) {
     try {
       // Ensure numeric values are valid numbers (never NaN)
       const cleanPrice = isNaN(payload.price) ? 0 : payload.price;
       const cleanQuantity = isNaN(payload.quantity) ? 0 : payload.quantity;
 
-      // Create a payload that supports both naming conventions for robustness
+      // Align exactly with the backend's expected structure:
+      // - type: Capitalized ("Paid", "Free", "Donation")
+      // - status: "Active"
+      // - endDate/endTime: naming convention
       const apiPayload = {
-        ...payload,
+        eventId: payload.eventId,
+        name: payload.name,
+        type: payload.type.charAt(0).toUpperCase() + payload.type.slice(1),
         price: cleanPrice,
         quantity: cleanQuantity,
-        event_id: payload.eventId,
-        quantity_total: cleanQuantity,
-        currency: "USD",
-        min_per_order: 1,
-        max_per_order: 10,
-        is_active: true,
-        sale_start_date: payload.startDate ? `${payload.startDate}T${payload.startTime || '00:00'}:00` : undefined,
-        sale_end_date: payload.stopDate ? `${payload.stopDate}T${payload.stopTime || '23:59'}:00` : undefined,
+        startDate: payload.startDate,
+        startTime: payload.startTime,
+        endDate: payload.endDate,
+        endTime: payload.endTime,
+        description: payload.description || `Ticket tier for your event.`,
+        status: "Active"
       };
 
       // Diagnostic logging for development/debugging
-      console.log('[TicketsService] Sending payload to /api/ticket/create:', apiPayload);
+      console.log('[TicketsService] Sending aligned payload to /api/ticket/create:', apiPayload);
 
       const response = await axiosInstance.post('/api/ticket/create', apiPayload);
       return { data: response.data, error: null };
