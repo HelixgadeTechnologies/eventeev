@@ -39,7 +39,11 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
           type: "donation",
           price,
           quantity,
-          status: "published"
+          status: "published",
+          startDate,
+          stopDate,
+          startTime,
+          stopTime
         });
 
         if (error) throw error;

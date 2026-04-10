@@ -47,9 +47,22 @@ export class TicketsService {
     price: number;
     quantity: number;
     status: string;
+    startDate?: string;
+    stopDate?: string;
+    startTime?: string;
+    stopTime?: string;
   }) {
     try {
-      const response = await axiosInstance.post('/api/ticket/create', payload);
+      // Create a payload that supports both naming conventions for robustness
+      const apiPayload = {
+        ...payload,
+        event_id: payload.eventId,
+        quantity_total: payload.quantity,
+        sale_start_date: payload.startDate ? `${payload.startDate}T${payload.startTime || '00:00'}:00` : undefined,
+        sale_end_date: payload.stopDate ? `${payload.stopDate}T${payload.stopTime || '23:59'}:00` : undefined,
+      };
+
+      const response = await axiosInstance.post('/api/ticket/create', apiPayload);
       return { data: response.data, error: null };
     } catch (error: any) {
       console.error('Failed to create ticket:', error);

@@ -38,7 +38,11 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
           type: "free",
           price: 0,
           quantity,
-          status: "published"
+          status: "published",
+          startDate,
+          stopDate,
+          startTime,
+          stopTime
         });
 
         if (error) throw error;

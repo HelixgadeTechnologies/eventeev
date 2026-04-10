@@ -40,7 +40,11 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
           type: "paid",
           price,
           quantity,
-          status: "published"
+          status: "published",
+          startDate,
+          stopDate,
+          startTime,
+          stopTime
         });
 
         if (error) throw error;
