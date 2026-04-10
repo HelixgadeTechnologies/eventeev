@@ -56,16 +56,16 @@ const SpeakersSummary = () => {
         trendLabel="Active profiles" 
       />
       <SummaryCard 
-        label="Topics Covered" 
-        value={stats.totalTopics.toString()} 
+        label="Sessions Scheduled" 
+        value={stats.totalSessions.toString()} 
         icon={<Calendar size={20} />} 
-        trendLabel="Diversity" 
+        trendLabel="Healthy" 
       />
       <SummaryCard 
-        label="Sessions Total" 
-        value={stats.totalSessions.toString()} 
+        label="Total Speaker Hours" 
+        value={`${stats.totalSpeakers / 2} hours`} // Placeholder logic for now
         icon={<Clock size={20} />} 
-        trendLabel="Engagement" 
+        trendLabel="Recent activity" 
       />
     </div>
   );
