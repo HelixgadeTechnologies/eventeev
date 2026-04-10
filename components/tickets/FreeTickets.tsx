@@ -9,6 +9,7 @@ import { useParams } from "next/navigation";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
 import { Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 
 const filters: FilterConfig[] = [
@@ -110,6 +111,11 @@ export default function FreeTickets({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // States for branded delete confirmation
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
     if (eventId) {
       fetchTicketData();
@@ -153,17 +159,26 @@ export default function FreeTickets({
     }
   };
 
-  const handleDelete = async (ticketId: string) => {
-    if (!window.confirm("Are you sure you want to delete this free ticket?")) return;
+  const handleDelete = (ticketId: string) => {
+    setTicketToDelete(ticketId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!ticketToDelete) return;
     
+    setIsDeleting(true);
     try {
-      const { error } = await ticketsService.deleteTicket(ticketId);
+      const { error } = await ticketsService.deleteTicket(ticketToDelete);
       if (error) throw error;
-      alert("Ticket tier deleted successfully!");
       fetchTicketData(); // Refresh list
+      setIsDeleteModalOpen(false);
+      setTicketToDelete(null);
     } catch (err: any) {
       console.error("Failed to delete ticket:", err);
       alert(err.message || "Failed to delete ticket");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -283,6 +298,18 @@ export default function FreeTickets({
           </div>
         </div>
       )}
+
+      <ActionConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Free Ticket?"
+        description="Are you sure you want to delete this free ticket? This action cannot be undone."
+        confirmLabel="Delete Ticket"
+        cancelLabel="Keep Ticket"
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </section>
   );
 }
