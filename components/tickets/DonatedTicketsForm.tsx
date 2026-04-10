@@ -239,7 +239,6 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
           {initialData ? "Update Donation Tier" : "Create Donation Tier"}
         </button>
       </div>
-      </div>
 
       <ActionConfirmationModal
         isOpen={statusModal.isOpen}

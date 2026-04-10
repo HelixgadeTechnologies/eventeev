@@ -217,7 +217,6 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
           {initialData ? "Update Free Tier" : "Initialize Free Tier"}
         </button>
       </div>
-      </div>
 
       <ActionConfirmationModal
         isOpen={statusModal.isOpen}

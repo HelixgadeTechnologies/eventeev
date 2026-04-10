@@ -66,7 +66,17 @@ const ProfileDisabled = () => {
     orgIndustry: ""
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: "success" | "error";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "success",
+  });
 
   // Sync with user data when it changes
   useEffect(() => {
@@ -134,11 +144,21 @@ const ProfileDisabled = () => {
 
         if (orgResult.error) throw new Error(orgResult.error.message || "Failed to update organisation details");
 
-        setShowSuccessModal(true);
+        setStatusModal({
+          isOpen: true,
+          title: "Profile Updated!",
+          description: "Your information has been successfully saved across the platform.",
+          variant: "success"
+        });
         setIsEditing(false);
       } catch (error: any) {
         console.error("Save error:", error);
-        alert(error.message || "An error occurred while saving profile data.");
+        setStatusModal({
+          isOpen: true,
+          title: "Update Failed",
+          description: error.message || "An error occurred while saving profile data.",
+          variant: "error"
+        });
       } finally {
         setIsSaving(false);
       }
@@ -379,13 +399,14 @@ const ProfileDisabled = () => {
       </div>
 
       <ActionConfirmationModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        onConfirm={() => setShowSuccessModal(false)}
-        title="Success!"
-        description="Profile data saved successfully. Your information has been updated across the platform."
-        confirmLabel="Great!"
-        cancelLabel="Close"
+        isOpen={statusModal.isOpen}
+        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        title={statusModal.title}
+        description={statusModal.description}
+        confirmLabel="Understood"
+        hideCancelButton={true}
+        variant={statusModal.variant}
       />
     </form>
   );

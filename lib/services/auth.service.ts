@@ -20,12 +20,13 @@ export class AuthService {
     try {
       const response = await axiosInstance.post('/api/auth/register', data);
       const { user, token } = response.data;
+      const mappedUser = user ? { ...user, id: user.id || user._id } : null;
       
       if (token) {
         localStorage.setItem('x-auth-token', token);
       }
       
-      return { user, error: null }
+      return { user: mappedUser, error: null }
     } catch (error: any) {
       return { user: null, error: error.response?.data?.message || 'Registration failed' }
     }
@@ -38,12 +39,13 @@ export class AuthService {
     try {
       const response = await axiosInstance.post('/api/auth/login', data);
       const { user, token } = response.data;
+      const mappedUser = user ? { ...user, id: user.id || user._id } : null;
       
       if (token) {
         localStorage.setItem('x-auth-token', token);
       }
 
-      return { user, session: { access_token: token, user }, error: null }
+      return { user: mappedUser, session: { access_token: token, user: mappedUser }, error: null }
     } catch (error: any) {
       return { user: null, session: null, error: error.response?.data?.message || 'Login failed' }
     }
@@ -87,7 +89,8 @@ export class AuthService {
   async getCurrentUser() {
     try {
       const response = await axiosInstance.get('/api/user/me');
-      return { user: response.data, error: null }
+      const user = response.data ? { ...response.data, id: response.data.id || response.data._id } : null;
+      return { user, error: null }
     } catch (error: any) {
       return { user: null, error: error.response?.data?.message || 'Failed to get current user' }
     }
