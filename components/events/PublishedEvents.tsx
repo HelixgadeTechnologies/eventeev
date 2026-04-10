@@ -18,7 +18,11 @@ export default function PublishedEvents() {
       if (error) {
         setError(error.message || "Failed to load events");
       } else {
-        setEvents(data || []);
+        // Filter out "Production Test Event" as requested
+        const filteredEvents = (data || []).filter(
+          (event: any) => event.name !== "Production Test Event"
+        );
+        setEvents(filteredEvents);
       }
       setLoading(false);
     };

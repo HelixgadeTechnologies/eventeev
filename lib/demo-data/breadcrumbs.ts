@@ -1,4 +1,4 @@
-const username = "Richard";
+const username = "{firstName}";
 
 export const breadcrumbMap = [
   {

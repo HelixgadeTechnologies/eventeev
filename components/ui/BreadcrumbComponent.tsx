@@ -8,6 +8,7 @@ import Image from "next/image";
 import Button from "./Button";
 import { IoAdd } from "react-icons/io5";
 import AddTickets from "../tickets/AddTicketModal";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   fallbackTitle?: string;
@@ -21,6 +22,7 @@ export default function Breadcrumb({
   const pathname = usePathname();
   // const params = useParams();
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
+  const { user } = useAuth();
 
   // const _id = Array.isArray(params._id) ? params._id[0] : params._id;
 
@@ -99,12 +101,15 @@ export default function Breadcrumb({
   // Hide breadcrumb on games pages as per user request to move content up
   if (pathname.includes("/games")) return null;
 
+  const displayTitle = (matched?.title || fallbackTitle).replace(
+    "{firstName}",
+    user?.firstName || "User"
+  );
+
   return (
     <section className="flex justify-between items-center">
       <div>
-        <h2 className="font-semibold text-base md:text-[22px]">
-          {matched?.title || fallbackTitle}
-        </h2>
+        <h2 className="font-semibold text-base md:text-[22px]">{displayTitle}</h2>
         <p className="text-[10px] md:text-xs text-gray-500">
           {matched !== null ? matched.subtitle : fallbackSubtitle}
         </p>
