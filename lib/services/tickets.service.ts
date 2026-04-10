@@ -53,14 +53,27 @@ export class TicketsService {
     stopTime?: string;
   }) {
     try {
+      // Ensure numeric values are valid numbers (never NaN)
+      const cleanPrice = isNaN(payload.price) ? 0 : payload.price;
+      const cleanQuantity = isNaN(payload.quantity) ? 0 : payload.quantity;
+
       // Create a payload that supports both naming conventions for robustness
       const apiPayload = {
         ...payload,
+        price: cleanPrice,
+        quantity: cleanQuantity,
         event_id: payload.eventId,
-        quantity_total: payload.quantity,
+        quantity_total: cleanQuantity,
+        currency: "USD",
+        min_per_order: 1,
+        max_per_order: 10,
+        is_active: true,
         sale_start_date: payload.startDate ? `${payload.startDate}T${payload.startTime || '00:00'}:00` : undefined,
         sale_end_date: payload.stopDate ? `${payload.stopDate}T${payload.stopTime || '23:59'}:00` : undefined,
       };
+
+      // Diagnostic logging for development/debugging
+      console.log('[TicketsService] Sending payload to /api/ticket/create:', apiPayload);
 
       const response = await axiosInstance.post('/api/ticket/create', apiPayload);
       return { data: response.data, error: null };
