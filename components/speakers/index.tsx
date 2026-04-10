@@ -230,7 +230,25 @@ const Speakers = () => {
         </Alert>
       ) : (
         <div className="mt-4">
-          {isGrid ? (
+          {filteredSpeakers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur-xl rounded-[40px] border border-dashed border-gray-200 text-center space-y-4">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-2">
+                <Users className="w-8 h-8 text-gray-300" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-[#1B1818] uppercase tracking-tight">No Speakers Yet</h3>
+                <p className="text-sm text-gray-500 font-medium max-w-xs mx-auto">
+                  Start building your event program by adding professional speakers.
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsAddModalOpen(true)}
+                className="mt-4 bg-[#EB5017] text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#EB5017]/10 hover:scale-105 active:scale-95 transition-all"
+              >
+                Get Started
+              </button>
+            </div>
+          ) : isGrid ? (
             <GridList 
               data={filteredSpeakers} 
               onSpeakerClick={handleSpeakerClick} 

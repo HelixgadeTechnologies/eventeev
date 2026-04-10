@@ -101,6 +101,17 @@ export class SpeakersService {
       console.error('Failed to manage sessions:', error);
       return { data: null, error: error.response?.data || { message: 'Failed to manage sessions' } };
     }
+  /**
+   * Get speaker statistics for an event
+   */
+  async getSpeakerStats(eventId: string) {
+    try {
+      const response = await axiosInstance.get(`/api/speaker/event/${eventId}/stats`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to fetch speaker stats:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } };
+    }
   }
 }
 
