@@ -6,6 +6,7 @@ import TimePicker from "../ui/TimePicker";
 import { useParams, useRouter } from "next/navigation";
 import { ticketsService } from "@/lib/services/tickets.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
@@ -19,6 +20,19 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
   const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
   const [endTime, setEndTime] = useState(initialData?.stopTime || "");
+
+  // Status modal state
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: "success" | "error";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "success",
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,12 +58,12 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
 
         if (error) throw error;
         
-        alert("Donation tier successfully updated!");
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          window.location.reload();
-        }
+        setStatusModal({
+          isOpen: true,
+          title: "Tier Updated!",
+          description: "Donation tier updated successfully.",
+          variant: "success"
+        });
       } else {
         const { error } = await ticketsService.createTicket({
           eventId,
@@ -66,16 +80,21 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
 
         if (error) throw error;
         
-        alert("Donation tier successfully created!");
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          window.location.reload();
-        }
+        setStatusModal({
+          isOpen: true,
+          title: "Tier Created!",
+          description: "New donation tier added to your event.",
+          variant: "success"
+        });
       }
     } catch (err: any) {
       console.error("Failed to save donation tier:", err);
-      alert(err.message || "Failed to save donation tier");
+      setStatusModal({
+        isOpen: true,
+        title: "Action Failed",
+        description: err.message || "Something went wrong while saving.",
+        variant: "error"
+      });
     } finally {
       setLoading(false);
     }
@@ -220,6 +239,24 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
           {initialData ? "Update Donation Tier" : "Create Donation Tier"}
         </button>
       </div>
+      </div>
+
+      <ActionConfirmationModal
+        isOpen={statusModal.isOpen}
+        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => {
+          setStatusModal(prev => ({ ...prev, isOpen: false }));
+          if (statusModal.variant === "success") {
+            if (onSuccess) onSuccess();
+            else window.location.reload();
+          }
+        }}
+        title={statusModal.title}
+        description={statusModal.description}
+        confirmLabel="Understood"
+        hideCancelButton={true}
+        variant={statusModal.variant === "success" ? "success" : "error"}
+      />
     </form>
   )
 }

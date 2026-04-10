@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ActionConfirmationModalProps {
@@ -21,7 +21,8 @@ interface ActionConfirmationModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isLoading?: boolean;
-  variant?: "primary" | "danger";
+  variant?: "primary" | "danger" | "success" | "error";
+  hideCancelButton?: boolean;
 }
 
 const ActionConfirmationModal = ({
@@ -34,8 +35,22 @@ const ActionConfirmationModal = ({
   cancelLabel = "Cancel",
   isLoading = false,
   variant = "primary",
+  hideCancelButton = false,
 }: ActionConfirmationModalProps) => {
-  const Icon = variant === "danger" ? Trash2 : AlertTriangle;
+  const Icon = variant === "danger" ? Trash2 : 
+               variant === "success" ? CheckCircle2 :
+               variant === "error" ? XCircle : 
+               AlertTriangle;
+
+  const iconBgColor = variant === "danger" ? "bg-red-50 text-red-500" :
+                     variant === "success" ? "bg-green-50 text-green-500" :
+                     variant === "error" ? "bg-red-50 text-red-500" :
+                     "bg-orange-50 text-[#eb5017]";
+  
+  const confirmBtnColor = variant === "danger" ? "bg-red-500 hover:bg-red-600 shadow-red-200" :
+                         variant === "success" ? "bg-green-600 hover:bg-green-700 shadow-green-200" :
+                         variant === "error" ? "bg-red-600 hover:bg-red-700 shadow-red-200" :
+                         "bg-[#eb5017] hover:bg-[#d64815] shadow-orange-200";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -43,7 +58,7 @@ const ActionConfirmationModal = ({
         <DialogHeader className="space-y-3 text-center sm:text-center">
           <div className={cn(
             "mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-2 animate-in zoom-in duration-300",
-            variant === "danger" ? "bg-red-50 text-red-500" : "bg-orange-50 text-[#eb5017]"
+            iconBgColor
           )}>
             <Icon className="w-5 h-5" />
           </div>
@@ -56,21 +71,22 @@ const ActionConfirmationModal = ({
         </DialogHeader>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-3 mt-8 sm:justify-center">
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="flex-1 px-8 py-3 rounded-xl border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50"
-          >
-            {cancelLabel}
-          </button>
+          {!hideCancelButton && (
+            <button
+              onClick={onClose}
+              disabled={isLoading}
+              className="flex-1 px-8 py-3 rounded-xl border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {cancelLabel}
+            </button>
+          )}
           <button
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-              "flex-1 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all active:scale-95 shadow-xl disabled:opacity-50 flex items-center justify-center gap-2",
-              variant === "danger" 
-                ? "bg-red-500 hover:bg-red-600 shadow-red-200" 
-                : "bg-[#eb5017] hover:bg-[#d64815] shadow-orange-200"
+              "px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-white transition-all active:scale-95 shadow-xl disabled:opacity-50 flex items-center justify-center gap-2",
+              hideCancelButton ? "w-full" : "flex-1",
+              confirmBtnColor
             )}
           >
             {isLoading ? (

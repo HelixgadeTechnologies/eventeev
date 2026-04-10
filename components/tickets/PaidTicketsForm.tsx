@@ -6,6 +6,7 @@ import TimePicker from "../ui/TimePicker";
 import { useParams, useRouter } from "next/navigation";
 import { ticketsService } from "@/lib/services/tickets.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
@@ -19,6 +20,19 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
   const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
   const [endTime, setEndTime] = useState(initialData?.stopTime || "");
+  
+  // Status modal state
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: "success" | "error";
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "success",
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,12 +58,12 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
         if (error) throw error;
         
-        alert("Ticket tier successfully updated!");
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          window.location.reload();
-        }
+        setStatusModal({
+          isOpen: true,
+          title: "Ticket Updated!",
+          description: "Your changes have been saved successfully.",
+          variant: "success"
+        });
       } else {
         const { error } = await ticketsService.createTicket({
           eventId,
@@ -66,16 +80,21 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
         if (error) throw error;
         
-        alert("Ticket tier successfully created!");
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          window.location.reload(); // Fallback to refresh data
-        }
+        setStatusModal({
+          isOpen: true,
+          title: "Ticket Created!",
+          description: "New ticket tier has been added to your event.",
+          variant: "success"
+        });
       }
     } catch (err: any) {
       console.error("Failed to save ticket:", err);
-      alert(err.message || "Failed to save ticket tier");
+      setStatusModal({
+        isOpen: true,
+        title: "Action Failed",
+        description: err.message || "Something went wrong while saving.",
+        variant: "error"
+      });
     } finally {
       setLoading(false);
     }
@@ -221,6 +240,23 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
           {initialData ? "Update Ticket Tier" : "Initialize Ticket Tier"}
         </button>
       </div>
+
+      <ActionConfirmationModal
+        isOpen={statusModal.isOpen}
+        onClose={() => setStatusModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => {
+          setStatusModal(prev => ({ ...prev, isOpen: false }));
+          if (statusModal.variant === "success") {
+            if (onSuccess) onSuccess();
+            else window.location.reload();
+          }
+        }}
+        title={statusModal.title}
+        description={statusModal.description}
+        confirmLabel="Understood"
+        hideCancelButton={true}
+        variant={statusModal.variant === "success" ? "success" : "error"}
+      />
     </form>
   );
 };
