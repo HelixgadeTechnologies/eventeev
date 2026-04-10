@@ -9,7 +9,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import { useParams } from "next/navigation";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
 
 type Props = {
@@ -171,6 +171,20 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
     }
   };
 
+  const handleDelete = async (ticketId: string) => {
+    if (!window.confirm("Are you sure you want to delete this ticket tier? This action cannot be undone.")) return;
+    
+    try {
+      const { error } = await ticketsService.deleteTicket(ticketId);
+      if (error) throw error;
+      alert("Ticket tier deleted successfully!");
+      fetchTicketData(); // Refresh list
+    } catch (err: any) {
+      console.error("Failed to delete ticket:", err);
+      alert(err.message || "Failed to delete ticket tier");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
@@ -233,7 +247,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
               
               return (
                 <div key={tier.id} className="relative group overflow-hidden rounded-[32px] bg-white/95 backdrop-blur-xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500">
-                  <div className="absolute top-0 right-0 p-4">
+                  <div className="absolute top-0 right-0 p-4 flex items-center gap-2">
                     <button 
                       onClick={() => onEdit({
                         id: tier.id,
@@ -247,9 +261,16 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
                         stopTime: tier.endTime,
                         description: tier.description
                       })}
-                      className="bg-[#EB5017] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#EB5017]/10 hover:scale-110 active:scale-95 transition-all"
+                      className="bg-white text-[#EB5017] border border-[#EB5017]/20 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#EB5017] hover:text-white transition-all shadow-sm"
                     >
                       Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(tier.id)}
+                      className="bg-red-50 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-white transition-all shadow-sm border border-red-100"
+                      title="Delete Ticket"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                   <div className="space-y-6">
