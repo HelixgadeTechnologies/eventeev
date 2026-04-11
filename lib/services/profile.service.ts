@@ -7,6 +7,9 @@ export interface ProfileUpdateData {
   tZone: string;
   country: string;
   avatar?: string;
+  orgName?: string;
+  orgWebsite?: string;
+  orgIndustry?: string;
 }
 
 export interface OrganisationUpdateData {

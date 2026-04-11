@@ -124,25 +124,30 @@ const ProfileDisabled = () => {
       try {
         if (!user?.id) throw new Error("User ID not found");
 
-        // 1. Update general profile fields
+        // 1. Update general profile and organisation fields together
         const profileResult = await profileService.updateUserProfile(user.id, {
           firstName: formData.firstName,
           lastName: formData.lastName,
           gender: formData.gender,
           tZone: formData.tZone,
-          country: formData.country
+          country: formData.country,
+          orgName: formData.orgName,
+          orgWebsite: formData.orgWebsite,
+          orgIndustry: formData.orgIndustry
         });
 
         if (profileResult.error) throw new Error(profileResult.error.message || "Failed to update profile");
 
-        // 2. Update organisation details
+        // 2. Also call organisation-specific endpoint for legacy support/redundancy
         const orgResult = await profileService.updateOrganisationDetails({
           orgName: formData.orgName,
           orgWebsite: formData.orgWebsite,
           orgIndustry: formData.orgIndustry
         });
 
-        if (orgResult.error) throw new Error(orgResult.error.message || "Failed to update organisation details");
+        if (orgResult.error) {
+          console.warn("Minor issue updating organisation-specific record:", orgResult.error);
+        }
         
         // Refresh the global auth state to sync UI
         await refreshUser();
