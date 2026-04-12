@@ -6,7 +6,7 @@ import { uploadService } from "@/lib/services/upload.service";
 import { Loader2 } from "lucide-react";
 
 interface FileInputProps {
-  onChange: (file: File | null) => void;
+  onChange: (file: string | null) => void;
   defaultValue?: string;
   className?: string;
 }

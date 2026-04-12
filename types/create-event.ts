@@ -6,8 +6,8 @@ export interface createEventData {
   startTime: string;
   stopTime: string;
   recurrentEvent: boolean;
-  thumbnail: null | File | string;
-  banner: null | File | string;
+  thumbnail: null | string;
+  banner: null | string;
   eventType: "virtual" | "hybrid" | "in person";
   location: string;
   category: "conference" | "info session" | "watch party" | "workshop" | "tech talk" | "hackathon";
