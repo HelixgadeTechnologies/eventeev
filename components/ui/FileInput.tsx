@@ -6,7 +6,7 @@ import { uploadService } from "@/lib/services/upload.service";
 import { Loader2 } from "lucide-react";
 
 interface FileInputProps {
-  onChange: (file: string | null) => void;
+  onChange: (url: string, file: File | null) => void;
   defaultValue?: string;
   className?: string;
 }
@@ -35,7 +35,7 @@ const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
     setIsUploading(false);
 
     if (data?.url) {
-      onChange?.(data.url);
+      onChange?.(data.url, selectedFile);
     } else {
       console.error("Upload error:", error);
       alert("Failed to upload image. Please try again.");

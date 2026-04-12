@@ -76,7 +76,7 @@ const EventThumbnailForm = () => {
                   <FileInput 
                     className="h-full border-none p-0" 
                     defaultValue={field.value as string} 
-                    onChange={(file) => field.onChange(file)} 
+                    onChange={(url) => field.onChange(url)} 
                   />
                 </div>
               )}
@@ -97,7 +97,7 @@ const EventThumbnailForm = () => {
                   <FileInput 
                     className="h-full border-none p-0" 
                     defaultValue={field.value as string} 
-                    onChange={(file) => field.onChange(file)} 
+                    onChange={(url) => field.onChange(url)} 
                   />
                 </div>
               )}

@@ -73,7 +73,7 @@ const ResourceUploadModal = ({ isOpen, onClose, onUploadComplete }: ResourceUplo
     }, 200);
   };
 
-  const handleFileSelect = (selectedFile: File | null) => {
+  const handleFileSelect = (url: string, selectedFile: File | null) => {
     setFile(selectedFile);
     if (selectedFile && !title) {
         setTitle(selectedFile.name);
