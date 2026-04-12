@@ -35,9 +35,9 @@ export default function OrganizationRegistrationForm() {
     try {
       // Map frontend fields to backend PUT /api/auth/organisation payload
       const payload = {
-        orgName: userData.orgName,
-        orgWebsite: userData.orgWebsite,
-        orgIndustry: userData.orgIndustry,
+        organisationName: userData.orgName,
+        organisationWebsite: userData.orgWebsite,
+        organisationIndustry: userData.orgIndustry,
       };
 
       await axiosInstance.put("/api/auth/organisation", payload);

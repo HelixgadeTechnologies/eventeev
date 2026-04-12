@@ -86,11 +86,11 @@ const ProfileDisabled = () => {
         lastName: user.lastName || "",
         email: user.email || "",
         gender: user.gender || "Female",
-        tZone: user.tZone || "Africa/Lagos",
+        tZone: user.timezone || user.tZone || "Africa/Lagos",
         country: user.country || "Nigeria",
-        orgName: user.orgName || "",
-        orgWebsite: user.orgWebsite || "",
-        orgIndustry: user.orgIndustry || ""
+        orgName: user.organisationName || user.orgName || "",
+        orgWebsite: user.organisationWebsite || user.orgWebsite || "",
+        orgIndustry: user.organisationIndustry || user.orgIndustry || ""
       });
     }
   }, [user]);
