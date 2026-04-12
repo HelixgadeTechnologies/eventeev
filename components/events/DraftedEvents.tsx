@@ -50,8 +50,8 @@ export default function DraftedEvents() {
 
   return events.length === 0 ? (
     <EmptyState
-      titleText="You currently have no event listed here."
-      subtitleText="You will see list of events that you have Live events"
+      titleText="No draft events found"
+      subtitleText="Any events you've saved as draft but haven't published yet will appear here."
       icon={img}
     />
   ) : (
