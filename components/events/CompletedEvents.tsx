@@ -13,28 +13,34 @@ export default function CompletedEvents() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchEvents = async () => {
-    setLoading(true);
-    
-    // Fetch both completed and published events
-    const [completedRes, publishedRes] = await Promise.all([
-      eventsService.getCompletedEvents(),
-      eventsService.getPublishedEvents()
-    ]);
-
-    if (completedRes.error) {
-      setError(completedRes.error.message || "Failed to load events");
-    } else {
-      const completedEvents = completedRes.data || [];
+    try {
+      setLoading(true);
       
-      // Filter out published events that have already passed
-      const passedPublishedEvents = (publishedRes.data || []).filter(
-        (event: any) => isEventPassed(event)
-      );
+      // Fetch both completed and published events
+      const [completedRes, publishedRes] = await Promise.all([
+        eventsService.getCompletedEvents(),
+        eventsService.getPublishedEvents()
+      ]);
 
-      // Merge both lists
-      setEvents([...completedEvents, ...passedPublishedEvents]);
+      if (completedRes.error) {
+        setError(completedRes.error.message || "Failed to load events");
+      } else {
+        const completedEvents = completedRes.data || [];
+        
+        // Filter out published events that have already passed
+        const passedPublishedEvents = (publishedRes.data || []).filter(
+          (event: any) => event && isEventPassed(event)
+        );
+
+        // Merge both lists
+        setEvents([...completedEvents, ...passedPublishedEvents]);
+      }
+    } catch (err: any) {
+      console.error("Error in CompletedEvents fetch:", err);
+      setError("An unexpected error occurred while loading events.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

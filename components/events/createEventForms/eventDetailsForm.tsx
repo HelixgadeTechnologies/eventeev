@@ -163,13 +163,22 @@ const EventDetailsForm = () => {
           </div>
         </div>
 
-        {/* Recurrent Toggle */}
         <div className="bg-[#F9FAFB] border border-gray-100 rounded-xl px-4 py-3 flex justify-between items-center mt-2">
           <div className="space-y-0.5">
             <Label className="text-xs font-bold text-[#1B1818]">Recurrent Event?</Label>
             <p className="text-[9px] font-medium text-gray-400 uppercase tracking-wider">Repeat this event periodically</p>
           </div>
-          <Switch className="data-[state=checked]:bg-[#F56630] scale-90" />
+          <Controller
+            name="recurrentEvent"
+            control={control}
+            render={({ field }) => (
+              <Switch 
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                className="data-[state=checked]:bg-[#F56630] scale-90" 
+              />
+            )}
+          />
         </div>
 
         {/* Navigation Buttons */}

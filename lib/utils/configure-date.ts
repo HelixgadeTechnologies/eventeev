@@ -49,24 +49,27 @@ export const formatDay = (dateStr: string) => {
 export const convertTo24HourFormat = (timeStr: string) => {
   if (!timeStr) return "";
 
-  // Check if already in 24-hour format
-  if (timeStr.includes("AM") || timeStr.includes("PM")) {
-    const [time, period] = timeStr.split(" ");
-    const [hours, minutes] = time.split(":");
-    let hour = parseInt(hours, 10);
+  const cleanTime = timeStr.trim().toUpperCase();
+  
+  // Check if it's already in 12-hour format (e.g., "10:00 AM" or "10:00AM")
+  const amPmMatch = cleanTime.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  
+  if (amPmMatch) {
+    let hour = parseInt(amPmMatch[1], 10);
+    const minute = amPmMatch[2];
+    const period = amPmMatch[3];
 
-    // Convert to 24-hour format
     if (period === "PM" && hour < 12) {
       hour += 12;
     } else if (period === "AM" && hour === 12) {
       hour = 0;
     }
 
-    // Format with leading zeros
-    return `${hour.toString().padStart(2, "0")}:${minutes}`;
+    return `${hour.toString().padStart(2, "0")}:${minute}`;
   }
 
-  return timeStr;
+  // Fallback for simple "HH:MM" 24h or other formats
+  return cleanTime;
 };
 
 /**
@@ -74,29 +77,43 @@ export const convertTo24HourFormat = (timeStr: string) => {
  * Combines endDate (or startDate) and endTime (or startTime) for comparison.
  */
 export const isEventPassed = (event: {
-  startDate: string;
+  startDate?: string;
   endDate?: string;
-  startTime: string;
+  startTime?: string;
   endTime?: string;
-}) => {
+} | null) => {
+  if (!event) return false;
+
   const dateStr = event.endDate || event.startDate;
   const timeStr = event.endTime || event.startTime;
 
   if (!dateStr) return false;
 
-  const date = new Date(dateStr);
-  
-  // If time is provided, set the hours and minutes
-  if (timeStr && timeStr !== "N/A") {
-    const time24 = convertTo24HourFormat(timeStr);
-    const [hours, minutes] = time24.split(":").map(Number);
-    if (!isNaN(hours) && !isNaN(minutes)) {
-      date.setHours(hours, minutes, 0, 0);
-    }
-  } else {
-    // If no time is specified, assume it passes at the end of the day
-    date.setHours(23, 59, 59, 999);
-  }
+  try {
+    const date = new Date(dateStr);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return false;
 
-  return date < new Date();
+    // If time is provided, set the hours and minutes
+    if (timeStr && timeStr !== "N/A") {
+      const time24 = convertTo24HourFormat(timeStr);
+      const timeParts = time24.split(":");
+      if (timeParts.length === 2) {
+        const hours = parseInt(timeParts[0], 10);
+        const minutes = parseInt(timeParts[1], 10);
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          date.setHours(hours, minutes, 0, 0);
+        }
+      }
+    } else {
+      // If no time is specified, assume it passes at the end of the day
+      date.setHours(23, 59, 59, 999);
+    }
+
+    return date < new Date();
+  } catch (error) {
+    console.warn("Error parsing event date/time:", error);
+    return false;
+  }
 };

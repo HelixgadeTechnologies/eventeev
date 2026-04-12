@@ -14,20 +14,27 @@ export default function PublishedEvents() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      setLoading(true);
-      const { data, error } = await eventsService.getPublishedEvents();
-      if (error) {
-        setError(error.message || "Failed to load events");
-      } else {
-        // Filter out "Production Test Event" and exclude events that have passed
-        const filteredEvents = (data || []).filter(
-          (event: any) => 
-            event.name !== "Production Test Event" && 
-            !isEventPassed(event)
-        );
-        setEvents(filteredEvents);
+      try {
+        setLoading(true);
+        const { data, error } = await eventsService.getPublishedEvents();
+        if (error) {
+          setError(error.message || "Failed to load events");
+        } else {
+          // Filter out "Production Test Event" and exclude events that have passed
+          const filteredEvents = (data || []).filter(
+            (event: any) => 
+              event &&
+              event.name !== "Production Test Event" && 
+              !isEventPassed(event)
+          );
+          setEvents(filteredEvents);
+        }
+      } catch (err: any) {
+        console.error("Error in PublishedEvents fetch:", err);
+        setError("An unexpected error occurred while loading events.");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchEvents();
@@ -57,8 +64,8 @@ export default function PublishedEvents() {
 
   return events.length === 0 ? (
     <EmptyState
-      titleText="You currently have no event listed here."
-      subtitleText="You will see list of events that you have Live events"
+      titleText="No ongoing events"
+      subtitleText="You currently have no live events. Published events that haven't ended will appear here."
       icon={img}
     />
   ) : (

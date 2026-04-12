@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 import { eventsService } from "@/lib/services/events.service";
 import { useRouter } from "next/navigation";
+import { convertTo24HourFormat } from "@/lib/utils/configure-date";
 
 const EventFormPreview = () => {
   const dispatch = useAppDispatch();
@@ -34,21 +35,25 @@ const EventFormPreview = () => {
     
     try {
       // Map frontend formData to backend expected format
+      // Note: Backend expects YYYY-MM-DD for dates and HH:mm (24h) for times
       const payload = {
         title: formData.name,
         description: formData.description,
         category: formData.category,
         type: formData.eventType,
-        startDate: new Date(`${formData.startDate} ${formData.startTime}`).toISOString(),
-        endDate: formData.stopDate ? new Date(`${formData.stopDate} ${formData.stopTime}`).toISOString() : undefined,
-        startTime: formData.startTime,
+        startDate: formData.startDate,
+        endDate: formData.stopDate || formData.startDate, // Required field
+        startTime: convertTo24HourFormat(formData.startTime),
+        endTime: convertTo24HourFormat(formData.stopTime),
         location: formData.location || 'Online',
-        website: formData.website,
-        facebookUrl: formData.facebookUrl,
-        instagramUrl: formData.instagramUrl,
-        xUrl: formData.xUrl,
-        recurrentEvent: formData.recurrentEvent,
-        status: status
+        website: formData.website || undefined,
+        facebookUrl: formData.facebookUrl || undefined,
+        instagramUrl: formData.instagramUrl || undefined,
+        xUrl: formData.xUrl || undefined,
+        recurrentEvent: formData.recurrentEvent || false,
+        status: status,
+        bannerImage: formData.banner || undefined,
+        thumbnailImage: formData.thumbnail || undefined,
       };
 
       const { data: result, error } = await eventsService.createEvent(payload);
