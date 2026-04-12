@@ -68,3 +68,35 @@ export const convertTo24HourFormat = (timeStr: string) => {
 
   return timeStr;
 };
+
+/**
+ * Checks if an event's end date and time have passed.
+ * Combines endDate (or startDate) and endTime (or startTime) for comparison.
+ */
+export const isEventPassed = (event: {
+  startDate: string;
+  endDate?: string;
+  startTime: string;
+  endTime?: string;
+}) => {
+  const dateStr = event.endDate || event.startDate;
+  const timeStr = event.endTime || event.startTime;
+
+  if (!dateStr) return false;
+
+  const date = new Date(dateStr);
+  
+  // If time is provided, set the hours and minutes
+  if (timeStr && timeStr !== "N/A") {
+    const time24 = convertTo24HourFormat(timeStr);
+    const [hours, minutes] = time24.split(":").map(Number);
+    if (!isNaN(hours) && !isNaN(minutes)) {
+      date.setHours(hours, minutes, 0, 0);
+    }
+  } else {
+    // If no time is specified, assume it passes at the end of the day
+    date.setHours(23, 59, 59, 999);
+  }
+
+  return date < new Date();
+};

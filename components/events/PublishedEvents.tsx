@@ -5,6 +5,7 @@ import EventPreviewCard from "./EventPreviewCard";
 import EmptyState from "@/components/display/EmptyStateComponent";
 import img from "@/public/ticket-icon.svg";
 import { eventsService } from "@/lib/services/events.service";
+import { isEventPassed } from "@/lib/utils/configure-date";
 
 export default function PublishedEvents() {
   const [events, setEvents] = useState<any[]>([]);
@@ -18,9 +19,11 @@ export default function PublishedEvents() {
       if (error) {
         setError(error.message || "Failed to load events");
       } else {
-        // Filter out "Production Test Event" as requested
+        // Filter out "Production Test Event" and exclude events that have passed
         const filteredEvents = (data || []).filter(
-          (event: any) => event.name !== "Production Test Event"
+          (event: any) => 
+            event.name !== "Production Test Event" && 
+            !isEventPassed(event)
         );
         setEvents(filteredEvents);
       }

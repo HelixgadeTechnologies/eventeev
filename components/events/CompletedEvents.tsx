@@ -5,6 +5,7 @@ import EventPreviewCard from "./EventPreviewCard";
 import EmptyState from "@/components/display/EmptyStateComponent";
 import img from "@/public/bitmap-icon.svg";
 import { eventsService } from "@/lib/services/events.service";
+import { isEventPassed } from "@/lib/utils/configure-date";
 
 export default function CompletedEvents() {
   const [events, setEvents] = useState<any[]>([]);
@@ -13,11 +14,25 @@ export default function CompletedEvents() {
 
   const fetchEvents = async () => {
     setLoading(true);
-    const { data, error } = await eventsService.getCompletedEvents();
-    if (error) {
-      setError(error.message || "Failed to load events");
+    
+    // Fetch both completed and published events
+    const [completedRes, publishedRes] = await Promise.all([
+      eventsService.getCompletedEvents(),
+      eventsService.getPublishedEvents()
+    ]);
+
+    if (completedRes.error) {
+      setError(completedRes.error.message || "Failed to load events");
     } else {
-      setEvents(data || []);
+      const completedEvents = completedRes.data || [];
+      
+      // Filter out published events that have already passed
+      const passedPublishedEvents = (publishedRes.data || []).filter(
+        (event: any) => isEventPassed(event)
+      );
+
+      // Merge both lists
+      setEvents([...completedEvents, ...passedPublishedEvents]);
     }
     setLoading(false);
   };
