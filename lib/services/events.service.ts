@@ -40,13 +40,19 @@ export class EventsService {
   async getPublishedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/published')
-      const data = response.data.map((event: any) => this.mapEvent(event))
+      const rawData = Array.isArray(response.data) ? response.data : [];
+      const data = rawData.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       // If the backend returns 404 or a "no events found" message, treat it as a successful empty response
-      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+      const isNotFoundError = error.response?.status === 404 || 
+                            error.response?.data?.message?.toLowerCase().includes('no') ||
+                            error.message?.toLowerCase().includes('map'); // Handle non-array response crash
+
+      if (isNotFoundError) {
         return { data: [], error: null }
       }
+      
       console.error('Failed to fetch published events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch events' } }
     }
@@ -58,13 +64,19 @@ export class EventsService {
   async getDraftedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/drafts')
-      const data = response.data.map((event: any) => this.mapEvent(event))
+      const rawData = Array.isArray(response.data) ? response.data : [];
+      const data = rawData.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       // Handle "No drafts" case gracefully
-      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+      const isNotFoundError = error.response?.status === 404 || 
+                            error.response?.data?.message?.toLowerCase().includes('no') ||
+                            error.message?.toLowerCase().includes('map');
+
+      if (isNotFoundError) {
         return { data: [], error: null }
       }
+      
       console.error('Failed to fetch draft events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch drafts' } }
     }
@@ -76,13 +88,19 @@ export class EventsService {
   async getCompletedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/completed')
-      const data = response.data.map((event: any) => this.mapEvent(event))
+      const rawData = Array.isArray(response.data) ? response.data : [];
+      const data = rawData.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       // Handle "No completed events" case gracefully
-      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+      const isNotFoundError = error.response?.status === 404 || 
+                            error.response?.data?.message?.toLowerCase().includes('no') ||
+                            error.message?.toLowerCase().includes('map');
+
+      if (isNotFoundError) {
         return { data: [], error: null }
       }
+      
       console.error('Failed to fetch completed events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch completed events' } }
     }
