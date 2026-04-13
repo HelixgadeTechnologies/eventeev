@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaAngleLeft } from "react-icons/fa6";
@@ -74,15 +74,9 @@ export default function PollsPage() {
     }
   };
 
-  import("react").then(React => {
-    React.useEffect(() => {
-      fetchPolls();
-    }, [_id]);
-  });
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewingPoll, setViewingPoll] = useState<Poll | null>(null);
-  const [filter, setFilter] = useState<"all" | "active" | "ended">("all");
-
+  useEffect(() => {
+    fetchPolls();
+  }, [_id]);
   // Create poll form state
   const [pollTitle, setPollTitle] = useState("");
   const [pollType, setPollType] = useState<"pre" | "post" | "live">("live");
