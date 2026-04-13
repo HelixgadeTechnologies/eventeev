@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { checkInData } from "@/lib/demo-data/attendees";
 import SpinningWheel from "@/components/games/SpinningWheel";
 import { HiOutlineTrophy } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,11 +8,41 @@ import Link from "next/link";
 import { FaAngleLeft, FaExpand, FaCompress } from "react-icons/fa6";
 import { useRef } from "react";
 import confetti from 'canvas-confetti';
+import { useParams } from 'next/navigation';
+import rollingGameService from '@/lib/services/rolling-game.service';
 
 export default function RollingGamePage() {
+  const params = useParams();
+  const eventId = params._id as string;
   const [winner, setWinner] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [winnersList, setWinnersList] = useState<any[]>([]);
+
+  const fetchWinners = async () => {
+    if (!eventId) return;
+    try {
+      const data = await rollingGameService.getWinners(eventId);
+      setWinnersList(data || []);
+    } catch (err) {
+      console.error("Failed to load winners:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (eventId) {
+      rollingGameService.getParticipants(eventId)
+        .then((res) => {
+          setParticipants(res || []);
+        })
+        .catch((err) => {
+          console.error("Failed to load participants:", err);
+        });
+        
+      fetchWinners();
+    }
+  }, [eventId]);
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -39,19 +68,30 @@ export default function RollingGamePage() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Use checked-in attendees for the wheel
   const eligibleUsers = useMemo(() => {
-    const checkedInAttendees = checkInData
-      .filter(attendee => attendee.checkedIn)
-      .map(attendee => attendee.name);
-    
-    // Return randomized names for the wheel
-    return checkedInAttendees.sort(() => Math.random() - 0.5);
-  }, []);
+    return participants
+      .map(p => `${p.firstName} ${p.lastName}`.trim())
+      .filter(name => name !== "")
+      .sort(() => Math.random() - 0.5);
+  }, [participants]);
 
-  const handleWinner = (name: string) => {
+  const handleWinner = async (name: string) => {
     setWinner(name);
     
+    // Find the participant to get their ID
+    const matchedUser = participants.find(p => `${p.firstName} ${p.lastName}`.trim() === name);
+    if (matchedUser && matchedUser._id && eventId) {
+      try {
+        await rollingGameService.recordWinner(eventId, { 
+          userId: matchedUser._id, 
+          prizeWon: 'Mystery Prize' 
+        });
+        fetchWinners();
+      } catch (err) {
+        console.error("Failed to record winner:", err);
+      }
+    }
+
     // Trigger celebratory confetti
     const duration = 5 * 1000;
     const animationEnd = Date.now() + duration;
@@ -114,6 +154,42 @@ export default function RollingGamePage() {
         <SpinningWheel names={eligibleUsers} onWinner={handleWinner} />
       </div>
 
+      {/* Winners Board */}
+      <div className={`absolute left-4 top-24 md:left-8 w-64 bg-white/80 backdrop-blur-md rounded-[32px] p-5 shadow-2xl shadow-black/5 border border-white hidden lg:block transition-all duration-500 z-20 ${isFullscreen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <h3 className="font-black text-xs uppercase tracking-[0.2em] text-[#1B1818] mb-5 flex items-center gap-2">
+          <HiOutlineTrophy className="text-[#EB5017] text-lg" />
+          Recent Winners
+        </h3>
+        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+          {winnersList.length === 0 ? (
+             <div className="text-center py-8">
+               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">No winners yet</p>
+             </div>
+          ) : (
+            winnersList.map((w, idx) => (
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                key={w._id || idx} 
+                className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50/50 hover:bg-gray-100 transition-colors border border-gray-100/50"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#EB5017]/10 text-[#EB5017] font-black flex items-center justify-center text-[10px]">
+                  #{idx + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-black text-[#1B1818] truncate">
+                    {w.userId?.firstName} {w.userId?.lastName}
+                  </p>
+                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest truncate mt-0.5">
+                    {w.prizeWon}
+                  </p>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      </div>
+
       {/* Winner Modal/Display */}
       <AnimatePresence>
         {winner && (
@@ -162,3 +238,4 @@ export default function RollingGamePage() {
     </div>
   );
 }
+
