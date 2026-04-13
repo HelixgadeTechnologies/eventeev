@@ -43,6 +43,10 @@ export class EventsService {
       const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
+      // If the backend returns 404 or a "no events found" message, treat it as a successful empty response
+      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+        return { data: [], error: null }
+      }
       console.error('Failed to fetch published events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch events' } }
     }
@@ -57,6 +61,10 @@ export class EventsService {
       const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
+      // Handle "No drafts" case gracefully
+      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+        return { data: [], error: null }
+      }
       console.error('Failed to fetch draft events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch drafts' } }
     }
@@ -71,6 +79,10 @@ export class EventsService {
       const data = response.data.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
+      // Handle "No completed events" case gracefully
+      if (error.response?.status === 404 || error.response?.data?.message?.toLowerCase().includes('no')) {
+        return { data: [], error: null }
+      }
       console.error('Failed to fetch completed events:', error)
       return { data: [], error: error.response?.data || { message: 'Failed to fetch completed events' } }
     }
