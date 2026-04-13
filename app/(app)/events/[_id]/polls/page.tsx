@@ -4,15 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaAngleLeft } from "react-icons/fa6";
-import {
-  HiOutlinePlus,
-  HiOutlineChartBar,
-  HiOutlineClock,
-  HiOutlineCheck,
-  HiOutlineX,
-  HiOutlineTrash,
-  HiOutlineEye,
-} from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineChartBar, HiOutlineClock, HiOutlineCheck, HiOutlineX, HiOutlineTrash, HiOutlineEye } from "react-icons/hi";
+import { pollsService } from "@/lib/services/polls.service";
+import { toast } from "sonner";
 
 // ─── Types ─────────────────────────────────────────────────────────────
 interface PollOption {
@@ -28,7 +22,7 @@ interface PollQuestion {
 }
 
 interface Poll {
-  id: number;
+  id: string; // Used to parse the Mongoose _id
   title: string;
   questions: PollQuestion[];
   status: "active" | "ended";
@@ -36,94 +30,55 @@ interface Poll {
   createdAt: string;
 }
 
-// ─── Mock Data ─────────────────────────────────────────────────────────
-const INITIAL_POLLS: Poll[] = [
-  {
-    id: 1,
-    title: "Attendee Expectations",
-    questions: [
-      {
-        id: "q1",
-        text: "What are you most looking forward to in this event?",
-        options: [
-          { text: "Networking Opportunities", votes: 42 },
-          { text: "Keynote Speeches", votes: 28 },
-          { text: "Workshops", votes: 35 },
-          { text: "Exhibition Booths", votes: 19 },
-        ],
-        totalVotes: 124,
-      }
-    ],
-    status: "active",
-    type: "pre",
-    createdAt: "Feb 13, 2026",
-  },
-  {
-    id: 2,
-    title: "Live Session Pulse",
-    questions: [
-      {
-        id: "q1",
-        text: "How would you rate the current presentation?",
-        options: [
-          { text: "⭐ Excellent", votes: 56 },
-          { text: "👍 Good", votes: 34 },
-          { text: "😐 Average", votes: 8 },
-          { text: "👎 Needs Improvement", votes: 3 },
-        ],
-        totalVotes: 101,
-      }
-    ],
-    status: "active",
-    type: "live",
-    createdAt: "Feb 13, 2026",
-  },
-  {
-    id: 3,
-    title: "Post-Event Survey",
-    questions: [
-      {
-        id: "q1",
-        text: "How likely are you to recommend this event to a colleague?",
-        options: [
-          { text: "Very Likely", votes: 44 },
-          { text: "Somewhat Likely", votes: 38 },
-          { text: "Neutral", votes: 29 },
-          { text: "Not Likely", votes: 17 },
-        ],
-        totalVotes: 128,
-      }
-    ],
-    status: "ended",
-    type: "post",
-    createdAt: "Feb 12, 2026",
-  },
-  {
-    id: 4,
-    title: "Workshop Feedback",
-    questions: [
-      {
-        id: "q1",
-        text: "Was the workshop content practical?",
-        options: [
-          { text: "Yes, very", votes: 22 },
-          { text: "Mostly", votes: 41 },
-          { text: "A bit", votes: 35 },
-          { text: "Not at all", votes: 15 },
-        ],
-        totalVotes: 113,
-      }
-    ],
-    status: "ended",
-    type: "live",
-    createdAt: "Feb 11, 2026",
-  },
-];
-
-// ─── Main Component ────────────────────────────────────────────────────
 export default function PollsPage() {
   const { _id } = useParams();
-  const [polls, setPolls] = useState<Poll[]>(INITIAL_POLLS);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [viewingPoll, setViewingPoll] = useState<Poll | null>(null);
+  const [filter, setFilter] = useState<"all" | "active" | "ended">("all");
+
+  // Fetch polls logic
+  const fetchPolls = async () => {
+    if (!_id) return;
+    try {
+      setIsLoading(true);
+      const data = await pollsService.getPolls(_id as string);
+      
+      const mappedPolls: Poll[] = data.map((backendPoll: any) => ({
+        id: backendPoll._id,
+        title: backendPoll.title,
+        status: backendPoll.status === "LIVE" ? "active" : "ended",
+        type: backendPoll.category === "Pre-Event" ? "pre" : backendPoll.category === "Live Poll" ? "live" : "post",
+        createdAt: new Date(backendPoll.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        questions: backendPoll.questions.map((q: any) => {
+          const options = q.options.map((o: any) => ({
+            text: o.text,
+            votes: o.votesCount || 0
+          }));
+          return {
+            id: q._id,
+            text: q.text,
+            options,
+            totalVotes: options.reduce((sum: number, opt: any) => sum + opt.votes, 0)
+          };
+        })
+      }));
+      setPolls(mappedPolls);
+    } catch (error) {
+      toast.error("Failed to fetch polls");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  import("react").then(React => {
+    React.useEffect(() => {
+      fetchPolls();
+    }, [_id]);
+  });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingPoll, setViewingPoll] = useState<Poll | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "ended">("all");
@@ -197,41 +152,62 @@ export default function PollsPage() {
     setCreationQuestions(updated);
   };
 
-  const handleCreatePoll = () => {
+  const handleCreatePoll = async () => {
     const validQuestions = creationQuestions.filter(q => 
       q.text.trim() && q.options.filter(o => o.trim()).length >= 2
     );
 
     if (!pollTitle.trim() || validQuestions.length === 0) return;
 
-    const newPoll: Poll = {
-      id: Date.now(),
-      title: pollTitle.trim(),
-      questions: validQuestions.map((q, idx) => ({
-        id: `q${idx + 1}`,
-        text: q.text.trim(),
-        options: q.options.filter(o => o.trim()).map(text => ({ text: text.trim(), votes: 0 })),
-        totalVotes: 0
-      })),
-      status: "active",
-      type: pollType,
-      createdAt: "Just now",
-    };
+    try {
+      setIsSubmitting(true);
+      const category = pollType === "pre" ? "Pre-Event" : pollType === "post" ? "Post-Event" : "Live Poll";
+      
+      const payload = {
+        eventId: _id as string,
+        title: pollTitle.trim(),
+        category,
+        questions: validQuestions.map(q => ({
+          text: q.text.trim(),
+          options: q.options.filter(o => o.trim()).map(text => ({ text: text.trim() }))
+        }))
+      };
 
-    setPolls([newPoll, ...polls]);
-    setPollTitle("");
-    setPollType("live");
-    setCreationQuestions([{ text: "", options: ["", ""] }]);
-    setShowCreateModal(false);
+      await pollsService.createPoll(payload);
+      toast.success("Poll created successfully!");
+      fetchPolls(); // Refetch to get real IDs and synced data
+
+      setPollTitle("");
+      setPollType("live");
+      setCreationQuestions([{ text: "", options: ["", ""] }]);
+      setShowCreateModal(false);
+    } catch (error) {
+      toast.error("Failed to create poll");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleEndPoll = (pollId: number) => {
-    setPolls(polls.map((p) => (p.id === pollId ? { ...p, status: "ended" as const } : p)));
+  const handleEndPoll = async (pollId: string) => {
+    try {
+      await pollsService.updateStatus(pollId, "ENDED");
+      setPolls(polls.map((p) => (p.id === pollId ? { ...p, status: "ended" as const } : p)));
+      toast.success("Poll ended successfully!");
+    } catch (error) {
+      toast.error("Failed to end poll");
+    }
   };
 
-  const handleDeletePoll = (pollId: number) => {
-    setPolls(polls.filter((p) => p.id !== pollId));
-    if (viewingPoll?.id === pollId) setViewingPoll(null);
+  const handleDeletePoll = async (pollId: string) => {
+    try {
+      await pollsService.deletePoll(pollId);
+      setPolls(polls.filter((p) => p.id !== pollId));
+      if (viewingPoll?.id === pollId) setViewingPoll(null);
+      toast.success("Poll deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete poll");
+    }
   };
 
   const activeCount = polls.filter((p) => p.status === "active").length;
@@ -302,7 +278,12 @@ export default function PollsPage() {
 
       {/* Polls List */}
       <div className="space-y-4">
-        {filteredPolls.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-white border border-gray-100 rounded-2xl p-12 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-[#EB5017]/20 border-t-[#EB5017] rounded-full animate-spin"></div>
+            <p className="ml-4 text-sm font-bold text-gray-400">Loading Polls...</p>
+          </div>
+        ) : filteredPolls.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center space-y-3">
             <HiOutlineChartBar className="text-4xl text-gray-200 mx-auto" />
             <p className="font-black text-sm text-gray-300 uppercase tracking-wider">No polls found</p>
@@ -601,16 +582,20 @@ export default function PollsPage() {
               </button>
               <button
                 onClick={handleCreatePoll}
-                disabled={!pollTitle.trim() || creationQuestions.every(q => !q.text.trim())}
+                disabled={!pollTitle.trim() || creationQuestions.every(q => !q.text.trim()) || isSubmitting}
                 className={`flex-1 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
-                  pollTitle.trim() && creationQuestions.some(q => q.text.trim() && q.options.filter(o => o.trim()).length >= 2)
+                  pollTitle.trim() && creationQuestions.some(q => q.text.trim() && q.options.filter(o => o.trim()).length >= 2) && !isSubmitting
                     ? "bg-[#EB5017] text-white hover:bg-[#d64815] shadow-xl shadow-[#EB5017]/20 active:scale-[0.98]"
                     : "bg-gray-100 text-gray-300 cursor-not-allowed"
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
-                  <HiOutlineCheck className="text-lg" />
-                  Launch Multi-Poll
+                  {isSubmitting ? (
+                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                     <HiOutlineCheck className="text-lg" />
+                  )}
+                  {isSubmitting ? "Creating..." : "Launch Multi-Poll"}
                 </div>
               </button>
             </div>
