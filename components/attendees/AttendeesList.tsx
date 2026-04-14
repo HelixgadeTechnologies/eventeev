@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import Avatar from "../ui/Avatar";
 import DataTable from "../ui/data-table";
-import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2, Download, Loader2, Plus, X } from "lucide-react";
+import { EllipsisVertical, ArrowUpDown, AlertCircle, CheckCircle2, Download, Loader2, Plus, X, ScanLine } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,7 @@ import {
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 import { FilterConfig } from "../ui/data-table";
 import Modal from "../ui/Modal";
+import QRScannerModal from "./QRScannerModal";
 import { useParams } from "next/navigation";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 
@@ -43,6 +44,7 @@ const AttendeesList = () => {
   
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [addForm, setAddForm] = useState({ name: "", email: "" });
   const [isAdding, setIsAdding] = useState(false);
   const [pendingAttendee, setPendingAttendee] = useState<AttendeesDataType | null>(null);
@@ -201,6 +203,37 @@ const AttendeesList = () => {
       fetchAttendees();
     }
     setIsAdding(false);
+  };
+
+  const handleScan = async (text: string) => {
+    setIsScannerOpen(false); 
+    
+    let scannedId = text;
+    if (text.includes('/')) {
+      const parts = text.split('/');
+      scannedId = parts[parts.length - 1]; 
+    }
+
+    setIsActionLoading(true);
+    const { error: checkInError } = await attendeesService.checkInAttendee(scannedId);
+    
+    if (checkInError) {
+      setStatusModal({
+        isOpen: true,
+        title: "Scan Failed",
+        description: checkInError.message || "Failed to check in scanned ticket.",
+        variant: "error"
+      });
+    } else {
+      setStatusModal({
+        isOpen: true,
+        title: "Check-in Successful!",
+        description: "Ticket verified and user checked in.",
+        variant: "success"
+      });
+      fetchAttendees();
+    }
+    setIsActionLoading(false);
   };
 
   const columns = useMemo<ColumnDef<AttendeesDataType>[]>(() => [
@@ -383,6 +416,13 @@ const AttendeesList = () => {
         </div>
         <div className="flex items-center gap-3">
           <button 
+            onClick={() => setIsScannerOpen(true)}
+            className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-sm hover:shadow-md group active:scale-95"
+          >
+            <ScanLine size={14} className="group-hover:scale-110 transition-transform text-[#EB5017]" />
+            Scan Ticket
+          </button>
+          <button 
             onClick={() => setIsAddModalOpen(true)}
             className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all shadow-sm hover:shadow-md group active:scale-95"
           >
@@ -499,6 +539,12 @@ const AttendeesList = () => {
         confirmLabel="Understood"
         hideCancelButton={true}
         variant={statusModal.variant}
+      />
+      
+      <QRScannerModal 
+        isOpen={isScannerOpen} 
+        onClose={() => setIsScannerOpen(false)} 
+        onScan={handleScan} 
       />
     </div>
   );
