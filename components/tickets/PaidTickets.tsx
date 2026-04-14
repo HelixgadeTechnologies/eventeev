@@ -161,7 +161,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
               name: a.name,
               email: a.email,
               ticketName: tier.name,
-              ticketId: a.id, // Using attendee registration ID as ticket ID for now
+              ticketId: a.id || a._id || "", // Using attendee registration ID as ticket ID for now
               dateRegistered: (a.registrationDate || a.createdAt) 
                 ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
                     month: 'short',

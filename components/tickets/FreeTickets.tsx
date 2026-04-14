@@ -143,7 +143,7 @@ export default function FreeTickets({
               name: a.name,
               email: a.email,
               ticketName: tier.name,
-              ticketId: a.id,
+              ticketId: a.id || a._id || "",
                dateRegistered: (a.registrationDate || a.createdAt) 
                 ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
                     month: 'short',
