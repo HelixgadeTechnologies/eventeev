@@ -56,7 +56,6 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose, onScan
                 audio: false,
                 onOff: true,
                 torch: true,
-                tracker: true,
               }}
             />
             
