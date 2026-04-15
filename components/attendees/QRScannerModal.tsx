@@ -53,9 +53,9 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose, onScan
                 video: { objectFit: "cover" },
               }}
               components={{
-                audio: false,
                 onOff: true,
                 torch: true,
+                finder: true,
               }}
             />
             
