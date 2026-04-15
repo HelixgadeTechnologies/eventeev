@@ -45,7 +45,7 @@ export class AttendeesService {
   /**
    * Create a new attendee (Manual registration via Admin)
    */
-  async createAttendee(payload: { eventId: string; name: string; email: string; status?: string }) {
+  async createAttendee(payload: { eventId: string; name: string; email: string; ticketId?: string; status?: string }) {
     try {
       const response = await axiosInstance.post('/api/attendee/create', payload);
       return { data: response.data as ApiAttendee, error: null };

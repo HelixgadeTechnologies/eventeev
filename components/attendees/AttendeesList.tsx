@@ -21,6 +21,7 @@ import Modal from "../ui/Modal";
 import QRScannerModal from "./QRScannerModal";
 import { useParams } from "next/navigation";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
+import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
 
 const filters: FilterConfig[] = [
   {
@@ -45,7 +46,8 @@ const AttendeesList = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [addForm, setAddForm] = useState({ name: "", email: "" });
+  const [ticketTiers, setTicketTiers] = useState<ApiTicket[]>([]);
+  const [addForm, setAddForm] = useState({ name: "", email: "", ticketId: "" });
   const [isAdding, setIsAdding] = useState(false);
   const [pendingAttendee, setPendingAttendee] = useState<AttendeesDataType | null>(null);
   const [pendingStatus, setPendingStatus] = useState<boolean>(false);
@@ -66,8 +68,14 @@ const AttendeesList = () => {
   useEffect(() => {
     if (eventId) {
       fetchAttendees();
+      fetchTicketTiers();
     }
   }, [eventId]);
+
+  const fetchTicketTiers = async () => {
+    const { data } = await ticketsService.getTickets(eventId);
+    setTicketTiers(data);
+  };
 
   const fetchAttendees = async () => {
     setLoading(true);
@@ -178,11 +186,14 @@ const AttendeesList = () => {
     if (!addForm.name || !addForm.email) return;
     
     setIsAdding(true);
-    const { data, error } = await attendeesService.createAttendee({ 
+    const payload: { eventId: string; name: string; email: string; ticketId?: string } = { 
       eventId, 
       name: addForm.name, 
-      email: addForm.email 
-    });
+      email: addForm.email,
+    };
+    if (addForm.ticketId) payload.ticketId = addForm.ticketId;
+
+    const { data, error } = await attendeesService.createAttendee(payload);
     
     if (error) {
       setStatusModal({
@@ -198,7 +209,7 @@ const AttendeesList = () => {
         description: `${addForm.name} has been successfully added to the event.`,
         variant: "success"
       });
-      setAddForm({ name: "", email: "" });
+      setAddForm({ name: "", email: "", ticketId: "" });
       setIsAddModalOpen(false);
       fetchAttendees();
     }
@@ -517,6 +528,31 @@ const AttendeesList = () => {
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#EB5017] focus:ring-4 focus:ring-[#EB5017]/10 outline-none transition-all text-sm font-bold placeholder:text-gray-300"
               placeholder="e.g. jane@example.com"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Ticket Tier <span className="text-gray-300 normal-case font-medium">(optional)</span>
+            </label>
+            <select
+              value={addForm.ticketId}
+              onChange={(e) => setAddForm({ ...addForm, ticketId: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-[#EB5017] focus:ring-4 focus:ring-[#EB5017]/10 outline-none transition-all text-sm font-bold text-gray-700 bg-white appearance-none cursor-pointer"
+            >
+              <option value="">No ticket tier (General Admission)</option>
+              {ticketTiers.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} — {t.price > 0 ? `$${t.price}` : 'Free'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-start gap-2.5 bg-[#EB5017]/5 border border-[#EB5017]/10 rounded-xl px-4 py-3">
+            <span className="text-[#EB5017] text-sm mt-0.5">✉</span>
+            <p className="text-[10px] text-[#AD3307] font-bold uppercase tracking-wider leading-relaxed">
+              A confirmation email with their QR ticket will be sent to this address automatically.
+            </p>
           </div>
           
           <button
