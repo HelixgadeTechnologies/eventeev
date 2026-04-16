@@ -124,12 +124,7 @@ export default function ChatPage() {
     }
   };
 
-  const onlineUsers = [
-    { name: "Marcus Lee", status: "online", level: 12, rank: "Pro", avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150" },
-    { name: "Sarah Jenkins", status: "online", level: 8, rank: "Newbie", avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" },
-    { name: "David Chen", status: "away", level: null, rank: null, avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150" },
-    { name: "Emily Watson", status: "online", level: 15, rank: "Expert", avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150" },
-  ];
+
 
   if (isLoading) {
     return (
@@ -269,32 +264,32 @@ export default function ChatPage() {
 
       {/* Right Sidebar */}
       <div className="w-[280px] bg-white border-l border-gray-50 flex flex-col shrink-0">
-        {/* Who's Online Section */}
+        {/* Who's Online Section - Placeholder for real-time presence */}
         <div className="p-6 border-b border-gray-50 flex-none overflow-y-auto custom-scrollbar max-h-[40%]">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Who&apos;s Online</h2>
-            <span className="bg-[#E7F6EC] text-[#0FAF94] px-2 py-0.5 rounded text-[10px] font-black">124</span>
+            <span className="bg-[#E7F6EC] text-[#0FAF94] px-2 py-0.5 rounded text-[10px] font-black">1</span>
           </div>
           
           <div className="space-y-6">
-            {onlineUsers.slice(0, 4).map((user, idx) => (
-              <div key={idx} className="flex items-center gap-3 group cursor-pointer">
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100 group-hover:ring-2 ring-[#EB5017] transition-all">
-                    <Image src={user.avatarUrl} alt={user.name} width={40} height={40} className="object-cover" />
-                  </div>
-                  <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${user.status === 'online' ? 'bg-[#0FAF94]' : 'bg-[#FAAD14]'}`} />
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#EB5017] shadow-sm">
+                  <Image 
+                    src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${currentUser?.name || 'User'}&background=random`} 
+                    alt={currentUser?.name || "You"} 
+                    width={40} 
+                    height={40} 
+                    className="object-cover" 
+                  />
                 </div>
-                <div className="flex-grow overflow-hidden">
-                  <p className="text-[13px] font-black text-[#1B1818] truncate group-hover:text-[#EB5017] transition-colors">{user.name}</p>
-                  {user.level ? (
-                    <p className="text-[10px] font-bold text-gray-400">Level {user.level} • {user.rank}</p>
-                  ) : (
-                    <p className="text-[10px] font-bold text-gray-400 capitalize">{user.status}</p>
-                  )}
-                </div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white bg-[#0FAF94]" />
               </div>
-            ))}
+              <div className="flex-grow overflow-hidden">
+                <p className="text-[13px] font-black text-[#1B1818] truncate">{currentUser?.name} (You)</p>
+                <p className="text-[10px] font-bold text-gray-400">Online</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -327,19 +322,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Upcoming Quizzes Section */}
-        <div className="p-6">
-          <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em] mb-4">Upcoming Quizzes</h2>
-          <div className="bg-[#FFF8F2] border border-[#FFD9B3] rounded-[16px] p-4 group cursor-pointer hover:border-[#EB5017] transition-all">
-            <p className="text-[11px] font-black text-[#EB5017] mb-1">Mega History Quiz</p>
-            <div className="flex items-center gap-1.5 text-[9px] font-black text-[#B28A6A] uppercase">
-               <div className="w-3 h-3 rounded-full border border-[#B28A6A]/30 flex items-center justify-center">
-                  <div className="w-1 h-1 bg-[#B28A6A] rounded-full" />
-               </div>
-               Starts in 15 mins
-            </div>
-          </div>
-        </div>
+
       </div>
 
       <style jsx>{`
