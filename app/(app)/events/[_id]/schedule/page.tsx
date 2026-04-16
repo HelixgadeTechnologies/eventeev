@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 export default function SchedulePage() {
   const { _id } = useParams();
-  const eventId = Array.isArray(_id) ? _id[0] : _id;
+  const eventId = (Array.isArray(_id) ? _id[0] : _id) as string;
   
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +28,9 @@ export default function SchedulePage() {
   // Fetch schedules from database
   const fetchSchedules = async () => {
     try {
+      if (!eventId) return;
       setLoading(true);
-      const data = await scheduleService.getSchedule(eventId);
+      const data = await scheduleService.getSchedule(eventId as string);
       // Map backend _id to id if necessary, though our interface uses id
       const normalizedData = data.map((item: any) => ({
         ...item,
