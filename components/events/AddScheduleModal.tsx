@@ -9,10 +9,10 @@ export interface ScheduleItem {
   endTime: string;
   title: string;
   description: string;
-  speaker?: {
+  speakers?: {
     name: string;
     role: string;
-  };
+  }[];
   type: "Keynote" | "Workshop" | "Break" | "Activity" | "Networking";
 }
 
@@ -37,14 +37,15 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
 
   React.useEffect(() => {
     if (editItem && isOpen) {
+      const mainSpeaker = editItem.speakers?.[0];
       setFormData({
         startTime: editItem.startTime,
         endTime: editItem.endTime,
         title: editItem.title,
         description: editItem.description,
         type: editItem.type,
-        speakerName: editItem.speaker?.name || "",
-        speakerRole: editItem.speaker?.role || "",
+        speakerName: mainSpeaker?.name || "",
+        speakerRole: mainSpeaker?.role || "",
       });
     } else if (isOpen) {
       setFormData({
@@ -62,22 +63,21 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newSchedule: ScheduleItem = {
-      id: `s-${Date.now()}`,
+      id: editItem?.id || `s-${Date.now()}`,
       startTime: formData.startTime,
       endTime: formData.endTime,
       title: formData.title,
       description: formData.description,
       type: formData.type,
       ...(formData.speakerName && {
-        speaker: {
+        speakers: [{
           name: formData.speakerName,
           role: formData.speakerRole,
-        }
+        }]
       })
     };
     
     if (editItem && onEdit) {
-      newSchedule.id = editItem.id;
       onEdit(newSchedule);
     } else {
       onAdd(newSchedule);

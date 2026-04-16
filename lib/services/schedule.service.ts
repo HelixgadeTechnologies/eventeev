@@ -10,6 +10,16 @@ export class ScheduleService {
     const response = await axiosInstance.post('/api/schedule', data);
     return response.data;
   }
+
+  async updateItem(id: string, data: any) {
+    const response = await axiosInstance.put(`/api/schedule/${id}`, data);
+    return response.data;
+  }
+
+  async deleteItem(id: string) {
+    const response = await axiosInstance.delete(`/api/schedule/${id}`);
+    return response.data;
+  }
 }
 
 export const scheduleService = new ScheduleService();

@@ -1,105 +1,99 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
-import { LuClock3, LuPlus } from "react-icons/lu";
+import { LuClock3, LuPlus, LuLoader2 } from "react-icons/lu";
 import { Reorder } from "framer-motion";
 import Avatar from "@/components/ui/Avatar";
 import { publishedEvents, draftedEvents, completedEvents } from "@/lib/demo-data/events";
 import AddScheduleModal, { ScheduleItem } from "@/components/events/AddScheduleModal";
 import PreviewScheduleModal from "@/components/events/PreviewScheduleModal";
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
-
-const SCHEDULE_DATA: ScheduleItem[] = [
-  {
-    id: "s1",
-    startTime: "09:00",
-    endTime: "09:45",
-    title: "Registration & Breakfast",
-    description: "Check-in, grab your badge, and enjoy some morning refreshments before we kick off.",
-    type: "Break"
-  },
-  {
-    id: "s2",
-    startTime: "09:45",
-    endTime: "11:00",
-    title: "Opening Keynote: The Future is Now",
-    description: "A deep dive into upcoming trends and what to expect in the tech landscape.",
-    speaker: {
-      name: "Dr. Richard Edem",
-      role: "Lead Innovator"
-    },
-    type: "Keynote"
-  },
-  {
-    id: "s3",
-    startTime: "11:00",
-    endTime: "12:00",
-    title: "Interactive Workshop: Building Scalable Systems",
-    description: "Learn hands-on techniques for designing architectures that scale effortlessly.",
-    speaker: {
-      name: "Sarah Jenkins",
-      role: "Senior Systems Engineer"
-    },
-    type: "Workshop"
-  },
-  {
-    id: "s4",
-    startTime: "12:00",
-    endTime: "13:30",
-    title: "Lunch & Networking",
-    description: "Connect with fellow attendees over a catered lunch.",
-    type: "Networking"
-  },
-  {
-    id: "s5",
-    startTime: "13:30",
-    endTime: "14:15",
-    title: "Panel Discussion: AI in the Modern Workplace",
-    description: "Industry experts discuss the practical applications and ethical implications of AI.",
-    speaker: {
-      name: "Daniel Foster",
-      role: "Chief Technology Officer"
-    },
-    type: "Activity"
-  },
-  {
-    id: "s6",
-    startTime: "14:15",
-    endTime: "15:15",
-    title: "Product Showcase & Demos",
-    description: "Get a first look at new products and feature releases from our sponsors.",
-    type: "Activity"
-  },
-  {
-    id: "s7",
-    startTime: "15:15",
-    endTime: "15:45",
-    title: "Closing Remarks & Awards",
-    description: "Wrapping up the event and recognizing outstanding contributions.",
-    speaker: {
-      name: "Dr. Richard Edem",
-      role: "Lead Innovator"
-    },
-    type: "Keynote"
-  }
-];
+import { scheduleService } from "@/lib/services/schedule.service";
+import toast from "react-hot-toast";
 
 export default function SchedulePage() {
   const { _id } = useParams();
+  const eventId = Array.isArray(_id) ? _id[0] : _id;
   
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(SCHEDULE_DATA);
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | null>(null);
 
+  // Fetch schedules from database
+  const fetchSchedules = async () => {
+    try {
+      setLoading(true);
+      const data = await scheduleService.getSchedule(eventId);
+      // Map backend _id to id if necessary, though our interface uses id
+      const normalizedData = data.map((item: any) => ({
+        ...item,
+        id: item._id || item.id
+      }));
+      setSchedules(normalizedData);
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+      toast.error("Failed to load schedule");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (eventId) {
+      fetchSchedules();
+    }
+  }, [eventId]);
+
+  // Handle adding new schedule item
+  const handleAddSchedule = async (newSchedule: Omit<ScheduleItem, 'id'>) => {
+    try {
+      await scheduleService.createItem({
+        ...newSchedule,
+        event: eventId
+      });
+      toast.success("Schedule item added");
+      fetchSchedules();
+    } catch (error) {
+      console.error("Error adding schedule:", error);
+      toast.error("Failed to add schedule item");
+    }
+  };
+
+  // Handle editing schedule item
+  const handleEditSchedule = async (updatedSchedule: ScheduleItem) => {
+    try {
+      await scheduleService.updateItem(updatedSchedule.id, updatedSchedule);
+      toast.success("Schedule item updated");
+      fetchSchedules();
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      toast.error("Failed to update schedule item");
+    }
+  };
+
+  // Handle deleting schedule item
+  const handleDeleteSchedule = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this schedule item?")) return;
+    try {
+      await scheduleService.deleteItem(id);
+      toast.success("Schedule item removed");
+      setSchedules(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      toast.error("Failed to delete schedule item");
+    }
+  };
+
   // Find the current event
   const currentEvent = useMemo(() => {
     const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents];
-    return allEvents.find(e => e._id === _id);
-  }, [_id]);
+    return allEvents.find(e => e._id === eventId);
+  }, [eventId]);
 
   return (
     <div className="space-y-8 pb-20 font-sans max-w-5xl mx-auto">
@@ -107,7 +101,7 @@ export default function SchedulePage() {
       <div className="space-y-4">
         <div className="px-2">
           <Link
-            href={`/events/${_id}/dashboard`}
+            href={`/events/${eventId}/dashboard`}
             className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
           >
             <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
@@ -166,92 +160,116 @@ export default function SchedulePage() {
           setIsAddModalOpen(false);
           setEditItem(null);
         }} 
-        onAdd={(newSchedule) => setSchedules([...schedules, newSchedule])}
-        onEdit={(updatedSchedule) => setSchedules(schedules.map(s => s.id === updatedSchedule.id ? updatedSchedule : s))}
+        onAdd={handleAddSchedule}
+        onEdit={handleEditSchedule}
         editItem={editItem}
       />
 
       {/* Schedule List */}
       <div className="space-y-4 px-2">
-        <Reorder.Group axis="y" values={schedules} onReorder={setSchedules} className="relative border-l-4 border-gray-100/60 ml-4 md:ml-6 space-y-8 py-4">
-          {schedules.map((item, index) => (
-            <Reorder.Item value={item} key={item.id} className="relative pl-8 md:pl-12 group cursor-grab active:cursor-grabbing">
-              {/* Timeline dot */}
-              <div className={`absolute -left-[14px] top-6 h-6 w-6 rounded-full border-[6px] border-white transition-colors duration-300 shadow-sm ${
-                item.type === "Break" || item.type === "Networking" ? "bg-gray-300" : "bg-[#EB5017]"
-              } group-hover:scale-125 z-10`} />
-              
-              <div className="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                  
-                  {/* Left Side: Time & Info */}
-                  <div className="space-y-4 flex-1">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-sm font-black text-[#EB5017] bg-[#EB5017]/10 px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-inner">
-                        {item.startTime}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full">
-                        <LuClock3 className="text-sm" />
-                        {item.endTime}
-                      </div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
-                          item.type === "Keynote" ? "bg-purple-50 text-purple-600 border-purple-100" :
-                          item.type === "Workshop" ? "bg-blue-50 text-blue-600 border-blue-100" :
-                          item.type === "Break" ? "bg-gray-100 text-gray-500 border-gray-200" :
-                          item.type === "Networking" ? "bg-teal-50 text-teal-600 border-teal-100" :
-                          "bg-orange-50 text-orange-600 border-orange-100"
-                      }`}>
-                          {item.type}
-                      </span>
-                    </div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400 space-y-4">
+            <LuLoader2 className="text-4xl animate-spin text-[#EB5017]" />
+            <p className="text-sm font-bold uppercase tracking-widest">Loading agenda...</p>
+          </div>
+        ) : schedules.length === 0 ? (
+          <div className="bg-gray-50 border-2 border-dashed border-gray-100 rounded-[40px] p-20 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm">
+              <LuClock3 className="text-2xl text-gray-300" />
+            </div>
+            <div>
+              <p className="text-lg font-black text-[#1B1818]">No sessions yet</p>
+              <p className="text-sm text-gray-400 font-medium">Start building your event timeline by adding activities.</p>
+            </div>
+            <button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="bg-[#1B1818] text-white px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+            >
+              Add First Activity
+            </button>
+          </div>
+        ) : (
+          <Reorder.Group axis="y" values={schedules} onReorder={setSchedules} className="relative border-l-4 border-gray-100/60 ml-4 md:ml-6 space-y-8 py-4">
+            {schedules.map((item) => (
+              <Reorder.Item value={item} key={item.id} className="relative pl-8 md:pl-12 group cursor-grab active:cursor-grabbing">
+                {/* Timeline dot */}
+                <div className={`absolute -left-[14px] top-6 h-6 w-6 rounded-full border-[6px] border-white transition-colors duration-300 shadow-sm ${
+                  item.type === "Break" || item.type === "Networking" ? "bg-gray-300" : "bg-[#EB5017]"
+                } group-hover:scale-125 z-10`} />
+                
+                <div className="bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                     
-                    <div>
-                      <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">{item.title}</h3>
-                      <p className="text-sm text-gray-500 font-medium leading-relaxed mt-1 max-w-2xl">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Side: Speaker */}
-                  {item.speaker && (
-                    <div className="flex items-center gap-4 bg-gray-50/80 hover:bg-white p-4 rounded-[24px] border border-gray-100 shrink-0 md:w-[280px] transition-colors duration-300 shadow-sm">
-                      <Avatar name={item.speaker.name} isBigger={true} />
-                      <div className="overflow-hidden flex-1">
-                        <p className="font-black text-xs text-[#1B1818] uppercase tracking-tighter truncate">
-                          {item.speaker.name}
-                        </p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest truncate mt-0.5">
-                          {item.speaker.role}
+                    {/* Left Side: Time & Info */}
+                    <div className="space-y-4 flex-1">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="text-sm font-black text-[#EB5017] bg-[#EB5017]/10 px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-inner">
+                          {item.startTime}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full">
+                          <LuClock3 className="text-sm" />
+                          {item.endTime}
+                        </div>
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
+                            item.type === "Keynote" ? "bg-purple-50 text-purple-600 border-purple-100" :
+                            item.type === "Workshop" ? "bg-blue-50 text-blue-600 border-blue-100" :
+                            item.type === "Break" ? "bg-gray-100 text-gray-500 border-gray-200" :
+                            item.type === "Networking" ? "bg-teal-50 text-teal-600 border-teal-100" :
+                            "bg-orange-50 text-orange-600 border-orange-100"
+                        }`}>
+                            {item.type}
+                        </span>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">{item.title}</h3>
+                        <p className="text-sm text-gray-500 font-medium leading-relaxed mt-1 max-w-2xl">
+                          {item.description}
                         </p>
                       </div>
                     </div>
-                  )}
-                  
-                  {/* Actions (Edit / Delete) */}
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button
-                      onClick={() => {
-                        setEditItem(item);
-                        setIsAddModalOpen(true);
-                      }}
-                      className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-blue-500 hover:border-blue-100 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm"
-                    >
-                      <FiEdit2 className="text-sm" />
-                    </button>
-                    <button
-                      onClick={() => setSchedules(schedules.filter(s => s.id !== item.id))}
-                      className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm"
-                    >
-                      <FiTrash2 className="text-sm" />
-                    </button>
+
+                    {/* Right Side: Speaker */}
+                    {item.speakers && item.speakers[0] && (
+                      <div className="flex items-center gap-4 bg-gray-50/80 hover:bg-white p-4 rounded-[24px] border border-gray-100 shrink-0 md:w-[280px] transition-colors duration-300 shadow-sm">
+                        <Avatar name={item.speakers[0].name} isBigger={true} />
+                        <div className="overflow-hidden flex-1">
+                          <p className="font-black text-xs text-[#1B1818] uppercase tracking-tighter truncate">
+                            {item.speakers[0].name}
+                          </p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest truncate mt-0.5">
+                            {item.speakers[0].role}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Actions (Edit / Delete) */}
+                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button
+                        onClick={() => {
+                          setEditItem(item);
+                          setIsAddModalOpen(true);
+                        }}
+                        className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-blue-500 hover:border-blue-100 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm"
+                      >
+                        <FiEdit2 className="text-sm" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSchedule(item.id)}
+                        className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm"
+                      >
+                        <FiTrash2 className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        )}
       </div>
     </div>
   );
 }
+
