@@ -97,15 +97,15 @@ export default function PreviewScheduleModal({ isOpen, onClose, schedules, event
                           </div>
 
                           {/* Right Side: Speaker */}
-                          {item.speaker && (
+                          {item.speakers && item.speakers[0] && (
                             <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-[24px] border border-gray-100 shrink-0 md:w-[220px]">
-                              <Avatar name={item.speaker.name} isBigger={false} />
+                              <Avatar name={item.speakers[0].name} isBigger={false} />
                               <div className="overflow-hidden flex-1">
                                 <p className="font-black text-xs text-[#1B1818] uppercase tracking-tighter truncate">
-                                  {item.speaker.name}
+                                  {item.speakers[0].name}
                                 </p>
                                 <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest truncate mt-0.5">
-                                  {item.speaker.role}
+                                  {item.speakers[0].role}
                                 </p>
                               </div>
                             </div>
