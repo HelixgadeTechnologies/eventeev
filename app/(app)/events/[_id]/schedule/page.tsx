@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
-import { LuClock3, LuPlus, LuLoader2 } from "react-icons/lu";
+import { LuClock3, LuPlus, LuLoader } from "react-icons/lu";
 import { Reorder } from "framer-motion";
 import Avatar from "@/components/ui/Avatar";
 import { publishedEvents, draftedEvents, completedEvents } from "@/lib/demo-data/events";
@@ -169,7 +169,7 @@ export default function SchedulePage() {
       <div className="space-y-4 px-2">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400 space-y-4">
-            <LuLoader2 className="text-4xl animate-spin text-[#EB5017]" />
+            <LuLoader className="text-4xl animate-spin text-[#EB5017]" />
             <p className="text-sm font-bold uppercase tracking-widest">Loading agenda...</p>
           </div>
         ) : schedules.length === 0 ? (
