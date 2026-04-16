@@ -1,8 +1,10 @@
+"use client";
+
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile } from "react-icons/fi";
 import { IoSend } from "react-icons/io5";
-import { LuLoader2 } from "react-icons/lu";
+import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import EmojiPicker from "@/components/chat/EmojiPicker";
 import { chatService, Message, Room } from "@/lib/services/chat.service";

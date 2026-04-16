@@ -1,77 +1,12 @@
 "use client";
 
-import { HiOutlineBell, HiOutlinePlus, HiOutlineCalendar, HiOutlineMail } from "react-icons/hi";
-import { useState } from "react";
+import { HiOutlineBell, HiOutlinePlus, HiOutlineCalendar, HiOutlineMail, HiOutlineTrash } from "react-icons/hi";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import AddReminderModal from "@/components/calendar/AddReminderModal";
-
-const MOCK_REMINDERS = [
-  {
-    id: 1,
-    title: "Final Venue Walkthrough",
-    date: "Feb 14, 2026",
-    time: "10:00 AM",
-    type: "task",
-    priority: "high",
-    description: "Complete final walkthrough of all event areas with the venue manager",
-    sendEmail: true,
-    syncToCalendar: true,
-  },
-  {
-    id: 2,
-    title: "Speaker Rehearsal — Keynote",
-    date: "Feb 14, 2026",
-    time: "2:00 PM",
-    type: "rehearsal",
-    priority: "high",
-    description: "Tech check and run-through with keynote speaker",
-    sendEmail: true,
-    syncToCalendar: true,
-  },
-  {
-    id: 3,
-    title: "Catering Confirmation",
-    date: "Feb 15, 2026",
-    time: "09:00 AM",
-    type: "task",
-    priority: "medium",
-    description: "Confirm final headcount and menu selections with caterer",
-    sendEmail: false,
-    syncToCalendar: false,
-  },
-  {
-    id: 4,
-    title: "Social Media Blast — 48hr Countdown",
-    date: "Feb 15, 2026",
-    time: "12:00 PM",
-    type: "marketing",
-    priority: "medium",
-    description: "Schedule and publish countdown posts across all platforms",
-    sendEmail: true,
-    syncToCalendar: false,
-  },
-  {
-    id: 5,
-    title: "Volunteer Briefing",
-    date: "Feb 16, 2026",
-    time: "08:00 AM",
-    type: "task",
-    priority: "low",
-    description: "Morning briefing with all event volunteers before doors open",
-    sendEmail: true,
-    syncToCalendar: true,
-  },
-  {
-    id: 6,
-    title: "Event Day — Doors Open",
-    date: "Feb 17, 2026",
-    time: "09:00 AM",
-    type: "milestone",
-    priority: "high",
-    description: "Main event day! Doors open for early arrivals and VIP guests",
-    sendEmail: true,
-    syncToCalendar: true,
-  },
-];
+import { checklistService } from "@/lib/services/checklist.service";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const priorityColors: Record<string, string> = {
   high: "bg-red-50 text-red-600 border-red-100",
@@ -94,45 +29,96 @@ const typeDotColors: Record<string, string> = {
 };
 
 export default function CalendarPage() {
-  const [reminders, setReminders] = useState(MOCK_REMINDERS);
+  const { _id } = useParams();
+  const eventId = (Array.isArray(_id) ? _id[0] : _id) as string;
+
+  const [reminders, setReminders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAddReminder = (data: any) => {
-    // Format date from YYYY-MM-DD to "MMM DD, YYYY"
-    const dateObj = new Date(data.date);
-    const formattedDate = dateObj.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+  const fetchReminders = useCallback(async () => {
+    try {
+      if (!eventId) return;
+      setLoading(true);
+      const data = await checklistService.getChecklist(eventId);
+      
+      // Normalize data: ensure category maps to type, and handle date formats
+      const normalizedData = data.map((item: any) => ({
+        ...item,
+        id: item._id || item.id,
+        type: item.category || 'task', // Map category to type
+        // Ensure UI formatting for dates if not already formatted
+        displayDate: item.date || new Date(item.createdAt).toLocaleDateString("en-US", {
+           month: "short",
+           day: "numeric",
+           year: "numeric"
+        }),
+        displayTime: item.time || new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }));
+      
+      setReminders(normalizedData);
+    } catch (error) {
+      console.error("Error fetching reminders:", error);
+      toast.error("Failed to load event timeline");
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId]);
 
-    // Format 24h time to 12h AM/PM
-    const [hours, minutes] = data.time.split(":");
-    const hourInt = parseInt(hours);
-    const ampm = hourInt >= 12 ? "PM" : "AM";
-    const displayHour = hourInt % 12 || 12;
-    const formattedTime = `${displayHour}:${minutes} ${ampm}`;
+  useEffect(() => {
+    fetchReminders();
+  }, [fetchReminders]);
 
-    const newReminder = {
-      ...data,
-      date: formattedDate,
-      time: formattedTime,
-    };
+  const handleAddReminder = async (data: any) => {
+    try {
+      // Map 'type' back to 'category' for backend
+      const payload = {
+        ...data,
+        event: eventId,
+        category: data.type
+      };
+      
+      await checklistService.createItem(payload);
+      toast.success("Reminder added to timeline");
+      fetchReminders();
+    } catch (error) {
+      console.error("Error adding reminder:", error);
+      toast.error("Failed to save reminder");
+    }
+  };
 
-    setReminders((prev) => [...prev, newReminder]);
+  const handleDeleteReminder = async (id: string) => {
+    if (!confirm("Are you sure you want to remove this reminder?")) return;
+    try {
+      await checklistService.deleteItem(id);
+      toast.success("Reminder removed");
+      setReminders(prev => prev.filter(r => r.id !== id));
+    } catch (error) {
+      toast.error("Failed to delete reminder");
+    }
   };
 
   // Group by date
   const groupedByDate = reminders.reduce((acc, reminder) => {
-    if (!acc[reminder.date]) acc[reminder.date] = [];
-    acc[reminder.date].push(reminder);
+    const key = reminder.displayDate;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(reminder);
     return acc;
-  }, {} as Record<string, typeof MOCK_REMINDERS>);
+  }, {} as Record<string, any[]>);
 
-  // Sort dates (approximation for mock data)
+  // Sort dates
   const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
     return new Date(a).getTime() - new Date(b).getTime();
   });
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-[#EB5017]" />
+        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Loading Timeline...</p>
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-8 font-sans">
@@ -193,8 +179,15 @@ export default function CalendarPage() {
                           </span>
                         </div>
                         
-                        {/* Status Badges */}
+                        {/* Actions */}
                         <div className="flex items-center gap-1.5">
+                           <button 
+                             onClick={() => handleDeleteReminder(reminder.id)}
+                             className="w-7 h-7 rounded-lg bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-100"
+                             title="Delete Reminder"
+                           >
+                             <HiOutlineTrash size={14} />
+                           </button>
                            {reminder.sendEmail && (
                              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 shadow-sm" title="Email Notification Enabled">
                                <HiOutlineMail size={14} />
@@ -215,7 +208,7 @@ export default function CalendarPage() {
                           <div className="p-1.5 rounded-lg bg-orange-50 text-[#EB5017]">
                             <HiOutlineBell size={14} />
                           </div>
-                          {reminder.time}
+                          {reminder.displayTime}
                         </span>
                         <span className="flex items-center gap-2 text-[11px] font-black text-gray-400 uppercase tracking-widest">
                           <span className={`w-2 h-2 rounded-full shadow-sm ${typeDotColors[reminder.type]}`} />

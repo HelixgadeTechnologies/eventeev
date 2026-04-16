@@ -8,11 +8,11 @@ import { LuClock3, LuPlus } from "react-icons/lu";
 import { Loader2 } from "lucide-react";
 import { Reorder } from "framer-motion";
 import Avatar from "@/components/ui/Avatar";
-import { publishedEvents, draftedEvents, completedEvents } from "@/lib/demo-data/events";
 import AddScheduleModal, { ScheduleItem } from "@/components/events/AddScheduleModal";
 import PreviewScheduleModal from "@/components/events/PreviewScheduleModal";
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { scheduleService } from "@/lib/services/schedule.service";
+import { eventsService } from "@/lib/services/events.service";
 import { toast } from "sonner";
 
 export default function SchedulePage() {
@@ -20,26 +20,36 @@ export default function SchedulePage() {
   const eventId = (Array.isArray(_id) ? _id[0] : _id) as string;
   
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [currentEvent, setCurrentEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | null>(null);
 
-  // Fetch schedules from database
-  const fetchSchedules = async () => {
+  // Fetch schedules and event details from database
+  const fetchData = async () => {
     try {
       if (!eventId) return;
       setLoading(true);
-      const data = await scheduleService.getSchedule(eventId as string);
+      
+      const [schedulesData, eventRes] = await Promise.all([
+        scheduleService.getSchedule(eventId as string),
+        eventsService.getEventById(eventId as string)
+      ]);
+
       // Map backend _id to id if necessary, though our interface uses id
-      const normalizedData = data.map((item: any) => ({
+      const normalizedData = schedulesData.map((item: any) => ({
         ...item,
         id: item._id || item.id
       }));
+      
       setSchedules(normalizedData);
+      if (eventRes.data) {
+        setCurrentEvent(eventRes.data);
+      }
     } catch (error) {
-      console.error("Error fetching schedules:", error);
-      toast.error("Failed to load schedule");
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load schedule information");
     } finally {
       setLoading(false);
     }
@@ -47,7 +57,7 @@ export default function SchedulePage() {
 
   useEffect(() => {
     if (eventId) {
-      fetchSchedules();
+      fetchData();
     }
   }, [eventId]);
 
@@ -59,7 +69,7 @@ export default function SchedulePage() {
         event: eventId
       });
       toast.success("Schedule item added");
-      fetchSchedules();
+      fetchData();
     } catch (error) {
       console.error("Error adding schedule:", error);
       toast.error("Failed to add schedule item");
@@ -71,7 +81,7 @@ export default function SchedulePage() {
     try {
       await scheduleService.updateItem(updatedSchedule.id, updatedSchedule);
       toast.success("Schedule item updated");
-      fetchSchedules();
+      fetchData();
     } catch (error) {
       console.error("Error updating schedule:", error);
       toast.error("Failed to update schedule item");
@@ -91,11 +101,7 @@ export default function SchedulePage() {
     }
   };
 
-  // Find the current event
-  const currentEvent = useMemo(() => {
-    const allEvents = [...publishedEvents, ...draftedEvents, ...completedEvents];
-    return allEvents.find(e => e._id === eventId);
-  }, [eventId]);
+
 
   return (
     <div className="space-y-8 pb-20 font-sans max-w-5xl mx-auto">
