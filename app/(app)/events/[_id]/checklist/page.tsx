@@ -14,7 +14,8 @@ import {
   HiOutlineLink as HiLink,
   HiOutlineInformationCircle as HiInfo,
   HiOutlineDownload,
-  HiOutlinePlus
+  HiOutlinePlus,
+  HiOutlineTrash
 } from "react-icons/hi";
 import { checklistService } from "@/lib/services/checklist.service";
 import { toast } from "sonner";
@@ -113,6 +114,17 @@ export default function ChecklistPage() {
       fetchTasks();
     } catch (error) {
       toast.error("Failed to save task");
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    try {
+      await checklistService.deleteItem(taskId);
+      toast.success("Task deleted successfully");
+      setTasks(prev => prev.filter(t => (t._id || t.id) !== taskId));
+    } catch (error) {
+      toast.error("Failed to delete task");
     }
   };
 
@@ -271,11 +283,21 @@ export default function ChecklistPage() {
               </div>
             </div>
 
-            {/* Hover Indicator */}
-            <div className={`absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity ${
-              task.status === 'Complete' ? "text-gray-400" : "text-[#EB5017]"
-            }`}>
-              <HiInfo className="text-lg" />
+            {/* Action Buttons */}
+            <div className="absolute top-0 right-0 p-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteTask(task._id || task.id);
+                }}
+                className="p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                title="Delete Task"
+              >
+                <HiOutlineTrash className="text-lg" />
+              </button>
+              <div className={task.status === 'Complete' ? "text-gray-400" : "text-[#EB5017]"}>
+                <HiInfo className="text-lg" />
+              </div>
             </div>
           </div>
         ))}
