@@ -69,6 +69,12 @@ class ChatService {
     }
   }
 
+  onRoomStatus(callback: (status: { activated: boolean; count: number; roomId: string }) => void) {
+    if (this.socket) {
+      this.socket.on('room_status', callback);
+    }
+  }
+
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();

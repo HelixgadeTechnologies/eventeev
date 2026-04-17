@@ -16,12 +16,16 @@ export default function ChatPage() {
   const { _id } = useParams();
   const eventId = (Array.isArray(_id) ? _id[0] : _id) || "";
   
+  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://eventeevapi.onrender.com');
+  
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [roomCount, setRoomCount] = useState(0);
+  const [isActivated, setIsActivated] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -89,6 +93,15 @@ export default function ChatPage() {
       };
 
       chatService.onReceiveMessage(handleNewMessage);
+
+      const handleRoomStatus = (status: { activated: boolean; count: number; roomId: string }) => {
+        if (status.roomId === (activeRoom.id || (activeRoom as any)._id)) {
+          setIsActivated(status.activated);
+          setRoomCount(status.count);
+        }
+      };
+
+      chatService.onRoomStatus(handleRoomStatus);
     }
   }, [activeRoom]);
 
@@ -219,7 +232,7 @@ export default function ChatPage() {
                 <div className="flex-shrink-0 mt-6">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm ring-1 ring-gray-100">
                       <Image 
-                        src={sender?.avatar || `https://ui-avatars.com/api/?name=${sender?.name || 'User'}&background=random`} 
+                        src={sender?.avatar ? (sender.avatar.startsWith('http') ? sender.avatar : `${BASE_URL}${sender.avatar}`) : `https://ui-avatars.com/api/?name=${sender?.name || 'User'}&background=random`} 
                         alt={sender?.name || "User"} 
                         width={40} 
                         height={40} 
@@ -244,11 +257,33 @@ export default function ChatPage() {
             );
           })
         )}
+          
+          {/* Room Activation Overlay */}
+          {activeRoom && !isActivated && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex items-center justify-center p-8">
+              <div className="text-center max-w-sm bg-white p-8 rounded-[32px] shadow-2xl shadow-[#EB5017]/10 border border-gray-50 transform hover:scale-[1.02] transition-transform">
+                <div className="w-16 h-16 bg-[#FFF8F2] rounded-2xl flex items-center justify-center text-[#EB5017] mx-auto mb-6">
+                  <HiOutlineUsers size={32} />
+                </div>
+                <h3 className="text-lg font-black text-[#1B1818] tracking-tight mb-2 uppercase">Awaiting Activation</h3>
+                <p className="text-sm text-gray-400 font-medium leading-relaxed mb-4">
+                  This room requires at least teams of 2 users to be present. Share the event link to invite others!
+                </p>
+                <div className="flex justify-center items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-[#EB5017] animate-ping" />
+                   <span className="text-[10px] font-black text-[#EB5017] uppercase tracking-widest">
+                     Current Count: {roomCount}/2
+                   </span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${!activeRoom ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${(!activeRoom || !isActivated) ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
           <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50 relative">
             <button 
               disabled={!activeRoom}
@@ -305,7 +340,7 @@ export default function ChatPage() {
         <div className="p-6 border-b border-gray-50 flex-none overflow-y-auto custom-scrollbar max-h-[40%]">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Who&apos;s Online</h2>
-            <span className="bg-[#E7F6EC] text-[#0FAF94] px-2 py-0.5 rounded text-[10px] font-black">1</span>
+            <span className="bg-[#E7F6EC] text-[#0FAF94] px-2 py-0.5 rounded text-[10px] font-black">{roomCount}</span>
           </div>
           
           <div className="space-y-6">
@@ -313,7 +348,7 @@ export default function ChatPage() {
               <div className="relative">
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#EB5017] shadow-sm">
                   <Image 
-                    src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${currentUser?.name || 'User'}&background=random`} 
+                    src={currentUser?.avatar ? (currentUser.avatar.startsWith('http') ? currentUser.avatar : `${BASE_URL}${currentUser.avatar}`) : `https://ui-avatars.com/api/?name=${currentUser?.name || 'User'}&background=random`} 
                     alt={currentUser?.name || "You"} 
                     width={40} 
                     height={40} 
