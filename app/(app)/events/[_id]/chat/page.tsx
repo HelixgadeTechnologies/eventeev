@@ -160,7 +160,7 @@ export default function ChatPage() {
         <header className="px-8 py-5 border-b border-gray-50 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-black text-[#1B1818] tracking-tight">{activeRoom.name}</h1>
-            <p className="text-xs font-bold text-gray-400 mt-0.5">{activeRoom.type === 'public' ? 'Public Lobby' : 'Private Session'}</p>
+            <p className="text-xs font-bold text-gray-400 mt-0.5">{activeRoom.type === 'general' ? 'Public Lobby' : 'Private Session'}</p>
           </div>
           <div className="flex items-center gap-4 text-gray-400">
             <button className="hover:text-[#EB5017] transition-colors"><FiSearch size={20} /></button>
@@ -319,7 +319,7 @@ export default function ChatPage() {
                 </div>
                 <div className="flex-grow overflow-hidden">
                   <p className={`text-[13px] font-black truncate transition-colors ${activeRoom.id === room.id ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>{room.name}</p>
-                  <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'public' ? 'Lobby' : 'Workshop'}</p>
+                  <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : 'Workshop'}</p>
                 </div>
               </div>
             ))}
