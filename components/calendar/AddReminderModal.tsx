@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "../ui/Modal";
 import InputComponent from "../ui/InputComponent";
 import { Textarea } from "../ui/textarea";
@@ -13,16 +13,17 @@ import {
 } from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import { HiOutlineBell, HiOutlineX, HiOutlineMail, HiOutlineCalendar } from "react-icons/hi";
+import { HiOutlineBell, HiOutlineX, HiOutlineMail, HiOutlineCalendar, HiOutlinePencil } from "react-icons/hi";
 import TimePicker from "../ui/TimePicker";
 
 interface AddReminderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (reminder: any) => void;
+  onSave: (reminder: any) => void;
+  editData?: any;
 }
 
-const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => {
+const AddReminderModal = ({ isOpen, onClose, onSave, editData }: AddReminderModalProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -33,6 +34,33 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
     sendEmail: true,
     syncToCalendar: true,
   });
+
+  useEffect(() => {
+    if (editData && isOpen) {
+      setFormData({
+        title: editData.title || "",
+        description: editData.description || "",
+        date: editData.date || "",
+        time: editData.time || "",
+        type: editData.type || editData.category?.toLowerCase() || "task",
+        priority: editData.priority?.toLowerCase() || "medium",
+        sendEmail: editData.sendEmail ?? true,
+        syncToCalendar: editData.syncToCalendar ?? true,
+      });
+    } else if (!isOpen) {
+      // Reset when closed
+      setFormData({
+        title: "",
+        description: "",
+        date: "",
+        time: "",
+        type: "task",
+        priority: "medium",
+        sendEmail: true,
+        syncToCalendar: true,
+      });
+    }
+  }, [editData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -51,25 +79,15 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
     e.preventDefault();
     if (!formData.title || !formData.date || !formData.time) return;
 
-    onAdd({
+    onSave({
       ...formData,
-      id: Date.now(),
-    });
-    
-    // Reset form
-    setFormData({
-      title: "",
-      description: "",
-      date: "",
-      time: "",
-      type: "task",
-      priority: "medium",
-      sendEmail: true,
-      syncToCalendar: true,
+      id: editData?._id || editData?.id || Date.now(),
     });
     
     onClose();
   };
+
+  const isEdit = !!editData;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-md p-0 overflow-hidden bg-white/95 backdrop-blur-xl">
@@ -77,12 +95,12 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#EB5017]/10 flex items-center justify-center text-[#EB5017]">
-              <HiOutlineBell size={20} />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isEdit ? 'bg-blue-50 text-blue-500' : 'bg-[#EB5017]/10 text-[#EB5017]'}`}>
+              {isEdit ? <HiOutlinePencil size={20} /> : <HiOutlineBell size={20} />}
             </div>
             <div>
-              <h3 className="font-black text-[#1B1818] uppercase tracking-tight">New Reminder</h3>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Schedule a task or milestone</p>
+              <h3 className="font-black text-[#1B1818] uppercase tracking-tight">{isEdit ? 'Edit Requirement' : 'New Reminder'}</h3>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{isEdit ? 'Update your event task' : 'Schedule a task or milestone'}</p>
             </div>
           </div>
           <button 
@@ -97,7 +115,7 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="space-y-4">
             <InputComponent
-              label="Reminder Title"
+              label="Title"
               name="title"
               placeholder="e.g. Venue Walkthrough"
               value={formData.title}
@@ -215,7 +233,7 @@ const AddReminderModal = ({ isOpen, onClose, onAdd }: AddReminderModalProps) => 
               type="submit"
               className="flex-1 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest bg-[#EB5017] text-white hover:bg-[#d64815] shadow-lg shadow-[#EB5017]/20 transition-all active:scale-[0.98]"
             >
-              Save Reminder
+              {isEdit ? 'Update Task' : 'Save Reminder'}
             </button>
           </div>
         </form>

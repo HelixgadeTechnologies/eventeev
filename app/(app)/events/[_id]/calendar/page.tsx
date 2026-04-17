@@ -7,6 +7,7 @@ import AddReminderModal from "@/components/calendar/AddReminderModal";
 import { checklistService } from "@/lib/services/checklist.service";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 
 const priorityColors: Record<string, string> = {
   high: "bg-red-50 text-red-600 border-red-100",
@@ -36,7 +37,12 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  
+  const [taskToEdit, setTaskToEdit] = useState<any>(null);
+  const [taskToDelete, setTaskToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchReminders = useCallback(async () => {
     try {
@@ -71,32 +77,43 @@ export default function CalendarPage() {
     fetchReminders();
   }, [fetchReminders]);
 
-  const handleAddReminder = async (data: any) => {
+  const handleSaveReminder = async (data: any) => {
     try {
-      // Map 'type' back to 'category' for backend
       const payload = {
         ...data,
         event: eventId,
         category: data.type
       };
       
-      await checklistService.createItem(payload);
-      toast.success("Reminder added to timeline");
+      if (taskToEdit) {
+        await checklistService.updateItem(taskToEdit._id || taskToEdit.id, payload);
+        toast.success("Reminder updated");
+      } else {
+        await checklistService.createItem(payload);
+        toast.success("Reminder added to timeline");
+      }
+      
+      setTaskToEdit(null);
       fetchReminders();
     } catch (error) {
-      console.error("Error adding reminder:", error);
+      console.error("Error saving reminder:", error);
       toast.error("Failed to save reminder");
     }
   };
 
-  const handleDeleteReminder = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this reminder?")) return;
+  const confirmDelete = async () => {
+    if (!taskToDelete) return;
     try {
-      await checklistService.deleteItem(id);
+      setIsDeleting(true);
+      await checklistService.deleteItem(taskToDelete._id || taskToDelete.id);
       toast.success("Reminder removed");
-      setReminders(prev => prev.filter(r => r.id !== id));
+      setReminders(prev => prev.filter(r => (r._id || r.id) !== (taskToDelete._id || taskToDelete.id)));
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
     } catch (error) {
       toast.error("Failed to delete reminder");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -233,13 +250,27 @@ export default function CalendarPage() {
                         
                         {/* Actions */}
                         <div className="flex items-center gap-1.5">
-                           <button 
-                             onClick={() => handleDeleteReminder(reminder.id)}
-                             className="w-7 h-7 rounded-lg bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-100"
-                             title="Delete Reminder"
-                           >
-                             <HiOutlineTrash size={14} />
-                           </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setTaskToEdit(reminder);
+                                setIsModalOpen(true);
+                              }}
+                              className="p-2 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-500 transition-all"
+                              title="Edit Reminder"
+                            >
+                              <HiOutlineSparkles size={16} />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setTaskToDelete(reminder);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                            >
+                              <HiOutlineTrash size={16} />
+                            </button>
+                          </div>
                            {reminder.sendEmail && (
                              <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 shadow-sm" title="Email Notification Enabled">
                                <HiOutlineMail size={14} />
@@ -307,8 +338,23 @@ export default function CalendarPage() {
 
       <AddReminderModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddReminder}
+        onClose={() => {
+          setIsModalOpen(false);
+          setTaskToEdit(null);
+        }}
+        onSave={handleSaveReminder}
+        editData={taskToEdit}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title={taskToDelete?.title || "this reminder"}
+        isDeleting={isDeleting}
       />
     </section>
   );

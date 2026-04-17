@@ -15,12 +15,14 @@ import {
   HiOutlineInformationCircle as HiInfo,
   HiOutlineDownload,
   HiOutlinePlus,
-  HiOutlineTrash
+  HiOutlineTrash,
+  HiOutlinePencil
 } from "react-icons/hi";
 import { checklistService } from "@/lib/services/checklist.service";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import AddReminderModal from "@/components/calendar/AddReminderModal";
+import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 
 interface ChecklistTask {
   id: string;
@@ -43,7 +45,12 @@ export default function ChecklistPage() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  
+  const [taskToEdit, setTaskToEdit] = useState<any>(null);
+  const [taskToDelete, setTaskToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -100,31 +107,43 @@ export default function ChecklistPage() {
     }
   };
 
-  const handleAddTask = async (data: any) => {
+  const handleSaveTask = async (data: any) => {
     try {
       const payload = {
         ...data,
         event: eventId,
-        category: data.type.charAt(0).toUpperCase() + data.type.slice(1), // Capitalize
+        category: data.type.charAt(0).toUpperCase() + data.type.slice(1), 
         status: 'Incomplete'
       };
       
-      await checklistService.createItem(payload);
-      toast.success("Task added to checklist");
+      if (taskToEdit) {
+        await checklistService.updateItem(taskToEdit._id || taskToEdit.id, payload);
+        toast.success("Task updated");
+      } else {
+        await checklistService.createItem(payload);
+        toast.success("Task added to checklist");
+      }
+      
+      setTaskToEdit(null);
       fetchTasks();
     } catch (error) {
       toast.error("Failed to save task");
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    if (!confirm("Are you sure you want to delete this task?")) return;
+  const confirmDelete = async () => {
+    if (!taskToDelete) return;
     try {
-      await checklistService.deleteItem(taskId);
+      setIsDeleting(true);
+      await checklistService.deleteItem(taskToDelete._id || taskToDelete.id);
       toast.success("Task deleted successfully");
-      setTasks(prev => prev.filter(t => (t._id || t.id) !== taskId));
+      setTasks(prev => prev.filter(t => (t._id || t.id) !== (taskToDelete._id || taskToDelete.id)));
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
     } catch (error) {
       toast.error("Failed to delete task");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -288,7 +307,19 @@ export default function ChecklistPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDeleteTask(task._id || task.id);
+                  setTaskToEdit(task);
+                  setIsModalOpen(true);
+                }}
+                className="p-2 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-500 transition-all"
+                title="Edit Task"
+              >
+                <HiOutlinePencil className="text-lg" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTaskToDelete(task);
+                  setIsDeleteModalOpen(true);
                 }}
                 className="p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
                 title="Delete Task"
@@ -357,8 +388,23 @@ export default function ChecklistPage() {
       {/* Modal Integration */}
       <AddReminderModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddTask}
+        onClose={() => {
+          setIsModalOpen(false);
+          setTaskToEdit(null);
+        }}
+        onSave={handleSaveTask}
+        editData={taskToEdit}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title={taskToDelete?.title || "this task"}
+        isDeleting={isDeleting}
       />
     </div>
   );
