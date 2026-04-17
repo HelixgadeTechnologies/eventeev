@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 export default function ChatPage() {
   const { _id } = useParams();
-  const eventId = Array.isArray(_id) ? _id[0] : _id;
+  const eventId = (Array.isArray(_id) ? _id[0] : _id) || "";
   
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -40,8 +40,10 @@ export default function ChatPage() {
         if (token) {
           chatService.initSocket(token);
         }
+        
+        if (!eventId) return;
 
-        const fetchedRooms = await chatService.getRooms(eventId);
+        const fetchedRooms = await chatService.getRooms(eventId as string);
         setRooms(fetchedRooms);
         if (fetchedRooms.length > 0) {
           setActiveRoom(fetchedRooms[0]);
@@ -132,7 +134,7 @@ export default function ChatPage() {
     return (
       <div className="flex bg-white h-[calc(100vh-140px)] border border-gray-100 rounded-[24px] items-center justify-center">
         <div className="text-center space-y-4">
-          <LuLoader2 className="w-10 h-10 animate-spin text-[#EB5017] mx-auto" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#EB5017] mx-auto" />
           <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Connecting to lobby...</p>
         </div>
       </div>

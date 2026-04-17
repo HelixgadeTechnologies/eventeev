@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 export default function SchedulePage() {
   const { _id } = useParams();
-  const eventId = (Array.isArray(_id) ? _id[0] : _id) as string;
+  const eventId = (Array.isArray(_id) ? _id[0] : _id) || "";
   
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [currentEvent, setCurrentEvent] = useState<any>(null);

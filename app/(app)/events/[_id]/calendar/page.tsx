@@ -30,7 +30,7 @@ const typeDotColors: Record<string, string> = {
 
 export default function CalendarPage() {
   const { _id } = useParams();
-  const eventId = (Array.isArray(_id) ? _id[0] : _id) as string;
+  const eventId = (Array.isArray(_id) ? _id[0] : _id) || "";
 
   const [reminders, setReminders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
