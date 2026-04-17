@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaAngleLeft } from "react-icons/fa6";
@@ -273,7 +273,7 @@ export default function ChecklistPage() {
 
             {/* Hover Indicator */}
             <div className={`absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity ${
-              task.completed ? "text-gray-400" : "text-[#EB5017]"
+              task.status === 'Complete' ? "text-gray-400" : "text-[#EB5017]"
             }`}>
               <HiInfo className="text-lg" />
             </div>
