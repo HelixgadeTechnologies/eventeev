@@ -1,6 +1,6 @@
 "use client";
 
-import { HiOutlineBell, HiOutlinePlus, HiOutlineCalendar, HiOutlineMail, HiOutlineTrash } from "react-icons/hi";
+import { HiOutlineBell, HiOutlinePlus, HiOutlineCalendar, HiOutlineMail, HiOutlineTrash, HiOutlineSparkles, HiOutlineDownload } from "react-icons/hi";
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import AddReminderModal from "@/components/calendar/AddReminderModal";
@@ -34,7 +34,9 @@ export default function CalendarPage() {
 
   const [reminders, setReminders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const fetchReminders = useCallback(async () => {
     try {
@@ -98,6 +100,20 @@ export default function CalendarPage() {
     }
   };
 
+  const handleInitialize = async (type: string) => {
+     try {
+       setIsInitializing(true);
+       await checklistService.initializeChecklist(eventId, type);
+       toast.success(`Checklist initialized for ${type}`);
+       setShowTemplates(false);
+       fetchReminders();
+     } catch (error) {
+       toast.error("Failed to initialize timeline");
+     } finally {
+       setIsInitializing(false);
+     }
+  };
+
   // Group by date
   const groupedByDate = reminders.reduce((acc, reminder) => {
     const key = reminder.displayDate;
@@ -129,13 +145,49 @@ export default function CalendarPage() {
           <h2 className="text-3xl font-black text-[#1B1818] tracking-tight">Event Timeline</h2>
           <p className="text-sm text-gray-400 font-medium leading-relaxed">Keep track of key milestones, rehearsals, and task deadlines for your event.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-xl shadow-[#EB5017]/30 shrink-0"
-        >
-          <HiOutlinePlus className="text-lg" />
-          Add Reminder
-        </button>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative">
+            <button 
+              onClick={() => setShowTemplates(!showTemplates)}
+              className="inline-flex items-center gap-2 bg-white border-2 border-gray-100 text-[#1B1818] px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:border-[#EB5017] hover:text-[#EB5017] transition-all active:scale-95 shadow-sm shrink-0"
+            >
+              <HiOutlineDownload className="text-lg" />
+              Import Template
+            </button>
+            
+            {showTemplates && (
+               <div className="absolute top-[calc(100%+12px)] right-0 w-[420px] bg-white rounded-3xl shadow-2xl border border-gray-50 z-[100] p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-sm font-black text-[#1B1818] uppercase tracking-widest">Select Template</h3>
+                    <div className="p-1.5 rounded-lg bg-orange-50 text-[#EB5017]">
+                       <HiOutlineSparkles size={16} className="animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['conference', 'concert', 'party', 'wedding', 'default'].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => handleInitialize(type)}
+                        disabled={isInitializing}
+                        className="flex flex-col items-start p-4 rounded-2xl border border-gray-100 font-sans group hover:border-[#EB5017] hover:bg-[#FFF8F2] transition-all text-left disabled:opacity-50"
+                      >
+                        <span className="text-[11px] font-black uppercase tracking-widest text-[#1B1818] group-hover:text-[#EB5017] mb-1">{type}</span>
+                        <span className="text-[10px] text-gray-400 font-bold group-hover:text-[#EB5017]/70">Ready to populate</span>
+                      </button>
+                    ))}
+                  </div>
+               </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-xl shadow-[#EB5017]/30 shrink-0"
+          >
+            <HiOutlinePlus className="text-lg" />
+            Add Reminder
+          </button>
+        </div>
       </div>
 
       {/* Timeline */}
@@ -224,9 +276,31 @@ export default function CalendarPage() {
         ))}
         
         {sortedDates.length === 0 && (
-          <div className="py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-             <HiOutlineCalendar className="text-4xl text-gray-300 mx-auto mb-4" />
-             <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">No reminders scheduled yet</p>
+          <div className="py-16 px-8 text-center bg-gray-50/50 rounded-[48px] border-2 border-dashed border-gray-100 flex flex-col items-center max-w-4xl mx-auto">
+             <div className="w-20 h-20 bg-white rounded-[32px] shadow-xl flex items-center justify-center text-[#EB5017] mb-8 ring-8 ring-white/50">
+                <HiOutlineCalendar className="text-3xl" />
+             </div>
+             <h3 className="text-2xl font-black text-[#1B1818] tracking-tight mb-2 uppercase">Your Timeline is Empty</h3>
+             <p className="text-sm text-gray-400 font-medium leading-relaxed mb-12 max-w-sm mx-auto">
+                Get started by adding individual tasks or use a pre-built template to populate your milestones instantly.
+             </p>
+
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                {['Conference', 'Concert', 'Wedding'].map((type) => (
+                   <button 
+                    key={type}
+                    onClick={() => handleInitialize(type.toLowerCase())}
+                    disabled={isInitializing}
+                    className="group bg-white p-8 rounded-[36px] shadow-xl shadow-gray-200/50 border border-transparent hover:border-[#EB5017] transition-all duration-500 hover:-translate-y-2 text-left disabled:opacity-50"
+                   >
+                     <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 mb-6 group-hover:bg-[#FFF8F2] group-hover:text-[#EB5017] transition-colors">
+                        <HiOutlineSparkles size={24} />
+                     </div>
+                     <h4 className="font-black text-sm text-[#1B1818] uppercase tracking-widest mb-2">{type}</h4>
+                     <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest group-hover:text-[#EB5017]/60">Apply Template</p>
+                   </button>
+                ))}
+             </div>
           </div>
         )}
       </div>

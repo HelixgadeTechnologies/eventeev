@@ -20,6 +20,11 @@ export class ChecklistService {
     const response = await axiosInstance.delete(`/api/checklist/${id}`);
     return response.data;
   }
+
+  async initializeChecklist(eventId: string, templateType: string) {
+    const response = await axiosInstance.post('/api/checklist/initialize', { eventId, templateType });
+    return response.data;
+  }
 }
 
 export const checklistService = new ChecklistService();
