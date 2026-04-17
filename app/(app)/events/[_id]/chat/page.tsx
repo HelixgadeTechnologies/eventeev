@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile } from "react-icons/fi";
+import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile, FiMessageSquare, FiCoffee } from "react-icons/fi";
 import { IoSend } from "react-icons/io5";
+import { HiOutlineChatBubbleLeftRight, HiOutlineUsers } from "react-icons/hi2";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import EmojiPicker from "@/components/chat/EmojiPicker";
@@ -141,15 +142,7 @@ export default function ChatPage() {
     );
   }
 
-  if (!activeRoom) {
-     return (
-      <div className="flex bg-white h-[calc(100vh-140px)] border border-gray-100 rounded-[24px] items-center justify-center">
-        <div className="text-center space-y-4">
-          <p className="text-lg font-black text-gray-400">No chat rooms available for this event.</p>
-        </div>
-      </div>
-    );
-  }
+
 
 
   return (
@@ -157,20 +150,55 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-grow flex flex-col min-w-0 bg-white">
         {/* Header */}
-        <header className="px-8 py-5 border-b border-gray-50 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-black text-[#1B1818] tracking-tight">{activeRoom.name}</h1>
-            <p className="text-xs font-bold text-gray-400 mt-0.5">{activeRoom.type === 'general' ? 'Public Lobby' : 'Private Session'}</p>
-          </div>
-          <div className="flex items-center gap-4 text-gray-400">
-            <button className="hover:text-[#EB5017] transition-colors"><FiSearch size={20} /></button>
-            <button className="hover:text-[#EB5017] transition-colors"><FiMoreVertical size={20} /></button>
-          </div>
+        <header className="px-8 py-5 border-b border-gray-50 flex items-center justify-between min-h-[84px]">
+          {activeRoom ? (
+            <>
+              <div>
+                <h1 className="text-xl font-black text-[#1B1818] tracking-tight">{activeRoom.name}</h1>
+                <p className="text-xs font-bold text-gray-400 mt-0.5">{activeRoom.type === 'general' ? 'Public Lobby' : 'Private Session'}</p>
+              </div>
+              <div className="flex items-center gap-4 text-gray-400">
+                <button className="hover:text-[#EB5017] transition-colors"><FiSearch size={20} /></button>
+                <button className="hover:text-[#EB5017] transition-colors"><FiMoreVertical size={20} /></button>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-300">
+                 <FiMessageSquare size={20} />
+               </div>
+               <div>
+                 <div className="h-4 w-32 bg-gray-50 rounded animate-pulse mb-2" />
+                 <div className="h-3 w-48 bg-gray-50/50 rounded animate-pulse" />
+               </div>
+            </div>
+          )}
         </header>
 
-        {/* Messages List */}
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8 custom-scrollbar">
-          {messages.map((msg: any) => {
+        {/* Messages List Area */}
+        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8 custom-scrollbar relative">
+          {!activeRoom ? (
+            <div className="absolute inset-0 flex items-center justify-center p-12">
+               <div className="text-center max-w-sm">
+                 <div className="w-20 h-20 bg-[#FFF8F2] rounded-[32px] flex items-center justify-center text-[#EB5017] mx-auto mb-6 shadow-xl shadow-[#EB5017]/5">
+                   <HiOutlineChatBubbleLeftRight size={40} />
+                 </div>
+                 <h3 className="text-xl font-black text-[#1B1818] tracking-tight mb-2 uppercase">Select a Room</h3>
+                 <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                   Join a lobby or session to start interacting with other attendees and organizers in real-time.
+                 </p>
+               </div>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center py-12">
+               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                 <FiMessageSquare size={24} />
+               </div>
+               <p className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Begin the conversation</p>
+               <p className="text-xs text-gray-300 font-bold uppercase tracking-widest">No messages yet — be the first to speak!</p>
+            </div>
+          ) : (
+            messages.map((msg: any) => {
             const isSystem = msg.type === "system_message";
             if (isSystem) {
               return (
@@ -214,14 +242,16 @@ export default function ChatPage() {
                 </div>
               </div>
             );
-          })}
+          })
+        )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <div className="px-8 pb-8 pt-4">
+        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${!activeRoom ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
           <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50 relative">
             <button 
+              disabled={!activeRoom}
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className={`p-3 transition-colors ${showEmojiPicker ? "text-[#EB5017]" : "text-gray-400 hover:text-[#EB5017]"}`}
             >
@@ -241,6 +271,7 @@ export default function ChatPage() {
               onChange={handleFileChange}
             />
             <button 
+              disabled={!activeRoom}
               onClick={handleAttachClick}
               className="p-3 text-gray-400 hover:text-[#EB5017] transition-colors"
             >
@@ -249,7 +280,8 @@ export default function ChatPage() {
             <form onSubmit={handleSendMessage} className="flex-grow flex items-center gap-2">
               <input 
                 type="text" 
-                placeholder={activeRoom.name === "General Lobby" ? "Type a message to the lobby..." : `Message ${activeRoom.name}...`}
+                disabled={!activeRoom}
+                placeholder={!activeRoom ? "Please select a room first..." : activeRoom.name === "General Lobby" ? "Type a message to the lobby..." : `Message ${activeRoom.name}...`}
                 className="flex-grow bg-transparent outline-none text-sm font-semibold text-[#1B1818] placeholder:text-gray-300 px-2"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -257,7 +289,8 @@ export default function ChatPage() {
               />
               <button 
                 type="submit"
-                className="bg-[#EB5017] text-white pl-8 pr-6 py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-md shadow-[#EB5017]/20"
+                disabled={!activeRoom}
+                className="bg-[#EB5017] text-white pl-8 pr-6 py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-md shadow-[#EB5017]/20 disabled:bg-gray-200 disabled:shadow-none"
               >
                 Send <IoSend className="-rotate-12 ml-1" />
               </button>
@@ -304,25 +337,34 @@ export default function ChatPage() {
           </div>
           
           <div className="space-y-6">
-            {rooms.map((room) => (
-              <div 
-                key={room.id || (room as any)._id} 
-                onClick={() => setActiveRoom(room)}
-                className={`flex items-center gap-3 group cursor-pointer p-2 rounded-xl transition-all ${activeRoom.id === room.id ? 'bg-[#FFF8F2] border border-[#FFD9B3]' : 'hover:bg-gray-50'}`}
-              >
-                <div className="relative">
-                  <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all ${activeRoom.id === room.id ? 'border-[#EB5017] bg-[#EB5017]/10' : 'border-white bg-gray-50 shadow-sm'}`}>
-                    <span className={`font-black text-xs ${activeRoom.id === room.id ? 'text-[#EB5017]' : 'text-gray-400'}`}>
-                      {room.name.charAt(0)}
-                    </span>
+            {rooms.length === 0 ? (
+               <div className="py-12 px-4 text-center group cursor-default">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-200 mx-auto mb-4 group-hover:bg-[#FFF8F2] group-hover:text-[#EB5017] transition-all duration-500">
+                    <FiCoffee size={24} />
+                  </div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">No chat rooms found for this event yet.</p>
+               </div>
+            ) : (
+              rooms.map((room) => (
+                <div 
+                  key={room.id || (room as any)._id} 
+                  onClick={() => setActiveRoom(room)}
+                  className={`flex items-center gap-3 group cursor-pointer p-2 rounded-xl transition-all ${activeRoom?.id === room.id ? 'bg-[#FFF8F2] border border-[#FFD9B3]' : 'hover:bg-gray-50'}`}
+                >
+                  <div className="relative">
+                    <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all ${activeRoom?.id === room.id ? 'border-[#EB5017] bg-[#EB5017]/10' : 'border-white bg-gray-50 shadow-sm'}`}>
+                      <span className={`font-black text-xs ${activeRoom?.id === room.id ? 'text-[#EB5017]' : 'text-gray-400'}`}>
+                        {room.name.charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex-grow overflow-hidden">
+                    <p className={`text-[13px] font-black truncate transition-colors ${activeRoom?.id === room.id ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>{room.name}</p>
+                    <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : 'Workshop'}</p>
                   </div>
                 </div>
-                <div className="flex-grow overflow-hidden">
-                  <p className={`text-[13px] font-black truncate transition-colors ${activeRoom.id === room.id ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>{room.name}</p>
-                  <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : 'Workshop'}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
