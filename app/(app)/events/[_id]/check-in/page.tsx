@@ -15,7 +15,7 @@ interface AttendeesPageProps {
   }>;
 }
 
-export default function AttendeesPage({ params }: AttendeesPageProps) {
+export default function CheckInPage({ params }: AttendeesPageProps) {
   const { _id } = use(params);
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -84,8 +84,8 @@ export default function AttendeesPage({ params }: AttendeesPageProps) {
             Back to Dashboard
           </Link>
           <div className="pt-2">
-            <h1 className="text-4xl font-black text-[#1B1818] tracking-tight lowercase first-letter:uppercase">Attendees</h1>
-            <p className="text-sm text-gray-400 font-medium mt-1">Managing participants for <span className="text-[#1B1818] font-bold">{event.title}</span></p>
+            <h1 className="text-4xl font-black text-[#1B1818] tracking-tight lowercase first-letter:uppercase">Check-in</h1>
+            <p className="text-sm text-gray-400 font-medium mt-1">Managing access for <span className="text-[#1B1818] font-bold">{event.title}</span></p>
           </div>
         </div>
       </div>

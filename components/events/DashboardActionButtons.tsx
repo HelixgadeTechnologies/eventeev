@@ -14,7 +14,7 @@ const DashboardActionButtons = ({ eventId, eventName, publicUrl }: DashboardActi
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Use the actual public URL from the backend, or fallback to the previous format if missing
-  const eventUrl = publicUrl || `https://eventeev.com/events/${eventId}`;
+  const eventUrl = publicUrl || `https://eventeev.com/${eventId}`;
 
   return (
     <>

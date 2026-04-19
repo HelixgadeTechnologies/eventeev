@@ -287,7 +287,7 @@ export default function NetworkingPage() {
           <div className="relative z-10 grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-white/10">
             <div>
               <p className="text-xl font-black text-white">128</p>
-              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Attendees</p>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Participants</p>
             </div>
             <div>
               <p className="text-xl font-black text-[#EB5017]">86%</p>

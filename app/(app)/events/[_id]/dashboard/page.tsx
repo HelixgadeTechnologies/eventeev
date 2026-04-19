@@ -165,18 +165,18 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
           ))}
         </div>
 
-        {/* Newest Attendees Section */}
+        {/* Recent Check-ins Section */}
         <div className="space-y-4">
           <div className="flex justify-between items-end px-2">
             <div>
               <p className="text-[10px] font-black text-[#eb5017] uppercase tracking-[0.2em] mb-1">Activity</p>
-              <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">Recent Peeps</h3>
+              <h3 className="text-2xl font-black text-[#1B1818] tracking-tight">Recent Check-ins</h3>
             </div>
             <Link
               className="text-[10px] font-black primary flex items-center gap-1 uppercase tracking-widest group hover:translate-x-1 transition-transform"
-              href={`/events/${event._id}/attendees`}
+              href={`/events/${event._id}/check-in`}
             >
-              See all attendees
+              See all check-ins
               <FaAngleRight className="text-lg" />
             </Link>
           </div>

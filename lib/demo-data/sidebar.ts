@@ -12,8 +12,8 @@ export const topNavigations = [
     iconActive: "/icons/tickets-active.svg",
   },
   {
-    name: "Attendees",
-    href: "/events/:id/attendees",
+    name: "Check-in",
+    href: "/events/:id/check-in",
     iconInactive: "/icons/attendees-inactive.svg",
     iconActive: "/icons/attendees-active.svg",
   },

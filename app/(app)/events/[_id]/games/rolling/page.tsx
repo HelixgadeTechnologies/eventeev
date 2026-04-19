@@ -146,7 +146,7 @@ export default function RollingGamePage() {
           The Lucky <span className="text-[#EB5017]">Roll</span>
         </h1>
         <p className="text-gray-500 font-medium text-xs md:text-sm leading-relaxed uppercase tracking-[0.1em]">
-          Spin the wheel for all checked-in attendees to pick a lucky winner!
+          Spin the wheel for all checked-in participants to pick a lucky winner!
         </p>
       </header>
 
