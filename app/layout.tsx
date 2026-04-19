@@ -5,6 +5,12 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ReduxProvider from "@/store/reduxProvider";
 import { Inter } from "next/font/google";
+import localFont from "next/font/local";
+
+const featherFont = localFont({
+  src: "../public/fonts/feather.ttf",
+  variable: "--font-feather",
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.className} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.className} ${featherFont.variable} antialiased`}
         suppressHydrationWarning
       >
         <ReduxProvider>

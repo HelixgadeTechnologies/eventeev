@@ -1,12 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
 @custom-variant dark (&:is(.dark *));
-
-@font-face {
-  font-family: "Feather";
-  src: url("/fonts/feather.ttf") format("truetype");
-}
 
 h1,
 h2,
@@ -23,7 +17,7 @@ b,
 .font-black,
 .font-feather,
 .heading-text {
-  font-family: "Feather", sans-serif !important;
+  font-family: var(--font-feather), sans-serif !important;
 }
 
 .bg-login {
@@ -117,7 +111,7 @@ b,
 }
 
 @theme inline {
-  --font-feather: "Feather", sans-serif;
+  --font-feather: var(--font-feather);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

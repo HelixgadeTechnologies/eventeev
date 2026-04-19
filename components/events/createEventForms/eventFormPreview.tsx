@@ -19,6 +19,18 @@ const EventFormPreview = () => {
   const dispatch = useAppDispatch();
   const { formData } = useAppSelector((state: RootState) => state.createEvent);
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [feedbackModal, setFeedbackModal] = React.useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: "success" | "error";
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "success",
+  });
   const [isPublishing, setIsPublishing] = React.useState(false);
 
   const { handleSubmit } = useForm({
@@ -29,6 +41,20 @@ const EventFormPreview = () => {
   const handlePrevStep = () => dispatch(setPrevStep());
 
   const router = useRouter();
+
+  const extractErrorMessage = (error: any): string => {
+    if (typeof error === 'string') return error;
+    if (error.message && typeof error.message === 'string') {
+      // If there are specific validation errors, try to append them
+      if (error.errors && typeof error.errors === 'object') {
+        const fieldErrors = Object.values(error.errors).join(", ");
+        return fieldErrors || error.message;
+      }
+      return error.message;
+    }
+    if (error.error && typeof error.error === 'string') return error.error;
+    return "An unexpected error occurred.";
+  };
 
   const onSubmit = async (status: 'Published' | 'Draft' = 'Published') => {
     setIsPublishing(true);
@@ -59,15 +85,35 @@ const EventFormPreview = () => {
       const { data: result, error } = await eventsService.createEvent(payload);
       
       if (error) {
-        throw new Error(error.message || `Failed to ${status === 'Draft' ? 'save draft' : 'publish event'}`);
+        const errorMsg = extractErrorMessage(error);
+        setFeedbackModal({
+          isOpen: true,
+          title: status === 'Draft' ? "Failed to Save Draft" : "Failed to Publish",
+          description: errorMsg,
+          variant: "error",
+        });
+        return;
       }
 
+      setFeedbackModal({
+        isOpen: true,
+        title: status === 'Draft' ? "Draft Saved!" : "Event Published!",
+        description: status === 'Draft' 
+          ? "Your event has been saved as a draft. You can come back and finish it later." 
+          : "Congratulations! Your event is now live and ready to accept registrations.",
+        variant: "success",
+        onConfirm: () => router.push("/events"),
+      });
+      
       setShowConfirmModal(false);
-      alert(status === 'Draft' ? "Event Saved as Draft!" : "Event Published Successfully!");
-      router.push("/events");
     } catch (err: any) {
       console.error(`${status === 'Draft' ? 'Draft' : 'Publishing'} error:`, err);
-      alert(err.message || `An error occurred while ${status === 'Draft' ? 'saving the draft' : 'publishing the event'}.`);
+      setFeedbackModal({
+        isOpen: true,
+        title: "Something went wrong",
+        description: err.message || `An error occurred while ${status === 'Draft' ? 'saving the draft' : 'publishing the event'}.`,
+        variant: "error",
+      });
     } finally {
       setIsPublishing(false);
     }
@@ -189,6 +235,20 @@ const EventFormPreview = () => {
         isLoading={isPublishing}
       />
 
+      <ActionConfirmationModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => {
+          setFeedbackModal(prev => ({ ...prev, isOpen: false }));
+          feedbackModal.onConfirm?.();
+        }}
+        title={feedbackModal.title}
+        description={feedbackModal.description}
+        variant={feedbackModal.variant}
+        confirmLabel="Understood"
+        hideCancelButton={true}
+      />
+
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 3px;
@@ -204,5 +264,6 @@ const EventFormPreview = () => {
     </div>
   );
 };
+
 
 export default EventFormPreview;
