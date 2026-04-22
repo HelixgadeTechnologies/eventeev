@@ -10,6 +10,7 @@ interface QuestionPreviewCardProps {
   options: string[];
   correctOptionIndex: number;
   thumbnail: string;
+  showAnswer?: boolean;
 }
 
 export default function QuestionPreviewCard({
@@ -19,6 +20,7 @@ export default function QuestionPreviewCard({
   options,
   correctOptionIndex,
   thumbnail,
+  showAnswer = false,
 }: QuestionPreviewCardProps) {
   return (
     <div className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col md:flex-row gap-6 font-sans">
@@ -53,7 +55,7 @@ export default function QuestionPreviewCard({
             <div 
               key={idx}
               className={`px-4 py-3 rounded-xl border text-sm font-semibold transition-all ${
-                idx === correctOptionIndex 
+                showAnswer && idx === correctOptionIndex 
                   ? "border-[#eb5017] text-[#eb5017] bg-[#FFF2F0]" 
                   : "border-gray-100 text-[#667185] bg-white"
               }`}
