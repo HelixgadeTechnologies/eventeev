@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiX, HiOutlineBookOpen, HiOutlineChevronRight } from "react-icons/hi";
+import { HiX, HiOutlineBookOpen, HiOutlineChevronRight, HiOutlinePhotograph, HiOutlineTrash } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
+import { uploadService } from "@/lib/services/upload.service";
+import { toast } from "sonner";
 
 interface CreateQuizModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNext: (data: { title: string; description: string; category: string }) => void;
+  onNext: (data: { title: string; description: string; category: string; coverImage: string }) => void;
   categories: { id: string; name: string }[];
 }
 
@@ -17,7 +19,31 @@ export default function CreateQuizModal({ isOpen, onClose, onNext, categories }:
     title: "",
     description: "",
     category: "trivia",
+    coverImage: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const { data, error } = await uploadService.uploadImage(file);
+      if (error) throw new Error(error.message);
+      setFormData({ ...formData, coverImage: data.url });
+      toast.success("Cover image uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({ ...formData, coverImage: "" });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +88,65 @@ export default function CreateQuizModal({ isOpen, onClose, onNext, categories }:
             </div>
 
             {/* Content */}
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              {/* Cover Image Section */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Cover Image</label>
+                <div 
+                  onClick={() => !formData.coverImage && fileInputRef.current?.click()}
+                  className={`relative w-full h-48 rounded-[24px] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 overflow-hidden group ${
+                    formData.coverImage 
+                      ? "border-transparent bg-gray-50" 
+                      : "border-gray-200 bg-gray-50/50 hover:border-[#EB5017] hover:bg-[#FFF2F0] cursor-pointer"
+                  }`}
+                >
+                  {formData.coverImage ? (
+                    <>
+                      <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-3 bg-white rounded-full text-[#1B1818] hover:bg-[#EB5017] hover:text-white transition-all shadow-lg"
+                        >
+                          <HiOutlinePhotograph size={20} />
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={removeImage}
+                          className="p-3 bg-white rounded-full text-[#EB5017] hover:bg-red-600 hover:text-white transition-all shadow-lg"
+                        >
+                          <HiOutlineTrash size={20} />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#EB5017] transition-all">
+                        {isUploading ? (
+                          <div className="w-6 h-6 border-2 border-[#EB5017] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <HiOutlinePhotograph size={24} />
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-[#1B1818]">
+                          {isUploading ? "Uploading..." : "Click to upload cover image"}
+                        </p>
+                        <p className="text-xs font-medium text-gray-400 mt-0.5">JPG, PNG or WEBP (Max 5MB)</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleImageUpload} 
+                  className="hidden" 
+                  accept="image/*"
+                />
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Title</label>
                 <input

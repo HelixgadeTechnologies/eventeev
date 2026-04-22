@@ -55,11 +55,13 @@ export default function CreateQuizPage() {
   const initialTitle = searchParams.get("title") || "General Knowledge Quiz";
   const initialDescription = searchParams.get("description") || "A fun quiz to test your knowledge.";
   const initialCategory = searchParams.get("category") || "trivia";
+  const initialCoverImage = searchParams.get("coverImage") || "";
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [quizTitle, setQuizTitle] = useState(initialTitle);
   const [quizDescription, setQuizDescription] = useState(initialDescription);
   const [quizCategory, setQuizCategory] = useState(initialCategory);
+  const [quizCoverImage, setQuizCoverImage] = useState(initialCoverImage);
   const [quizId, setQuizId] = useState(initialId);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
@@ -257,6 +259,7 @@ export default function CreateQuizPage() {
       title: quizTitle,
       description: quizDescription,
       category: quizCategory,
+      thumbnail: quizCoverImage,
       questions: questions.map(q => ({
         text: q.text,
         mediaUrl: q.media,

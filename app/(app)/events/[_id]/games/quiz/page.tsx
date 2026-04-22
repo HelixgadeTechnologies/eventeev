@@ -93,7 +93,7 @@ export default function GamesPage() {
     setIsCreateModalOpen(true);
   };
 
-  const handleModalNext = (data: { title: string; description: string; category: string }) => {
+  const handleModalNext = (data: { title: string; description: string; category: string; coverImage: string }) => {
     const pathSegments = pathname.split("/");
     const eventId = pathSegments[2];
     const quizId = crypto.randomUUID();
@@ -102,7 +102,8 @@ export default function GamesPage() {
       id: quizId,
       title: data.title,
       description: data.description,
-      category: data.category
+      category: data.category,
+      coverImage: data.coverImage
     }).toString();
 
     router.push(`/events/${eventId}/games/create?${queryParams}`);
