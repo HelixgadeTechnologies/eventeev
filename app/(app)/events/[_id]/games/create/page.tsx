@@ -560,25 +560,19 @@ export default function CreateQuizPage() {
             {/* Answer Options */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Answer Options</label>
-              <div className="space-y-3">
-                <div 
+              <div className="flex bg-gray-50 p-1.5 rounded-[20px] border border-gray-100">
+                <button 
                   onClick={() => handleToggleMultiSelect(false)}
-                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${!activeQuestion.isMultiSelect ? "bg-[#FFF2F0] border-2 border-[#EB5017]" : "bg-white border border-gray-200 hover:border-[#EB5017]"}`}
+                  className={`flex-1 flex items-center justify-center py-3 rounded-[14px] text-xs font-black transition-all duration-300 ${!activeQuestion.isMultiSelect ? "bg-white text-[#EB5017] shadow-md shadow-black/5 scale-[1.02]" : "text-gray-400 hover:text-[#1B1818]"}`}
                 >
-                   <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border-2 bg-white ${!activeQuestion.isMultiSelect ? "border-4 border-[#EB5017]" : "border-gray-200"}`} />
-                    <span className="text-sm font-bold text-[#1B1818]">Single select</span>
-                   </div>
-                </div>
-                <div 
+                  Single Select
+                </button>
+                <button 
                   onClick={() => handleToggleMultiSelect(true)}
-                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${activeQuestion.isMultiSelect ? "bg-[#FFF2F0] border-2 border-[#EB5017]" : "bg-white border border-gray-200 hover:border-[#EB5017]"}`}
+                  className={`flex-1 flex items-center justify-center py-3 rounded-[14px] text-xs font-black transition-all duration-300 ${activeQuestion.isMultiSelect ? "bg-white text-[#EB5017] shadow-md shadow-black/5 scale-[1.02]" : "text-gray-400 hover:text-[#1B1818]"}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border-2 bg-white ${activeQuestion.isMultiSelect ? "border-4 border-[#EB5017]" : "border-gray-200"}`} />
-                    <span className="text-sm font-bold text-[#1B1818]">Multi-select</span>
-                  </div>
-                </div>
+                  Multi-select
+                </button>
               </div>
             </div>
           </div>
