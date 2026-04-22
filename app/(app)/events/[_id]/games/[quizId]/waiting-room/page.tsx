@@ -2,49 +2,48 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand } from "react-icons/hi";
+import { quizzesService } from "@/lib/services/quizzes.service";
+import { toast } from "sonner";
 
-const MOCK_PLAYERS = [
-  { name: "Alex 🔥", isQuizMaster: false },
-  { name: "Sam_99", isQuizMaster: false },
-  { name: "QuizMaster 👑", isQuizMaster: true },
-  { name: "PlayerOne", isQuizMaster: false },
-  { name: "Speedy ⚡", isQuizMaster: false },
-  { name: "Banana 🍌", isQuizMaster: false },
-  { name: "HappyCat 🐱", isQuizMaster: false },
-  { name: "Dragon 🐉", isQuizMaster: false },
-  { name: "Quizzer", isQuizMaster: false },
-  { name: "Star ⭐", isQuizMaster: false },
-  { name: "Winner 🏆", isQuizMaster: false },
-  { name: "Joker 🃏", isQuizMaster: false },
-  { name: "Pixel 👾", isQuizMaster: false },
-  { name: "Luna 🌙", isQuizMaster: false },
-  { name: "Rocket 🚀", isQuizMaster: false },
-  { name: "Sparkle ✨", isQuizMaster: false },
-  { name: "Cactus 🌵", isQuizMaster: false },
-  { name: "Ghost 👻", isQuizMaster: false },
-  { name: "Panda 🐼", isQuizMaster: false },
-  { name: "Owl 🦉", isQuizMaster: false },
-];
+// Mock data removed in favor of real API calls
 
 export default function WaitingRoomPage() {
   const params = useParams();
   const router = useRouter();
-  // const { user } = useAuth(); // Removed to fix lint error
+  const searchParams = useSearchParams();
+  const pin = searchParams.get("pin") || "";
   const eventId = params._id;
   const quizId = params.quizId;
 
-  const [players] = useState(MOCK_PLAYERS);
-  const [playerCount, setPlayerCount] = useState(24);
-
+  const [players, setPlayers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Simulate players joining
+  // Format PIN for display (e.g., 482910 -> 482 910)
+  const formatPin = (p: string) => {
+    if (!p) return "--- ---";
+    return p.length > 3 ? `${p.slice(0, 3)} ${p.slice(3)}` : p;
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayerCount(prev => prev + 1);
-    }, 5000);
+    if (!pin) return;
+
+    const fetchParticipants = async () => {
+      try {
+        const data = await quizzesService.getLeaderboard(pin);
+        // Leaderboard typically returns an array of { nickname, score, etc. }
+        setPlayers(data || []);
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParticipants();
+    const interval = setInterval(fetchParticipants, 3000); // Poll every 3 seconds
 
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
@@ -55,7 +54,7 @@ export default function WaitingRoomPage() {
       clearInterval(interval);
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
     };
-  }, []);
+  }, [pin]);
 
   const handleBack = () => {
     router.push(`/events/${eventId}/games/${quizId}`);
@@ -92,7 +91,7 @@ export default function WaitingRoomPage() {
         <div className="flex items-center gap-4">
           <div className="bg-white/80 backdrop-blur-sm text-[#EB5017] px-5 py-2.5 rounded-2xl flex items-center gap-2.5 font-black text-xs shadow-sm border border-gray-100">
             <div className="w-2 h-2 bg-[#EB5017] rounded-full animate-pulse" />
-            {playerCount} Players Active
+            {players.length} Players Active
           </div>
           <div className="w-10 h-10 rounded-full border-2 border-[#EB5017] overflow-hidden shadow-md">
              <Image src="/icons/avatar-placeholder.png" alt="User" width={40} height={40} />
@@ -108,7 +107,9 @@ export default function WaitingRoomPage() {
           </h1>
           <div className="inline-flex flex-col items-center">
             <span className="text-[10px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Game PIN</span>
-            <div className="text-5xl md:text-7xl font-black text-[#1B1818] tracking-widest leading-none">482 910</div>
+            <div className="text-5xl md:text-7xl font-black text-[#1B1818] tracking-widest leading-none">
+              {formatPin(pin)}
+            </div>
           </div>
         </div>
 
@@ -132,7 +133,7 @@ export default function WaitingRoomPage() {
             <div className="flex items-center gap-3">
               <h3 className="text-base font-black text-[#1B1818] uppercase tracking-wider opacity-70">Waiting Room</h3>
               <div className="bg-[#FFF2F0] text-[#EB5017] px-2 py-0.5 rounded-lg text-[10px] font-black">
-                {playerCount} Total
+                {players.length} Total
               </div>
             </div>
             <span className="text-[#EB5017] font-bold text-[10px] animate-pulse flex items-center gap-2">
@@ -142,21 +143,22 @@ export default function WaitingRoomPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 overflow-y-auto pr-1 flex-1 custom-scrollbar">
-            {players.slice(0, 23).map((player, index) => (
-              <div 
-                key={index}
-                className={`px-2 py-1.5 rounded-lg font-black text-xs transition-all flex items-center justify-center text-center shadow-sm border ${
-                  player.isQuizMaster 
-                    ? "bg-[#FFF2F0] text-[#EB5017] border-[#EB5017]/30" 
-                    : "bg-white text-[#1B1818] border-gray-100"
-                }`}
-              >
-                {player.name}
-              </div>
-            ))}
-            {playerCount > 23 && (
-              <div className="px-2 py-1.5 rounded-lg font-black text-xs bg-gray-50 text-[#667185] border border-gray-200 flex items-center justify-center text-center shadow-inner">
-                + {playerCount - 23} others
+            {players.length > 0 ? (
+              players.map((player, index) => (
+                <div 
+                  key={index}
+                  className={`px-2 py-1.5 rounded-lg font-black text-xs transition-all flex items-center justify-center text-center shadow-sm border ${
+                    player.isQuizMaster 
+                      ? "bg-[#FFF2F0] text-[#EB5017] border-[#EB5017]/30" 
+                      : "bg-white text-[#1B1818] border-gray-100"
+                  }`}
+                >
+                  {player.nickname || player.name || `Player ${index + 1}`}
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full flex items-center justify-center py-10 text-gray-400 font-bold text-sm">
+                {loading ? "Loading players..." : "Waiting for players to join..."}
               </div>
             )}
           </div>

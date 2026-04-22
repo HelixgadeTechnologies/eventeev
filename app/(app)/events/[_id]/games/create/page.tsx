@@ -20,8 +20,9 @@ import {
   IoEllipseOutline, 
   IoDiamond 
 } from "react-icons/io5";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { eventsService } from "@/lib/services/events.service";
+import { quizzesService } from "@/lib/services/quizzes.service";
 
 interface Option {
   text: string;
@@ -37,6 +38,7 @@ interface Question {
   timeLimit: string;
   media: string | null;
   options: Option[];
+  isMultiSelect: boolean;
 }
 
 const DEFAULT_MAX_QUESTIONS = 30;
@@ -44,11 +46,23 @@ const DEFAULT_MAX_QUESTIONS = 30;
 export default function CreateQuizPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const _id = params?._id as string;
+  
+  // Get initial data from query params
+  const initialId = searchParams.get("id") || "";
+  const initialTitle = searchParams.get("title") || "General Knowledge Quiz";
+  const initialDescription = searchParams.get("description") || "A fun quiz to test your knowledge.";
+  const initialCategory = searchParams.get("category") || "trivia";
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [quizTitle] = useState("General Knowledge Quiz");
+  const [quizTitle, setQuizTitle] = useState(initialTitle);
+  const [quizDescription, setQuizDescription] = useState(initialDescription);
+  const [quizCategory, setQuizCategory] = useState(initialCategory);
+  const [quizId, setQuizId] = useState(initialId);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [maxQuestions, setMaxQuestions] = useState(DEFAULT_MAX_QUESTIONS);
   const [questions, setQuestions] = useState<Question[]>([
     { 
@@ -59,6 +73,7 @@ export default function CreateQuizPage() {
       active: true, 
       timeLimit: "20 seconds", 
       media: null,
+      isMultiSelect: false,
       options: [
         { text: "Add answer 1", isCorrect: false },
         { text: "Add answer 2", isCorrect: false },
@@ -100,6 +115,7 @@ export default function CreateQuizPage() {
         active: true, 
         timeLimit: "20 seconds", 
         media: null,
+        isMultiSelect: false,
         options: [
           { text: "Add answer 1", isCorrect: false },
           { text: "Add answer 2", isCorrect: false },
@@ -205,14 +221,62 @@ export default function CreateQuizPage() {
   const handleToggleCorrect = (index: number) => {
     setQuestions(prev => prev.map(q => {
       if (q.id === activeQuestion.id) {
-        const newOptions = q.options.map((opt, i) => ({
-          ...opt,
-          isCorrect: i === index
-        }));
+        const newOptions = q.options.map((opt, i) => {
+          if (i === index) {
+            return { ...opt, isCorrect: q.isMultiSelect ? !opt.isCorrect : true };
+          }
+          return q.isMultiSelect ? opt : { ...opt, isCorrect: false };
+        });
         return { ...q, options: newOptions };
       }
       return q;
     }));
+  };
+
+  const handleToggleMultiSelect = (multi: boolean) => {
+    setQuestions(prev => prev.map(q => {
+      if (q.id === activeQuestion.id) {
+        // If switching to single select, keep only the first correct answer
+        const newOptions = multi ? q.options : q.options.map((opt, i, arr) => {
+          const firstCorrectIndex = arr.findIndex(o => o.isCorrect);
+          return { ...opt, isCorrect: i === firstCorrectIndex };
+        });
+        return { ...q, isMultiSelect: multi, options: newOptions };
+      }
+      return q;
+    }));
+  };
+
+  const handleSaveQuiz = async () => {
+    setIsSaving(true);
+    const payload = {
+      id: quizId,
+      eventId: _id,
+      title: quizTitle,
+      description: quizDescription,
+      category: quizCategory,
+      questions: questions.map(q => ({
+        text: q.text,
+        mediaUrl: q.media,
+        type: q.type,
+        options: q.options.map(o => o.text),
+        correctAnswer: q.options.reduce((acc, o, i) => o.isCorrect ? [...acc, i] : acc, [] as number[]),
+        timeLimit: parseInt(q.timeLimit) || 20,
+        points: 0,
+        isMultiSelect: q.isMultiSelect
+      }))
+    };
+
+    try {
+      await quizzesService.createQuiz(payload);
+      alert("Quiz saved successfully!");
+      router.push(`/events/${_id}/games/quiz`);
+    } catch (error) {
+      console.error("Save Quiz Error:", error);
+      alert("Failed to save quiz. Please check all fields.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -229,7 +293,12 @@ export default function CreateQuizPage() {
           </button>
           <div className="h-8 w-[1px] bg-gray-200" />
           <div className="flex flex-col">
-            <h1 className="text-sm font-bold text-[#1B1818]">{quizTitle}</h1>
+            <input 
+              type="text"
+              value={quizTitle}
+              onChange={(e) => setQuizTitle(e.target.value)}
+              className="text-sm font-bold text-[#1B1818] bg-transparent outline-none border-b border-transparent focus:border-[#EB5017] w-[200px]"
+            />
             <span className="text-[10px] text-gray-400 font-medium italic">Auto-saved at 2:45 PM</span>
           </div>
         </div>
@@ -238,8 +307,12 @@ export default function CreateQuizPage() {
           <button className="px-6 py-2.5 rounded-xl bg-[#F2F4F7] text-[#344054] font-bold text-sm hover:bg-gray-200 transition-all">
             Preview
           </button>
-          <button className="px-6 py-2.5 rounded-xl bg-[#EB5017] text-white font-bold text-sm hover:bg-[#d64815] transition-all shadow-lg shadow-[#EB5017]/20">
-            Save Quiz
+          <button 
+            onClick={handleSaveQuiz}
+            disabled={isSaving}
+            className="px-6 py-2.5 rounded-xl bg-[#EB5017] text-white font-bold text-sm hover:bg-[#d64815] transition-all shadow-lg shadow-[#EB5017]/20 disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save Quiz"}
           </button>
           <div className="w-10 h-10 rounded-full bg-[#FFE5D5] border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
              <Image src="/icons/avatar-placeholder.png" alt="Profile" width={40} height={40} />
@@ -294,13 +367,22 @@ export default function CreateQuizPage() {
         <main className="flex-1 overflow-y-auto bg-[#F9FAFB] p-6 flex flex-col items-center custom-scrollbar">
           <div className="w-full max-w-4xl flex flex-col items-center space-y-6">
             {/* Question Input */}
-            <input 
-              type="text" 
-              value={activeQuestion.text}
-              onChange={(e) => handleQuestionTextChange(e.target.value)}
-              placeholder="Start typing your question"
-              className="w-full bg-transparent text-center text-3xl font-black text-[#1B1818] placeholder:text-gray-300 outline-none border-none py-2"
-            />
+            <div className="w-full flex flex-col items-center gap-2">
+              <input 
+                type="text" 
+                value={activeQuestion.text}
+                onChange={(e) => handleQuestionTextChange(e.target.value)}
+                placeholder="Start typing your question"
+                className="w-full bg-transparent text-center text-3xl font-black text-[#1B1818] placeholder:text-gray-300 outline-none border-none py-2"
+              />
+              <input 
+                type="text" 
+                value={quizDescription}
+                onChange={(e) => setQuizDescription(e.target.value)}
+                placeholder="Add a quiz description (optional)"
+                className="w-full bg-transparent text-center text-xs font-medium text-gray-400 placeholder:text-gray-300 outline-none border-none"
+              />
+            </div>
 
             {/* Media Upload Area */}
             <div 
@@ -479,15 +561,21 @@ export default function CreateQuizPage() {
             <div className="space-y-2">
               <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Answer Options</label>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-[#FFF2F0] border-2 border-[#EB5017] rounded-2xl cursor-pointer">
+                <div 
+                  onClick={() => handleToggleMultiSelect(false)}
+                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${!activeQuestion.isMultiSelect ? "bg-[#FFF2F0] border-2 border-[#EB5017]" : "bg-white border border-gray-200 hover:border-[#EB5017]"}`}
+                >
                    <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full border-4 border-[#EB5017] bg-white" />
+                    <div className={`w-4 h-4 rounded-full border-2 bg-white ${!activeQuestion.isMultiSelect ? "border-4 border-[#EB5017]" : "border-gray-200"}`} />
                     <span className="text-sm font-bold text-[#1B1818]">Single select</span>
                    </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl cursor-pointer hover:border-[#EB5017] transition-all">
+                <div 
+                  onClick={() => handleToggleMultiSelect(true)}
+                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${activeQuestion.isMultiSelect ? "bg-[#FFF2F0] border-2 border-[#EB5017]" : "bg-white border border-gray-200 hover:border-[#EB5017]"}`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded-full border-2 border-gray-200 bg-white" />
+                    <div className={`w-4 h-4 rounded-full border-2 bg-white ${activeQuestion.isMultiSelect ? "border-4 border-[#EB5017]" : "border-gray-200"}`} />
                     <span className="text-sm font-bold text-[#1B1818]">Multi-select</span>
                   </div>
                 </div>

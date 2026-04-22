@@ -16,6 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import QuizCard from "@/components/games/QuizCard";
+import CreateQuizModal from "@/components/games/CreateQuizModal";
 
 const categories = [
   { id: "all", name: "All", icon: RiInfinityLine, active: true },
@@ -84,13 +85,27 @@ const featuredQuizzes = [
 
 export default function GamesPage() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const handleCreateQuiz = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleModalNext = (data: { title: string; description: string; category: string }) => {
     const pathSegments = pathname.split("/");
     const eventId = pathSegments[2];
-    router.push(`/events/${eventId}/games/create`);
+    const quizId = crypto.randomUUID();
+    
+    const queryParams = new URLSearchParams({
+      id: quizId,
+      title: data.title,
+      description: data.description,
+      category: data.category
+    }).toString();
+
+    router.push(`/events/${eventId}/games/create?${queryParams}`);
   };
 
   return (
@@ -181,6 +196,13 @@ export default function GamesPage() {
           Load More Quizzes
         </button>
       </div>
+
+      <CreateQuizModal 
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onNext={handleModalNext}
+        categories={categories}
+      />
     </div>
   );
 }

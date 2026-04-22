@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -16,63 +16,67 @@ import { LuClock3, LuChartBar } from "react-icons/lu";
 import { FiShare2, FiBookmark, FiAlertTriangle } from "react-icons/fi";
 import QuestionPreviewCard from "@/components/games/QuestionPreviewCard";
 import RelatedQuizItem from "@/components/games/RelatedQuizItem";
+import { quizzesService } from "@/lib/services/quizzes.service";
+import { toast } from "sonner";
 
 
 export default function QuizDetailPage() {
   const params = useParams();
-  const eventId = params._id;
+  const router = useRouter();
+  const eventId = params._id as string;
+  const quizId = params.quizId as string;
 
   const [showAnswers, setShowAnswers] = useState(false);
+  const [quiz, setQuiz] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isHosting, setIsHosting] = useState(false);
 
-  // Mock Quiz Data
-  const quiz = {
-    title: "Space Exploration: The Final Frontier",
-    category: "SPACE SCIENCE",
-    description: "Journey through the stars! Test your knowledge about the solar system, famous galaxies, and the incredible history of human space travel.",
-    author: "AstroProfessor",
-    isVerified: true,
-    thumbnail: "/thumbnails/space_trivia.png",
-    stats: {
-      questions: 20,
-      avgTime: "15m",
-      plays: "15.2k",
-      level: "Med",
-    },
-    questions: [
-      {
-        number: 1,
-        timeLimit: "30s",
-        question: "Which planet is known as the 'Red Planet'?",
-        options: ["Venus", "Mars", "Jupiter", "Saturn"],
-        correctOptionIndex: 1,
-        thumbnail: "/thumbnails/mars.png",
-      },
-      {
-        number: 2,
-        timeLimit: "60s",
-        question: "In what year did the first human land on the moon?",
-        options: ["1965", "1972", "1969", "1961"],
-        correctOptionIndex: 2,
-        thumbnail: "/thumbnails/moon_landing.png",
-      },
-    ],
-    relatedQuizzes: [
-      {
-        id: "the-solar-system-challenge",
-        title: "The Solar System Challenge",
-        questions: 12,
-        plays: "5.1k",
-        thumbnail: "/thumbnails/solar_system.png",
-      },
-      {
-        id: "black-holes-time-travel",
-        title: "Black Holes & Time Travel",
-        questions: 15,
-        plays: "2.8k",
-        thumbnail: "/thumbnails/black_hole.png",
-      },
-    ]
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const data = await quizzesService.getQuiz(quizId);
+        setQuiz(data);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        toast.error("Failed to load quiz details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [quizId]);
+
+  const handleHostGame = async () => {
+    setIsHosting(true);
+    try {
+      const response = await quizzesService.hostQuiz(quizId);
+      // Assuming response contains { pin: string }
+      const pin = response.pin;
+      router.push(`/events/${eventId}/games/${quizId}/waiting-room?pin=${pin}`);
+    } catch (error) {
+      console.error("Error hosting game:", error);
+      toast.error("Failed to start session.");
+    } finally {
+      setIsHosting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb5017]"></div>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+        <h1 className="text-2xl font-bold">Quiz not found</h1>
+        <Link href={`/events/${eventId}/games`} className="text-[#eb5017] font-bold">Back to Games</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto p-4 md:p-8 font-sans space-y-8 bg-gray-50/50 min-h-screen">
@@ -131,9 +135,13 @@ export default function QuizDetailPage() {
                   <HiOutlinePlay className="text-xl" />
                   Play Now
                 </Link>
-                <button className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all">
+                <button 
+                  onClick={handleHostGame}
+                  disabled={isHosting}
+                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all disabled:opacity-50"
+                >
                   <HiOutlineUsers className="text-xl" />
-                  Host Game
+                  {isHosting ? "Starting..." : "Host Game"}
                 </button>
               </div>
             </div>
@@ -146,28 +154,28 @@ export default function QuizDetailPage() {
                 <HiOutlineQuestionMarkCircle className="text-lg bg-[#FFF2F0] p-1 rounded w-6 h-6" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Questions</span>
               </div>
-              <p className="text-2xl font-black text-[#1B1818]">{quiz.stats.questions}</p>
+              <p className="text-2xl font-black text-[#1B1818]">{quiz.questions?.length || 0}</p>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-2">
               <div className="flex items-center gap-2 text-[#eb5017]">
                 <LuClock3 className="text-lg bg-[#FFF2F0] p-1 rounded w-6 h-6" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Avg. Time</span>
               </div>
-              <p className="text-2xl font-black text-[#1B1818]">{quiz.stats.avgTime}</p>
+              <p className="text-2xl font-black text-[#1B1818]">{quiz.avgTime || "15m"}</p>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-2">
               <div className="flex items-center gap-2 text-[#eb5017]">
                 <HiOutlinePlay className="text-lg bg-[#FFF2F0] p-1 rounded w-6 h-6" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Plays</span>
               </div>
-              <p className="text-2xl font-black text-[#1B1818]">{quiz.stats.plays}</p>
+              <p className="text-2xl font-black text-[#1B1818]">{quiz.plays || "0"}</p>
             </div>
             <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-2">
               <div className="flex items-center gap-2 text-[#eb5017]">
                 <LuChartBar className="text-lg bg-[#FFF2F0] p-1 rounded w-6 h-6" />
                 <span className="text-[10px] font-black uppercase tracking-wider">Level</span>
               </div>
-              <p className="text-2xl font-black text-[#1B1818]">{quiz.stats.level}</p>
+              <p className="text-2xl font-black text-[#1B1818]">{quiz.level || "Med"}</p>
             </div>
           </div>
 
@@ -185,8 +193,17 @@ export default function QuizDetailPage() {
             </div>
 
             <div className="space-y-4">
-              {quiz.questions.map((q) => (
-                <QuestionPreviewCard key={q.number} {...q} />
+              {quiz.questions?.map((q: any, i: number) => (
+                <QuestionPreviewCard 
+                  key={i} 
+                  number={i + 1}
+                  question={q.text}
+                  options={q.options}
+                  correctOptionIndex={q.correctAnswer?.[0]}
+                  timeLimit={`${q.timeLimit}s`}
+                  thumbnail={q.mediaUrl}
+                  showAnswer={showAnswers}
+                />
               ))}
             </div>
 
@@ -208,7 +225,7 @@ export default function QuizDetailPage() {
               <h3 className="text-lg font-black text-[#1B1818] tracking-tight">Related Quizzes</h3>
             </div>
             <div className="space-y-6">
-              {quiz.relatedQuizzes.map((q) => (
+              {quiz.relatedQuizzes?.map((q: any) => (
                 <RelatedQuizItem key={q.id} {...q} />
               ))}
             </div>
