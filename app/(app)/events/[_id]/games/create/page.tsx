@@ -12,6 +12,7 @@ import {
   HiOutlineViewGrid,
   HiOutlineArrowLeft,
   HiOutlineClock,
+  HiOutlineCollection,
   HiX
 } from "react-icons/hi";
 import { 
@@ -62,6 +63,7 @@ export default function CreateQuizPage() {
   const [quizId, setQuizId] = useState(initialId);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [maxQuestions, setMaxQuestions] = useState(DEFAULT_MAX_QUESTIONS);
   const [questions, setQuestions] = useState<Question[]>([
@@ -481,6 +483,42 @@ export default function CreateQuizPage() {
         {/* Right Sidebar - Settings */}
         <aside className="w-[320px] bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-hidden text-sm uppercase font-bold text-gray-400">
           <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar uppercase">
+            {/* Quiz Category */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Category</label>
+              <div className="relative">
+                <button 
+                  onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                  className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:border-[#EB5017] transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#FFF2F0] text-[#EB5017] flex items-center justify-center">
+                      <HiOutlineCollection className="text-xl" />
+                    </div>
+                    <span className="text-sm font-bold text-[#1B1818]">{quizCategory}</span>
+                  </div>
+                  <HiOutlineChevronDown className={`text-gray-400 group-hover:text-[#EB5017] transition-transform ${isCategoryDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isCategoryDropdownOpen && (
+                  <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-30 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {["trivia", "science", "music", "history", "geography", "pop-culture"].map((cat) => (
+                      <button 
+                        key={cat}
+                        onClick={() => {
+                          setQuizCategory(cat);
+                          setIsCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors ${quizCategory === cat ? "bg-gray-50 text-[#EB5017]" : "text-[#1B1818]"}`}
+                      >
+                        <span className="text-sm font-bold capitalize">{cat}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Question Type */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Question Type</label>
