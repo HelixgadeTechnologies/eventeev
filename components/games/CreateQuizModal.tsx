@@ -69,32 +69,32 @@ export default function CreateQuizModal({ isOpen, onClose, onNext, categories }:
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-[32px] shadow-2xl z-[151] overflow-hidden border border-gray-100"
           >
             {/* Header */}
-            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#FFF2F0] flex items-center justify-center text-[#EB5017]">
-                  <HiOutlineBookOpen size={24} />
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FFF2F0] flex items-center justify-center text-[#EB5017]">
+                  <HiOutlineBookOpen size={20} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-[#1B1818] tracking-tight">Create New Quiz</h2>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">Step 1 of 2: Basic Info</p>
+                  <h2 className="text-lg font-black text-[#1B1818] tracking-tight">Create New Quiz</h2>
+                  <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Basic Information</p>
                 </div>
               </div>
               <button 
                 onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:text-[#1B1818] hover:bg-white transition-all"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-[#1B1818] hover:bg-white transition-all"
               >
-                <IoClose size={24} />
+                <IoClose size={20} />
               </button>
             </div>
 
             {/* Content */}
-            <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              {/* Cover Image Section */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Cover Image</label>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Cover Image Section - Compact */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Cover Image</label>
                 <div 
                   onClick={() => !formData.coverImage && fileInputRef.current?.click()}
-                  className={`relative w-full h-48 rounded-[24px] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 overflow-hidden group ${
+                  className={`relative w-full h-32 rounded-[20px] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2 overflow-hidden group ${
                     formData.coverImage 
                       ? "border-transparent bg-gray-50" 
                       : "border-gray-200 bg-gray-50/50 hover:border-[#EB5017] hover:bg-[#FFF2F0] cursor-pointer"
@@ -107,33 +107,32 @@ export default function CreateQuizModal({ isOpen, onClose, onNext, categories }:
                         <button 
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="p-3 bg-white rounded-full text-[#1B1818] hover:bg-[#EB5017] hover:text-white transition-all shadow-lg"
+                          className="p-2.5 bg-white rounded-full text-[#1B1818] hover:bg-[#EB5017] hover:text-white transition-all shadow-lg"
                         >
-                          <HiOutlinePhotograph size={20} />
+                          <HiOutlinePhotograph size={18} />
                         </button>
                         <button 
                           type="button"
                           onClick={removeImage}
-                          className="p-3 bg-white rounded-full text-[#EB5017] hover:bg-red-600 hover:text-white transition-all shadow-lg"
+                          className="p-2.5 bg-white rounded-full text-[#EB5017] hover:bg-red-600 hover:text-white transition-all shadow-lg"
                         >
-                          <HiOutlineTrash size={20} />
+                          <HiOutlineTrash size={18} />
                         </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#EB5017] transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#EB5017] transition-all">
                         {isUploading ? (
-                          <div className="w-6 h-6 border-2 border-[#EB5017] border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-[#EB5017] border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <HiOutlinePhotograph size={24} />
+                          <HiOutlinePhotograph size={20} />
                         )}
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-bold text-[#1B1818]">
-                          {isUploading ? "Uploading..." : "Click to upload cover image"}
+                        <p className="text-xs font-bold text-[#1B1818]">
+                          {isUploading ? "Uploading..." : "Upload Cover Image"}
                         </p>
-                        <p className="text-xs font-medium text-gray-400 mt-0.5">JPG, PNG or WEBP (Max 5MB)</p>
                       </div>
                     </>
                   )}
@@ -147,48 +146,50 @@ export default function CreateQuizModal({ isOpen, onClose, onNext, categories }:
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. World History Trivia"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all placeholder:text-gray-300"
-                />
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5 col-span-2">
+                  <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Quiz Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. World History Trivia"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all placeholder:text-gray-300"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Description</label>
-                <textarea
-                  placeholder="Tell us what this quiz is about..."
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all placeholder:text-gray-300 resize-none"
-                />
-              </div>
+                <div className="space-y-1.5 col-span-2">
+                  <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Description</label>
+                  <textarea
+                    placeholder="Tell us what this quiz is about..."
+                    rows={2}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all placeholder:text-gray-300 resize-none"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Category</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all appearance-none cursor-pointer"
-                >
-                  {categories.filter(c => c.id !== "all").map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <div className="space-y-1.5 col-span-2">
+                  <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    {categories.filter(c => c.id !== "all").map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#EB5017] text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20 mt-4"
+                className="w-full bg-[#EB5017] text-white py-3.5 rounded-xl font-black flex items-center justify-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20 mt-2"
               >
                 Continue to Editor
-                <HiOutlineChevronRight size={20} />
+                <HiOutlineChevronRight size={18} />
               </button>
             </form>
           </motion.div>
