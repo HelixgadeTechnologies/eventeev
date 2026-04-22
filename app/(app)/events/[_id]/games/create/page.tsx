@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { 
   HiOutlineChevronDown, 
@@ -20,32 +20,114 @@ import {
   IoEllipseOutline, 
   IoDiamond 
 } from "react-icons/io5";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { eventsService } from "@/lib/services/events.service";
+
+interface Option {
+  text: string;
+  isCorrect: boolean;
+}
+
+interface Question {
+  id: number;
+  type: string;
+  title: string;
+  text: string;
+  active: boolean;
+  timeLimit: string;
+  media: string | null;
+  options: Option[];
+}
+
+const DEFAULT_MAX_QUESTIONS = 30;
 
 export default function CreateQuizPage() {
   const router = useRouter();
+  const params = useParams();
+  const _id = params?._id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [quizTitle] = useState("General Knowledge Quiz");
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
-  const [questions, setQuestions] = useState([
-    { id: 1, type: "Quiz", title: "1. Quiz", active: true, timeLimit: "20 seconds", media: null as string | null },
+  const [maxQuestions, setMaxQuestions] = useState(DEFAULT_MAX_QUESTIONS);
+  const [questions, setQuestions] = useState<Question[]>([
+    { 
+      id: 1, 
+      type: "Quiz", 
+      title: "1. Quiz", 
+      text: "", 
+      active: true, 
+      timeLimit: "20 seconds", 
+      media: null,
+      options: [
+        { text: "Add answer 1", isCorrect: false },
+        { text: "Add answer 2", isCorrect: false },
+        { text: "Add answer 3", isCorrect: false },
+        { text: "Add answer 4", isCorrect: false },
+      ]
+    },
   ]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!_id) return;
+      const { data, error } = await eventsService.getEventById(_id);
+      if (!error && data) {
+        const gameSettings = data.settings?.game;
+        if (gameSettings?.maxQuestions) {
+          setMaxQuestions(gameSettings.maxQuestions);
+        }
+      }
+    };
+    fetchSettings();
+  }, [_id]);
 
   const activeQuestion = questions.find(q => q.active) || questions[0];
 
   const handleAddQuestion = () => {
+    if (questions.length >= maxQuestions) {
+      alert(`Maximum of ${maxQuestions} questions allowed.`);
+      return;
+    }
     const newId = Math.max(...questions.map(q => q.id), 0) + 1;
     setQuestions(prev => [
       ...prev.map(q => ({ ...q, active: false })),
-      { id: newId, type: "Quiz", title: `${newId}. Quiz`, active: true, timeLimit: "20 seconds", media: null }
+      { 
+        id: newId, 
+        type: "Quiz", 
+        title: `${newId}. Quiz`, 
+        text: "", 
+        active: true, 
+        timeLimit: "20 seconds", 
+        media: null,
+        options: [
+          { text: "Add answer 1", isCorrect: false },
+          { text: "Add answer 2", isCorrect: false },
+          { text: "Add answer 3", isCorrect: false },
+          { text: "Add answer 4", isCorrect: false },
+        ]
+      }
     ]);
   };
 
   const handleTypeChange = (type: string) => {
-    setQuestions(prev => prev.map(q => 
-      q.id === activeQuestion.id ? { ...q, type, title: `${q.id}. ${type}` } : q
-    ));
+    setQuestions(prev => prev.map(q => {
+      if (q.id === activeQuestion.id) {
+        const options = type === "True/False" 
+          ? [
+              { text: "True", isCorrect: false },
+              { text: "False", isCorrect: false }
+            ]
+          : [
+              { text: "Add answer 1", isCorrect: false },
+              { text: "Add answer 2", isCorrect: false },
+              { text: "Add answer 3", isCorrect: false },
+              { text: "Add answer 4", isCorrect: false },
+            ];
+        return { ...q, type, title: `${q.id}. ${type}`, options };
+      }
+      return q;
+    }));
     setIsTypeDropdownOpen(false);
   };
 
@@ -58,6 +140,10 @@ export default function CreateQuizPage() {
 
   const handleDuplicate = () => {
     if (!activeQuestion) return;
+    if (questions.length >= maxQuestions) {
+      alert(`Maximum of ${maxQuestions} questions allowed.`);
+      return;
+    }
     const newId = Math.max(...questions.map(q => q.id), 0) + 1;
     const activeIndex = questions.findIndex(q => q.id === activeQuestion.id);
     const newQuestion = { ...activeQuestion, id: newId, title: `${newId}. ${activeQuestion.type}`, active: true };
@@ -97,6 +183,36 @@ export default function CreateQuizPage() {
     setQuestions(prev => prev.map(q => 
       q.id === activeQuestion.id ? { ...q, media: null } : q
     ));
+  };
+
+  const handleQuestionTextChange = (text: string) => {
+    setQuestions(prev => prev.map(q => 
+      q.id === activeQuestion.id ? { ...q, text } : q
+    ));
+  };
+
+  const handleOptionTextChange = (index: number, text: string) => {
+    setQuestions(prev => prev.map(q => {
+      if (q.id === activeQuestion.id) {
+        const newOptions = [...q.options];
+        newOptions[index] = { ...newOptions[index], text };
+        return { ...q, options: newOptions };
+      }
+      return q;
+    }));
+  };
+
+  const handleToggleCorrect = (index: number) => {
+    setQuestions(prev => prev.map(q => {
+      if (q.id === activeQuestion.id) {
+        const newOptions = q.options.map((opt, i) => ({
+          ...opt,
+          isCorrect: i === index
+        }));
+        return { ...q, options: newOptions };
+      }
+      return q;
+    }));
   };
 
   return (
@@ -152,8 +268,10 @@ export default function CreateQuizPage() {
                     className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" 
                   />
                 </div>
-                <div className="h-14 bg-white/50 rounded-lg border border-dashed border-gray-200 flex items-center justify-center">
-                  <span className="text-[10px] text-gray-400 font-medium">Start typing...</span>
+                <div className="h-14 bg-white/50 rounded-lg border border-dashed border-gray-200 flex items-center justify-center px-2 overflow-hidden">
+                  <span className="text-[10px] text-gray-400 font-medium truncate">
+                    {q.text || "Start typing..."}
+                  </span>
                 </div>
               </div>
             ))}
@@ -178,6 +296,8 @@ export default function CreateQuizPage() {
             {/* Question Input */}
             <input 
               type="text" 
+              value={activeQuestion.text}
+              onChange={(e) => handleQuestionTextChange(e.target.value)}
               placeholder="Start typing your question"
               className="w-full bg-transparent text-center text-3xl font-black text-[#1B1818] placeholder:text-gray-300 outline-none border-none py-2"
             />
@@ -230,51 +350,48 @@ export default function CreateQuizPage() {
               )}
             </div>
 
-            {/* Answer Grid */}
             <div className="grid grid-cols-2 gap-4 w-full">
-              {activeQuestion.type === "Quiz" ? (
-                <>
-                  {/* Top Left: Red Triangle (Hollow) */}
-                  <div className="h-[80px] bg-[#E21B3C] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <IoTriangleOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100">Add answer 1</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
+              {activeQuestion.options.map((option, index) => {
+                const colors = [
+                  { bg: "bg-[#E21B3C]", icon: <IoTriangleOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" /> },
+                  { bg: "bg-[#D89E00]", icon: <IoEllipseOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" /> },
+                  { bg: "bg-[#1368CE]", icon: <HiX className="absolute left-6 text-white text-3xl" /> },
+                  { bg: "bg-[#26890C]", icon: <IoSquareOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" /> },
+                ];
+                
+                // For True/False, we might want different icons, but the user's request
+                // says "Options (4 for quiz option 2 for trur/false)", so we'll use 
+                // the first two colors/icons or specific ones.
+                const tfIcons = [
+                  { bg: "bg-[#1368CE]", icon: <IoDiamond className="absolute left-6 text-white text-3xl" /> },
+                  { bg: "bg-[#E21B3C]", icon: <HiX className="absolute left-6 text-white text-3xl" /> },
+                ];
+
+                const style = activeQuestion.type === "True/False" ? tfIcons[index] : colors[index];
+
+                return (
+                  <div 
+                    key={index}
+                    className={`h-[80px] ${style.bg} rounded-[16px] relative flex items-center justify-center p-6 shadow-md border-b-4 border-black/20 group hover:brightness-110 transition-all`}
+                  >
+                    {style.icon}
+                    <input 
+                      type="text"
+                      value={option.text}
+                      onChange={(e) => handleOptionTextChange(index, e.target.value)}
+                      className="bg-transparent text-white text-[15px] font-bold opacity-90 group-hover:opacity-100 text-center outline-none border-none w-full px-12"
+                    />
+                    <button 
+                      onClick={() => handleToggleCorrect(index)}
+                      className={`absolute right-6 w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${
+                        option.isCorrect ? "bg-white border-white" : "border-white/50"
+                      }`}
+                    >
+                      {option.isCorrect && <div className="w-3 h-3 rounded-full bg-[#EB5017]" />}
+                    </button>
                   </div>
-                  {/* Top Right: Yellow Circle (Hollow) */}
-                  <div className="h-[80px] bg-[#D89E00] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <IoEllipseOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100">Add answer 2</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
-                  </div>
-                  {/* Bottom Left: Blue X (Solid) */}
-                  <div className="h-[80px] bg-[#1368CE] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <HiX className="absolute left-6 text-white text-3xl" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100">Add answer 3</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
-                  </div>
-                  {/* Bottom Right: Green Square (Hollow) */}
-                  <div className="h-[80px] bg-[#26890C] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <IoSquareOutline className="absolute left-6 text-white text-3xl stroke-[2.5]" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100">Add answer 4</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* True Option */}
-                  <div className="h-[80px] bg-[#1368CE] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <IoDiamond className="absolute left-6 text-white text-3xl" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100 text-center">True</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
-                  </div>
-                  {/* False Option */}
-                  <div className="h-[80px] bg-[#E21B3C] rounded-[16px] relative flex items-center justify-center p-6 shadow-md cursor-pointer group hover:brightness-110 transition-all border-b-4 border-black/20">
-                    <HiX className="absolute left-6 text-white text-3xl" />
-                    <span className="text-white text-[15px] font-bold opacity-90 group-hover:opacity-100 text-center">False</span>
-                    <div className="absolute right-6 w-6 h-6 rounded-full border-2 border-white/50" />
-                  </div>
-                </>
-              )}
+                );
+              })}
             </div>
           </div>
         </main>
@@ -357,23 +474,6 @@ export default function CreateQuizPage() {
               </div>
             </div>
 
-            {/* Points */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Points</label>
-                <span className="text-sm font-black text-[#EB5017]">5</span>
-              </div>
-              <div className="relative h-6 flex items-center">
-                <div className="absolute w-full h-1.5 bg-[#F2F4F7] rounded-full" />
-                <div className="absolute w-1/2 h-1.5 bg-[#EB5017] rounded-full" />
-                <div className="absolute left-1/2 -ml-2.5 w-5 h-5 bg-white border-[5px] border-[#EB5017] rounded-full shadow-md cursor-pointer" />
-              </div>
-              <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                <span>0</span>
-                <span>5</span>
-                <span>10</span>
-              </div>
-            </div>
 
             {/* Answer Options */}
             <div className="space-y-2">

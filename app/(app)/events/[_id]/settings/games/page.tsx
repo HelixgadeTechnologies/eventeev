@@ -27,6 +27,7 @@ export default function GameSettings() {
   const [enableGameChat, setEnableGameChat] = useState(false);
   const [timePerQuestion, setTimePerQuestion] = useState("20");
   const [gameTheme, setGameTheme] = useState("modern-sunset");
+  const [maxQuestions, setMaxQuestions] = useState(30);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -44,6 +45,7 @@ export default function GameSettings() {
         setEnableGameChat(game.enableChat ?? false);
         setTimePerQuestion(game.timePerQuestion?.toString() || "20");
         setGameTheme(game.theme || "modern-sunset");
+        setMaxQuestions(game.maxQuestions ?? 30);
       }
       setLoading(false);
     };
@@ -65,6 +67,7 @@ export default function GameSettings() {
           enableChat: enableGameChat,
           timePerQuestion: parseInt(timePerQuestion),
           theme: gameTheme,
+          maxQuestions,
         }
       }
     };
@@ -172,6 +175,17 @@ export default function GameSettings() {
                     <p className="text-[9px] font-medium text-gray-400">Shuffle questions so every session feels fresh</p>
                   </div>
                   <Switch checked={randomizeOrder} onCheckedChange={setRandomizeOrder} />
+                </div>
+
+                <div className="pt-2 border-t border-gray-50 space-y-1.5 min-w-0">
+                  <Label className="text-xs font-bold text-[#1B1818]">Max Questions</Label>
+                  <input 
+                    type="number"
+                    value={maxQuestions}
+                    onChange={(e) => setMaxQuestions(parseInt(e.target.value) || 0)}
+                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-medium text-[#1B1818] outline-none focus:border-[#EB5017] transition-all"
+                  />
+                  <p className="text-[9px] font-medium text-[#B28A6A] mt-1">The maximum number of questions allowed in a quiz</p>
                 </div>
               </div>
             </section>
