@@ -9,11 +9,37 @@ import PeakChatHoursWidget from "@/components/analytics/PeakChatHoursWidget";
 import MarketingWidget from "@/components/analytics/MarketingWidget";
 import { HiOutlineCurrencyDollar, HiOutlineTicket, HiOutlineUserGroup } from "react-icons/hi";
 import { HiOutlineChartPie } from "react-icons/hi2";
+import { useParams } from "next/navigation";
+import { eventsService } from "@/lib/services/events.service";
+import GameAnalyticsWidget from "@/components/analytics/GameAnalyticsWidget";
 
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 
 export default function AnalyticsPage() {
+  const params = useParams();
+  const eventId = params._id as string;
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data, error } = await eventsService.getEventStats(eventId);
+        if (data) setStats(data);
+      } catch (err) {
+        console.error("Error fetching event stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, [eventId]);
+
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(val);
+  };
+
   return (
     <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
 
@@ -23,7 +49,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           <StatsCard 
             title="Total Revenue" 
-            value="$1.24M" 
+            value={stats ? formatCurrency(stats.totalRevenue || 0) : "$0"} 
             trend="14.2%" 
             trendUp={true} 
             icon={<HiOutlineCurrencyDollar className="text-xl" />}
@@ -32,7 +58,7 @@ export default function AnalyticsPage() {
           />
           <StatsCard 
             title="Net Profit" 
-            value="$482.5K" 
+            value={stats ? formatCurrency((stats.totalRevenue || 0) * 0.4) : "$0"} 
             trend="6.8%" 
             trendUp={true} 
             icon={<HiOutlineChartPie className="text-xl" />}
@@ -41,7 +67,7 @@ export default function AnalyticsPage() {
           />
           <StatsCard 
             title="Tickets Sold" 
-            value="18,540" 
+            value={stats ? (stats.totalRegistrations || 0).toLocaleString() : "0"} 
             trend="21.4%" 
             trendUp={true} 
             icon={<HiOutlineTicket className="text-xl" />}
@@ -50,7 +76,7 @@ export default function AnalyticsPage() {
           />
           <StatsCard 
             title="Attendance Rate" 
-            value="94.2%" 
+            value={stats ? `${Math.round((stats.attendanceRate || 0) * 100)}%` : "0%"} 
             trend="1.2%" 
             trendUp={false} 
             icon={<HiOutlineUserGroup className="text-xl" />}
@@ -69,6 +95,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
           <div className="space-y-5">
+            <GameAnalyticsWidget />
             <EngagementWidget />
           </div>
         </div>

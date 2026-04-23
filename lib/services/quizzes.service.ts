@@ -30,6 +30,11 @@ export class QuizzesService {
     const response = await axiosInstance.get(`/api/game/quiz/session/${pin}/leaderboard`);
     return response.data;
   }
+
+  async getQuizzesByEvent(eventId: string) {
+    const response = await axiosInstance.get(`/api/game/quiz/event/${eventId}`);
+    return response.data;
+  }
 }
 
 export const quizzesService = new QuizzesService();
