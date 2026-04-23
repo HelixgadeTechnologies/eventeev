@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { HiOutlineChevronDown, HiOutlineTrophy, HiOutlineUserGroup, HiOutlineClock } from "react-icons/hi";
+import { HiOutlineChevronDown, HiOutlineTrophy, HiOutlineUserGroup, HiOutlineClock } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
 import { useParams } from "next/navigation";
 
