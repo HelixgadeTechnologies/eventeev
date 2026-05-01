@@ -16,7 +16,7 @@ export default function OTPVerificationComponent() {
   const [activeOtpIndex, setActiveOtpIndex] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [resendTimer, setResendTimer] = useState(30);
+  const [resendTimer, setResendTimer] = useState(120);
   const [canResend, setCanResend] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -109,7 +109,7 @@ export default function OTPVerificationComponent() {
     if (resendError) {
       setError(resendError.message || "Failed to resend code");
     } else {
-      setResendTimer(30);
+      setResendTimer(120);
       setCanResend(false);
       setError("");
       setOtp(new Array(6).fill(""));
@@ -173,7 +173,7 @@ export default function OTPVerificationComponent() {
                 </button>
               ) : (
                 <span className="text-gray-400 font-medium">
-                  Resend in {resendTimer}s
+                  Resend in {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
                 </span>
               )}
             </p>
