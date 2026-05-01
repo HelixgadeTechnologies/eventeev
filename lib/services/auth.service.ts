@@ -76,7 +76,7 @@ export class AuthService {
    */
   async updatePassword(token: string, password: string) {
     try {
-      await axiosInstance.put(`/api/auth/resetpassword/${token}`, { password });
+      await axiosInstance.post(`/api/auth/resetpassword/${token}`, { password });
       return { error: null }
     } catch (error: any) {
       return { error: error.response?.data?.message || 'Failed to update password' }
