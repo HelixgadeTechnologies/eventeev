@@ -13,6 +13,8 @@ interface AuthContextType {
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any | null }>
   updatePassword: (token: string, newPassword: string) => Promise<{ error: any | null }>
+  verifyOtp: (email: string, otp: string) => Promise<{ error: any | null }>
+  resendOtp: (email: string) => Promise<{ error: any | null }>
   refreshUser: () => Promise<void>
 }
 
@@ -88,6 +90,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const verifyOtp = async (email: string, otp: string) => {
+    const { user: verifiedUser, error } = await authService.verifyOtp(email, otp)
+    if (!error && verifiedUser) {
+      setUser(verifiedUser)
+      const { session: newSession } = await authService.getSession()
+      setSession(newSession)
+      return { error: null }
+    }
+    return { error }
+  }
+
+  const resendOtp = async (email: string) => {
+    const { error } = await authService.resendOtp(email)
+    return { error }
+  }
+
   const refreshUser = async () => {
     const { user: updatedUser, error } = await authService.getCurrentUser()
     if (!error && updatedUser) {
@@ -104,6 +122,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     resetPassword,
     updatePassword,
+    verifyOtp,
+    resendOtp,
     refreshUser,
   }
 

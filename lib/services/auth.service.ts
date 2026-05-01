@@ -135,6 +135,37 @@ export class AuthService {
       return { data: null, error: error.response?.data?.message || 'Failed to get profile' }
     }
   }
+
+  /**
+   * Verify OTP
+   */
+  async verifyOtp(email: string, otp: string) {
+    try {
+      const response = await axiosInstance.post('/api/auth/verify-otp', { email, otp });
+      const { user, token } = response.data;
+      const mappedUser = user ? { ...user, id: user.id || user._id } : null;
+      
+      if (token) {
+        localStorage.setItem('x-auth-token', token);
+      }
+      
+      return { user: mappedUser, token, error: null }
+    } catch (error: any) {
+      return { user: null, token: null, error: error.response?.data?.message || 'Verification failed' }
+    }
+  }
+
+  /**
+   * Resend OTP
+   */
+  async resendOtp(email: string) {
+    try {
+      const response = await axiosInstance.post('/api/auth/resend-otp', { email });
+      return { data: response.data, error: null }
+    } catch (error: any) {
+      return { data: null, error: error.response?.data?.message || 'Failed to resend OTP' }
+    }
+  }
 }
 
 export const authService = new AuthService()

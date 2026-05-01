@@ -69,7 +69,7 @@ export default function SignUpComponent() {
         setLoading(false);
         // Redirect after successful signup
         setTimeout(() => {
-          router.push("/sign-up/organization-registration");
+          router.push(`/sign-up/otp?email=${encodeURIComponent(userData.email)}`);
         }, 2000);
       }
     } catch {
@@ -89,7 +89,7 @@ export default function SignUpComponent() {
           </div>
           <h2 className="text-2xl font-semibold text-green-900 mb-2">Registration Successful!</h2>
           <p className="text-green-700 mb-4">
-            Your account has been created. Redirecting to organization setup...
+            Your account has been created. Redirecting to email verification...
           </p>
         </div>
       </div>
