@@ -7,14 +7,15 @@ export const metadata = {
     description: "Add tickets based on ticket type for your event."
 }
 
-export default function Tickets() {
+export default function Tickets({ params }: { params: { _id: string } }) {
+    const { _id } = params;
     return (
         <div className="space-y-10">
             {/* Premium Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                 <div className="space-y-2">
                     <Link 
-                        href="../dashboard" 
+                        href={`/events/${_id}/dashboard`} 
                         className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-colors group"
                     >
                         <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />

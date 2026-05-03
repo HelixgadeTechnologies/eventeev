@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 import { RiLoader4Line } from "react-icons/ri";
-import { FaAngleRight } from "react-icons/fa6";
+import { FaAngleRight, FaAngleLeft } from "react-icons/fa6";
 
 export default function GamesSelectionPage() {
   const { _id } = useParams();
@@ -35,6 +36,16 @@ export default function GamesSelectionPage() {
 
   return (
     <div className="p-6 md:p-10 max-w-[1200px] mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="w-full flex justify-start">
+        <Link 
+            href={`/events/${_id}/dashboard`} 
+            className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
+        >
+            <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
+            Back to Dashboard
+        </Link>
+      </div>
+
       <div className="text-center space-y-4">
         <h1 className="text-4xl md:text-5xl font-black text-[#1B1818] tracking-tight">
           Select Your Game

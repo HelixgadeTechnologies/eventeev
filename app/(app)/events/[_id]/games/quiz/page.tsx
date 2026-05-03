@@ -84,6 +84,8 @@ const featuredQuizzes = [
 // }
 
 export default function GamesPage() {
+  const params = useParams();
+  const eventId = params._id;
   const [activeCategory, setActiveCategory] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pathname = usePathname();
@@ -111,7 +113,14 @@ export default function GamesPage() {
 
   return (
     <div className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-12 font-sans">
-      <div className="w-full flex justify-start">
+      <div className="w-full flex flex-col gap-4 justify-start">
+        <Link 
+            href={`/events/${eventId}/dashboard`} 
+            className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
+        >
+            <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
+            Back to Dashboard
+        </Link>
         <Link 
             href="../games" 
             className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
