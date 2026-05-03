@@ -33,7 +33,7 @@ const featuredQuizzes = [
     id: "space-trivia",
     title: "The Ultimate Space Trivia",
     category: "Science",
-    questions: 15,
+    questions: 10,
     author: "SARAH J.",
     thumbnail: "/thumbnails/space_trivia.png",
   },

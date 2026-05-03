@@ -25,7 +25,7 @@ export default function CountdownPage() {
       // Navigate to the play page
       const eventId = params._id;
       const quizId = params.quizId;
-      router.push(`/events/${eventId}/games/${quizId}/intro`);
+      router.push(`/events/${eventId}/games/${quizId}/intro?q=0`);
     }
   }, [count, params._id, params.quizId, router]);
 

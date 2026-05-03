@@ -1,29 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineChevronRight, HiOutlineCheckCircle } from "react-icons/hi";
+import { quizzesService } from "@/lib/services/quizzes.service";
 
-export default function QuestionResultsPage() {
+function QuestionResultsContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const eventId = params?._id;
-  const quizId = params?.quizId;
+  const quizId = params?.quizId as string;
+  const qIndex = parseInt(searchParams.get("q") || "0");
 
-  // Mock data matching the design
-  const results = [
-    { label: "Lyon", count: 4, color: "#EB1D44", isCorrect: false },
-    { label: "Marseille", count: 8, color: "#FFC20E", isCorrect: false },
-    { label: "PARIS", count: 28, color: "#1368CE", isCorrect: true },
-    { label: "Bordeaux", count: 2, color: "#26890C", isCorrect: false },
-  ];
-
-  // const totalPlayers = 42; // Removed to fix lint error
-  const maxCount = Math.max(...results.map(r => r.count));
+  const [quiz, setQuiz] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showEndModal, setShowEndModal] = useState(false);
-  const totalDuration = 4000; // 4 seconds
+  const totalDuration = 4000;
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const data = await quizzesService.getQuiz(quizId);
+        setQuiz(data);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [quizId]);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -34,15 +43,15 @@ export default function QuestionResultsPage() {
 
       if (progress >= 100) {
         clearInterval(interval);
-        router.push(`/events/${eventId}/games/${quizId}/leaderboard`);
+        handleNextQuestion();
       }
-    }, 16); // ~60fps
+    }, 16);
 
     return () => clearInterval(interval);
-  }, [router, eventId, quizId]);
+  }, [router, eventId, quizId, qIndex]);
 
   const handleNextQuestion = () => {
-    router.push(`/events/${eventId}/games/${quizId}/leaderboard`);
+    router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}`);
   };
 
   const handleEndGame = () => {
@@ -52,6 +61,27 @@ export default function QuestionResultsPage() {
   const confirmEndGame = () => {
     router.push(`/events/${eventId}/games`);
   };
+
+  if (loading || !quiz) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFBF7]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb5017]"></div>
+      </div>
+    );
+  }
+
+  const currentQuestion = quiz.questions[qIndex] || quiz.questions[0];
+  
+  // Mock results generation based on correct answer
+  const colors = ["#EB1D44", "#FFC20E", "#1368CE", "#26890C"];
+  const results = currentQuestion.options.map((opt: string, i: number) => ({
+    label: opt,
+    count: currentQuestion.correctAnswer.includes(i) ? 4 : Math.floor(Math.random() * 3),
+    color: colors[i],
+    isCorrect: currentQuestion.correctAnswer.includes(i)
+  }));
+
+  const maxCount = Math.max(...results.map((r: any) => r.count));
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
@@ -64,11 +94,11 @@ export default function QuestionResultsPage() {
         <div className="flex items-center gap-10">
           <div className="flex flex-col items-center">
             <span className="text-[8px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Join PIN</span>
-            <span className="text-xl font-black text-[#1B1818] tracking-tight">882 104</span>
+            <span className="text-xl font-black text-[#1B1818] tracking-tight">452 901</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-[8px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Progress</span>
-            <span className="text-xl font-black text-[#1B1818] tracking-tight">5 / 10</span>
+            <span className="text-xl font-black text-[#1B1818] tracking-tight">{qIndex + 1} / {quiz.questions.length}</span>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={handleEndGame} className="px-5 py-2 border-2 border-red-100 text-[#EB1D44] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-colors">
@@ -84,12 +114,12 @@ export default function QuestionResultsPage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-between pt-12 pb-4 px-2 text-center overflow-hidden">
         <h1 className="text-[36px] md:text-[42px] font-black text-[#1B1818] tracking-tight leading-none max-w-5xl font-feather uppercase">
-          What is the capital of France?
+          {currentQuestion.text}
         </h1>
 
         {/* Bar Chart Container */}
         <div className="w-full max-w-5xl flex items-end justify-between gap-6 relative px-8 mb-0">
-          {results.map((res, i) => (
+          {results.map((res: any, i: number) => (
             <div key={i} className="flex-1 flex flex-col items-center">
               {/* Correct Indicator & Count (Floating above) */}
               <div className="flex flex-col items-center mb-2">
@@ -109,7 +139,7 @@ export default function QuestionResultsPage() {
                   className={`w-full rounded-xl transition-all duration-1000 ease-out shadow-lg ${res.isCorrect ? 'shadow-2xl shadow-[#667185]/20 ring-[3px] ring-[#EB5017]/5' : ''}`}
                   style={{ 
                     backgroundColor: res.color,
-                    height: `${(res.count / maxCount) * 100}%`,
+                    height: `${(res.count / (maxCount || 1)) * 100}%`,
                     opacity: res.isCorrect ? 1 : 0.8
                   }}
                 />
@@ -136,18 +166,18 @@ export default function QuestionResultsPage() {
            <div className="bg-white border border-gray-100 p-4 rounded-[24px] shadow-xl shadow-gray-200/40 flex flex-col min-w-[200px]">
               <span className="text-[9px] font-black text-[#667185] opacity-40 uppercase tracking-[0.2em]">Total Players</span>
               <div className="flex items-center gap-4 mt-0.5">
-                <span className="text-[32px] font-black text-[#1B1818] leading-none text-orange-600">42</span>
+                <span className="text-[32px] font-black text-[#1B1818] leading-none text-orange-600">5</span>
                 <span className="bg-[#E7F8ED] text-[#26890C] px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
-                  +12% vs Q4
+                  LIVE
                 </span>
               </div>
            </div>
 
            {/* Insights */}
            <div className="flex flex-col -gap-1">
-              <span className="text-lg font-black text-[#1B1818]">85% Correct Answers</span>
+              <span className="text-lg font-black text-[#1B1818]">View Leaderboard</span>
               <span className="text-[10px] font-black text-[#667185] uppercase tracking-widest opacity-60">
-                Top Performer: <span className="text-[#EB5017] border-b border-[#EB5017]/20 uppercase">Alex_W</span>
+                Top Performer: <span className="text-[#EB5017] border-b border-[#EB5017]/20 uppercase">SpaceExplorer</span>
               </span>
            </div>
         </div>
@@ -157,7 +187,7 @@ export default function QuestionResultsPage() {
           onClick={handleNextQuestion}
           className="bg-[#EB5017] text-white px-8 py-3.5 rounded-[20px] font-black text-[18px] uppercase tracking-tight flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-[0.98] shadow-2xl shadow-[#EB5017]/30"
         >
-          Next Question
+          Next Step
           <HiOutlineChevronRight className="text-xl" />
         </button>
       </footer>
@@ -203,5 +233,13 @@ export default function QuestionResultsPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function QuestionResultsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuestionResultsContent />
+    </Suspense>
   );
 }

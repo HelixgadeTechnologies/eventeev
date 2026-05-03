@@ -13,7 +13,7 @@ export default function WaitingRoomPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pin = searchParams.get("pin") || "";
+  const pin = searchParams.get("pin") || (quizId === "space-trivia" ? "452901" : "");
   const eventId = params._id;
   const quizId = params.quizId;
 

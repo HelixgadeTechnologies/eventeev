@@ -1,20 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineLightBulb, HiOutlineGlobeAlt, HiOutlinePresentationChartBar, HiOutlineBeaker } from "react-icons/hi";
+import { quizzesService } from "@/lib/services/quizzes.service";
 
-export default function QuestionIntroPage() {
+function QuestionIntroContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const eventId = params?._id;
-  const quizId = params?.quizId;
+  const quizId = params?.quizId as string;
+  const qIndex = parseInt(searchParams.get("q") || "0");
+
+  const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(3);
 
   useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const data = await quizzesService.getQuiz(quizId);
+        setQuiz(data);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+      }
+    };
+    fetchQuiz();
+  }, [quizId]);
+
+  useEffect(() => {
     if (timeLeft === 0) {
-      router.push(`/events/${eventId}/games/${quizId}/play`);
+      router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}`);
       return;
     }
 
@@ -23,7 +40,15 @@ export default function QuestionIntroPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, eventId, quizId, router]);
+  }, [timeLeft, eventId, quizId, qIndex, router]);
+
+  if (!quiz) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFBF7]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#eb5017]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
@@ -35,7 +60,7 @@ export default function QuestionIntroPage() {
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-end">
             <span className="text-[10px] font-black text-[#667185] uppercase tracking-widest opacity-60">Game PIN</span>
-            <span className="text-lg font-black text-[#1B1818]">EV-2024</span>
+            <span className="text-lg font-black text-[#1B1818]">452 901</span>
           </div>
           <div className="w-12 h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center p-1 shadow-sm">
              <div className="w-full h-full bg-[#F2F4F7] rounded-full overflow-hidden">
@@ -49,17 +74,17 @@ export default function QuestionIntroPage() {
       <main className="flex-1 flex flex-col items-center justify-center relative">
         {/* Background Large Number */}
         <div className="absolute inset-x-0 inset-y-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
-          <span className="text-[80vh] font-black leading-none translate-y-20">1</span>
+          <span className="text-[80vh] font-black leading-none translate-y-20">{qIndex + 1}</span>
         </div>
 
         {/* Round Info */}
         <div className="bg-[#FFF2F0] text-[#EB5017] px-6 py-2 rounded-full font-black text-xs uppercase tracking-[0.2em] mb-12 shadow-sm border border-[#EB5017]/10">
-          Round 1 of 10
+          Round {qIndex + 1} of {quiz.questions.length}
         </div>
 
         {/* Question Heading */}
         <h1 className="text-[14vw] font-black text-[#EB5017] tracking-tighter leading-none mb-12 drop-shadow-sm">
-          QUESTION 1
+          QUESTION {qIndex + 1}
         </h1>
 
         {/* Category Card */}
@@ -68,7 +93,7 @@ export default function QuestionIntroPage() {
             <HiOutlineLightBulb className="text-lg text-[#EB5017]" />
             Category
           </span>
-          <span className="text-2xl font-black text-[#1B1818]">General Knowledge</span>
+          <span className="text-2xl font-black text-[#1B1818]">{quiz.category}</span>
         </div>
 
         {/* Iconic Placeholders */}
@@ -96,7 +121,7 @@ export default function QuestionIntroPage() {
               </span>
             </div>
             <div className="text-4xl font-black text-[#EB5017]">
-              100%
+              {Math.round((timeLeft / 3) * 100)}%
             </div>
           </div>
           
@@ -115,5 +140,13 @@ export default function QuestionIntroPage() {
       <div className="absolute bottom-60 right-20 w-40 h-40 border-8 border-[#EB5017]/10 rounded-full" />
       <div className="absolute top-1/2 left-1/4 w-3 h-3 bg-[#EB5017] rounded-full opacity-60" />
     </div>
+  );
+}
+
+export default function QuestionIntroPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuestionIntroContent />
+    </Suspense>
   );
 }

@@ -84,7 +84,7 @@ export default function QuizDetailPage() {
       <nav className="flex items-center gap-2 text-sm font-semibold text-[#667185]">
         <Link href={`/events/${eventId}/dashboard`} className="hover:text-[#eb5017]">Home</Link>
         <HiOutlineChevronRight className="text-gray-400" />
-        <Link href={`/events/${eventId}/games`} className="hover:text-[#eb5017]">Science</Link>
+        <Link href={`/events/${eventId}/games`} className="hover:text-[#eb5017]">{quiz.category}</Link>
         <HiOutlineChevronRight className="text-gray-400" />
         <span className="text-[#1B1818] truncate">{quiz.title}</span>
       </nav>
