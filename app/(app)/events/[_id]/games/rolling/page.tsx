@@ -9,6 +9,7 @@ import { FaAngleLeft, FaExpand, FaCompress } from "react-icons/fa6";
 import { useRef } from "react";
 import confetti from 'canvas-confetti';
 import { useParams } from 'next/navigation';
+import { attendeesService, ApiAttendee } from '@/lib/services/attendees.service';
 import rollingGameService from '@/lib/services/rolling-game.service';
 
 export default function RollingGamePage() {
@@ -17,7 +18,7 @@ export default function RollingGamePage() {
   const [winner, setWinner] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<ApiAttendee[]>([]);
   const [winnersList, setWinnersList] = useState<any[]>([]);
 
   const fetchWinners = async () => {
@@ -32,9 +33,11 @@ export default function RollingGamePage() {
 
   useEffect(() => {
     if (eventId) {
-      rollingGameService.getParticipants(eventId)
+      attendeesService.getAttendees(eventId)
         .then((res) => {
-          setParticipants(res || []);
+          // Filter for checked-in participants as requested
+          const checkedIn = (res.data || []).filter(a => a.isCheckedIn);
+          setParticipants(checkedIn);
         })
         .catch((err) => {
           console.error("Failed to load participants:", err);
@@ -70,7 +73,7 @@ export default function RollingGamePage() {
 
   const eligibleUsers = useMemo(() => {
     return participants
-      .map(p => `${p.firstName} ${p.lastName}`.trim())
+      .map(p => p.name.trim())
       .filter(name => name !== "")
       .sort(() => Math.random() - 0.5);
   }, [participants]);
@@ -79,11 +82,11 @@ export default function RollingGamePage() {
     setWinner(name);
     
     // Find the participant to get their ID
-    const matchedUser = participants.find(p => `${p.firstName} ${p.lastName}`.trim() === name);
-    if (matchedUser && matchedUser._id && eventId) {
+    const matchedUser = participants.find(p => p.name.trim() === name);
+    if (matchedUser && matchedUser.id && eventId) {
       try {
         await rollingGameService.recordWinner(eventId, { 
-          userId: matchedUser._id, 
+          userId: matchedUser.id, 
           prizeWon: 'Mystery Prize' 
         });
         fetchWinners();

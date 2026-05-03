@@ -15,12 +15,28 @@ export default function WinnerPage() {
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [visibleStep, setVisibleStep] = useState(0); // 0: none, 1: 3rd, 2: 2nd, 3: 1st
 
   const winners = [
+    { rank: 3, name: "StarGazer", points: "7,900", avatar: "/icons/avatar-placeholder.png", color: "#CD7F32" },
     { rank: 2, name: "RocketMan", points: "8,420", avatar: "/icons/avatar-placeholder.png", color: "#E2E8F0" },
     { rank: 1, name: "SpaceExplorer", points: "9,850", avatar: "/icons/avatar-placeholder.png", color: "#FFD700" },
-    { rank: 3, name: "StarGazer", points: "7,900", avatar: "/icons/avatar-placeholder.png", color: "#CD7F32" },
   ];
+
+  const triggerConfetti = (rank: number) => {
+    const scalar = rank === 1 ? 2 : 1;
+    const defaults = { spread: 360, ticks: 100, gravity: 1, decay: 0.94, startVelocity: 30 * scalar, shapes: ['circle', 'square'] as any };
+    
+    if (rank === 1) {
+       // Big finish for 1st place
+       confetti({ ...defaults, particleCount: 150, origin: { y: 0.6 } });
+       // Side bursts
+       setTimeout(() => confetti({ ...defaults, particleCount: 80, origin: { x: 0, y: 0.6 } }), 200);
+       setTimeout(() => confetti({ ...defaults, particleCount: 80, origin: { x: 1, y: 0.6 } }), 400);
+    } else {
+       confetti({ ...defaults, particleCount: 60, origin: { y: 0.7 } });
+    }
+  };
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -34,31 +50,19 @@ export default function WinnerPage() {
       }
     };
     fetchQuiz();
-
-    // Initial confetti burst
-    const duration = 15 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-    function randomInRange(min: number, max: number) {
-      return Math.random() * (max - min) + min;
-    }
-
-    const interval: any = setInterval(function() {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval);
-      }
-
-      const particleCount = 50 * (timeLeft / duration);
-      // since particles fall down, start a bit higher than random
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-    }, 250);
-
-    return () => clearInterval(interval);
   }, [quizId]);
+
+  useEffect(() => {
+    if (!loading && quiz) {
+      // Drama sequence: Reveal 3rd, then 2nd, then 1st
+      const timers = [
+        setTimeout(() => { setVisibleStep(1); triggerConfetti(3); }, 2000),
+        setTimeout(() => { setVisibleStep(2); triggerConfetti(2); }, 5000),
+        setTimeout(() => { setVisibleStep(3); triggerConfetti(1); }, 8500),
+      ];
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [loading, quiz]);
 
   const handleFinish = () => {
     router.push(`/events/${eventId}/games`);
@@ -72,6 +76,9 @@ export default function WinnerPage() {
     );
   }
 
+  // Sort for display on podium: [2nd, 1st, 3rd]
+  const podiumOrder = [winners[1], winners[2], winners[0]];
+
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
       {/* Background Decor */}
@@ -82,7 +89,14 @@ export default function WinnerPage() {
 
       {/* Header */}
       <header className="w-full p-8 flex items-center justify-between relative z-10">
-        <Image src="/logo-black.svg" alt="Eventeev" width={140} height={45} priority />
+        <Link 
+            href={`/events/${eventId}/games`} 
+            className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
+        >
+            <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
+            Back to Games
+        </Link>
+        <Image src="/logo-black.svg" alt="Eventeev" width={140} height={45} priority className="mr-auto ml-8" />
         <div className="flex items-center gap-4">
            <button className="p-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-gray-400 hover:text-[#EB5017] transition-colors">
               <HiOutlineShare className="text-2xl" />
@@ -98,73 +112,83 @@ export default function WinnerPage() {
             Quiz Completed
           </div>
           <h1 className="text-[64px] md:text-[80px] font-black text-[#1B1818] tracking-tighter leading-none mb-4 font-feather uppercase italic">
-            WE HAVE A WINNER!
+            {visibleStep === 3 ? "WE HAVE A WINNER!" : "THE RESULTS ARE IN..."}
           </h1>
-          <p className="text-lg text-[#667185] font-medium max-w-lg mx-auto leading-relaxed">
-            Congratulations to all participants. {quiz.title} was a blast!
+          <p className="text-lg text-[#667185] font-medium max-w-lg mx-auto leading-relaxed h-8">
+            {visibleStep === 0 && "Calculating final scores..."}
+            {visibleStep === 1 && "In 3rd Place..."}
+            {visibleStep === 2 && "The Runner Up is..."}
+            {visibleStep === 3 && "All hail the Champion!"}
           </p>
         </div>
 
         {/* Podium */}
         <div className="flex items-end justify-center gap-4 md:gap-12 w-full max-w-5xl mb-20">
-          {winners.map((winner, index) => (
-            <div 
-              key={winner.rank} 
-              className={`flex flex-col items-center animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-${index * 200}`}
-              style={{ order: index === 0 ? 2 : index === 1 ? 1 : 3 }}
-            >
-              {/* Avatar Circle */}
-              <div className={`relative mb-6 ${winner.rank === 1 ? 'w-32 h-32 md:w-40 md:h-40' : 'w-24 h-24 md:w-28 md:h-28'}`}>
-                <div className={`absolute inset-0 rounded-full border-[6px] shadow-2xl z-10`} style={{ borderColor: winner.color }}>
-                   <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
-                      <Image src={winner.avatar} alt={winner.name} fill className="object-cover" />
-                   </div>
-                </div>
-                {winner.rank === 1 && (
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFC20E" stroke="#FFC20E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                )}
-                {/* Rank Badge */}
-                <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-white shadow-lg`} style={{ backgroundColor: winner.color, color: winner.rank === 1 ? '#1B1818' : 'white' }}>
-                   {winner.rank}
-                </div>
-              </div>
+          {podiumOrder.map((winner) => {
+            const isVisible = (winner.rank === 3 && visibleStep >= 1) || 
+                              (winner.rank === 2 && visibleStep >= 2) || 
+                              (winner.rank === 1 && visibleStep >= 3);
 
-              {/* Name and Points */}
-              <div className="text-center mb-6">
-                <h3 className={`font-black text-[#1B1818] uppercase tracking-tight ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
-                  {winner.name}
-                </h3>
-                <span className="text-sm font-black text-[#667185] opacity-60 uppercase tracking-widest">
-                  {winner.points} PTS
-                </span>
-              </div>
-
-              {/* Podium Block */}
+            return (
               <div 
-                className={`w-32 md:w-48 rounded-t-[32px] shadow-2xl transition-all duration-1000 delay-500`}
-                style={{ 
-                  height: winner.rank === 1 ? '240px' : winner.rank === 2 ? '180px' : '140px',
-                  backgroundColor: 'white',
-                  borderTop: `8px solid ${winner.color}`,
-                  background: 'linear-gradient(to bottom, white, rgba(255,255,255,0.8))'
-                }}
-              />
-            </div>
-          ))}
+                key={winner.rank} 
+                className={`flex flex-col items-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95 blur-xl pointer-events-none'}`}
+              >
+                {/* Avatar Circle */}
+                <div className={`relative mb-6 ${winner.rank === 1 ? 'w-32 h-32 md:w-40 md:h-40' : 'w-24 h-24 md:w-28 md:h-28'}`}>
+                  <div className={`absolute inset-0 rounded-full border-[6px] shadow-2xl z-10`} style={{ borderColor: winner.color }}>
+                     <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
+                        <Image src={winner.avatar} alt={winner.name} fill className="object-cover" />
+                     </div>
+                  </div>
+                  {winner.rank === 1 && (
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFC20E" stroke="#FFC20E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  )}
+                  {/* Rank Badge */}
+                  <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-white shadow-lg`} style={{ backgroundColor: winner.color, color: winner.rank === 1 ? '#1B1818' : 'white' }}>
+                     {winner.rank}
+                  </div>
+                </div>
+
+                {/* Name and Points */}
+                <div className="text-center mb-6">
+                  <h3 className={`font-black text-[#1B1818] uppercase tracking-tight ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
+                    {winner.name}
+                  </h3>
+                  <span className="text-sm font-black text-[#667185] opacity-60 uppercase tracking-widest">
+                    {winner.points} PTS
+                  </span>
+                </div>
+
+                {/* Podium Block */}
+                <div 
+                  className={`w-32 md:w-48 rounded-t-[32px] shadow-2xl transition-all duration-1000`}
+                  style={{ 
+                    height: winner.rank === 1 ? '240px' : winner.rank === 2 ? '180px' : '140px',
+                    backgroundColor: 'white',
+                    borderTop: `8px solid ${winner.color}`,
+                    background: 'linear-gradient(to bottom, white, rgba(255,255,255,0.8))'
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/* Action Button */}
-        <button 
-          onClick={handleFinish}
-          className="bg-[#1B1818] text-white px-12 py-5 rounded-[24px] font-black text-lg uppercase tracking-widest flex items-center gap-3 hover:bg-[#eb5017] transition-all transform active:scale-95 shadow-2xl shadow-black/20 group"
-        >
-          <HiOutlineHome className="text-2xl group-hover:-translate-y-1 transition-transform" />
-          Finish Session
-        </button>
+        <div className={`transition-all duration-1000 ${visibleStep === 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
+          <button 
+            onClick={handleFinish}
+            className="bg-[#1B1818] text-white px-12 py-5 rounded-[24px] font-black text-lg uppercase tracking-widest flex items-center gap-3 hover:bg-[#eb5017] transition-all transform active:scale-95 shadow-2xl shadow-black/20 group"
+          >
+            <HiOutlineHome className="text-2xl group-hover:-translate-y-1 transition-transform" />
+            Finish Session
+          </button>
+        </div>
       </main>
 
       {/* Confetti Canvas Placeholder */}
