@@ -12,7 +12,7 @@ import {
 } from "react-icons/hi";
 import { RiInfinityLine } from "react-icons/ri";
 import { IoAdd } from "react-icons/io5";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import QuizCard from "@/components/games/QuizCard";
