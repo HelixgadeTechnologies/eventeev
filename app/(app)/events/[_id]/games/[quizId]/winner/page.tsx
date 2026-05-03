@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { FaAngleLeft } from "react-icons/fa6";
 import confetti from "canvas-confetti";
 import { HiOutlineTrophy, HiOutlineHome, HiOutlineShare } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
