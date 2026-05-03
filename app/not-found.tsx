@@ -74,7 +74,7 @@ export default function NotFound() {
               left: sticker.left,
               right: sticker.right,
               transform: `rotate(${sticker.rotation})`,
-              delay: `${index * 100}ms`
+              animationDelay: `${index * 100}ms`
             }}
           >
             {sticker.text}
