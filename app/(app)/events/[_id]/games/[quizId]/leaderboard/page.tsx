@@ -34,8 +34,8 @@ function LeaderboardContent() {
     if (qIndex < quiz.questions.length - 1) {
       router.push(`/events/${eventId}/games/${quizId}/intro?q=${qIndex + 1}`);
     } else {
-      // Game finished, go back to selection or a final screen
-      router.push(`/events/${eventId}/games`);
+      // Game finished, go to winner screen
+      router.push(`/events/${eventId}/games/${quizId}/winner`);
     }
   }, [router, eventId, quizId, qIndex, quiz]);
 
