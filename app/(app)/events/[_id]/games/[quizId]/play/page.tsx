@@ -21,6 +21,7 @@ function GamePlayContent() {
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(20);
   const [answersCount, setAnswersCount] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showEndModal, setShowEndModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +54,13 @@ function GamePlayContent() {
       handleNextQuestion();
     }
   }, [timeLeft, showEndModal]);
+
+  const handleSelectAnswer = (index: number) => {
+    if (selectedAnswer !== null) return;
+    setSelectedAnswer(index);
+    setAnswersCount(prev => Math.min(prev + 1, 5));
+    toast.success("Answer submitted!");
+  };
 
   const handleNextQuestion = () => {
     router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}`);
@@ -151,6 +159,9 @@ function GamePlayContent() {
         {currentQuestion.options.map((option: string, index: number) => {
           const colors = ["#EB1D44", "#FFC20E", "#1368CE", "#26890C"];
           const borderColors = ["#b01736", "#cc9b0b", "#0e4da1", "#1d6b0a"];
+          const isSelected = selectedAnswer === index;
+          const isDimmed = selectedAnswer !== null && !isSelected;
+
           const shapes = [
             <svg key="tri" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
               <path d="M50 15L85 75H15L50 15Z" fill="none" stroke="white" strokeWidth="10" strokeLinejoin="round" />
@@ -169,8 +180,11 @@ function GamePlayContent() {
           return (
             <button 
               key={index}
-              onClick={() => setAnswersCount(prev => Math.min(prev + 1, totalPlayers))}
-              className="h-16 md:h-20 rounded-xl flex items-center px-5 gap-4 hover:brightness-110 transition-all shadow-lg active:scale-[0.98] border-b-[4px]"
+              disabled={selectedAnswer !== null}
+              onClick={() => handleSelectAnswer(index)}
+              className={`h-16 md:h-20 rounded-xl flex items-center px-5 gap-4 transition-all shadow-lg active:scale-[0.98] border-b-[4px] ${
+                isSelected ? "scale-105 ring-4 ring-white ring-offset-2 ring-offset-[#eb5017]/20 z-10" : ""
+              } ${isDimmed ? "opacity-40 grayscale-[0.5]" : "opacity-100"}`}
               style={{ backgroundColor: colors[index], borderColor: borderColors[index] }}
             >
                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
