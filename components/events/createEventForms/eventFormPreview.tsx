@@ -135,9 +135,13 @@ const EventFormPreview = () => {
         {/* Visual Summary Card */}
         <div className="bg-[#FAF9F6] border border-gray-100 rounded-3xl p-5 shadow-sm space-y-4">
           <div className="relative aspect-video rounded-2xl bg-gray-200 overflow-hidden group">
-            <div className="absolute inset-0 bg-[#F56630]/10 flex items-center justify-center">
-               <Image src={document} alt="banner" width={48} height={48} className="opacity-20 translate-y-2 group-hover:translate-y-0 transition-transform" />
-            </div>
+            {formData.banner ? (
+              <Image src={formData.banner} alt="banner" fill className="object-cover" />
+            ) : (
+              <div className="absolute inset-0 bg-[#F56630]/10 flex items-center justify-center">
+                 <Image src={document} alt="banner" width={48} height={48} className="opacity-20 translate-y-2 group-hover:translate-y-0 transition-transform" />
+              </div>
+            )}
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
