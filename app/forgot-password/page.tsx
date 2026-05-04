@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import EmailInput from "@/components/ui/EmailInput";
 import { MdMail } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
