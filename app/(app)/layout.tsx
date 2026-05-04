@@ -3,7 +3,9 @@
 import Sidebar from "@/components/display/Sidebar";
 import Navigation from "@/components/display/Navigation";
 import Breadcrumb from "@/components/ui/BreadcrumbComponent";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export default function UserLayout({
   children,
@@ -11,7 +13,15 @@ export default function UserLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/");
+    }
+  }, [user, loading, router]);
+
   // Routes that should be full-screen (game playback)
   const isGameView = pathname.includes("/games/") && (
     pathname.includes("/play") || 
@@ -19,6 +29,21 @@ export default function UserLayout({
     pathname.includes("/leaderboard") ||
     pathname.includes("/intro")
   );
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#F56630] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-black text-[#1B1818] uppercase tracking-widest animate-pulse">Verifying Session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
+  }
 
   if (isGameView) {
     return (

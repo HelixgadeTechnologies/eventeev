@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -11,8 +11,14 @@ import { useAuth } from "@/context/AuthContext";
 export default function ResetPassword() {
     const params = useParams();
     const router = useRouter();
-    const { updatePassword } = useAuth();
+    const { updatePassword, user, loading: authLoading } = useAuth();
     const token = params.token as string;
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            router.push("/events");
+        }
+    }, [user, authLoading, router]);
 
     const [userData, setUserData] = useState({
         password: "",
@@ -45,8 +51,9 @@ export default function ResetPassword() {
             return;
         }
 
-        if (userData.password.length < 6) {
-            setError("Password must be at least 6 characters");
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(userData.password)) {
+            setError("Password must be at least 8 characters and include uppercase, lowercase, and numbers");
             return;
         }
 

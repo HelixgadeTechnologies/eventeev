@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import EmailInput from "@/components/ui/EmailInput";
@@ -8,10 +8,17 @@ import { MdMail } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ForgotPassword() {
-    const { resetPassword } = useAuth();
+    const { resetPassword, user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            router.push("/events");
+        }
+    }, [user, authLoading, router]);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
@@ -27,12 +34,9 @@ export default function ForgotPassword() {
         setMessage(null);
 
         try {
-            const { error } = await resetPassword(email);
-            if (error) {
-                setMessage({ type: 'error', text: error.message || "Failed to send reset link. Please try again." });
-            } else {
-                setMessage({ type: 'success', text: "Reset link has been sent to your email!" });
-            }
+            await resetPassword(email);
+            // Always show success to prevent email enumeration (information leakage)
+            setMessage({ type: 'success', text: "If an account with that email exists, a reset link has been sent." });
         } catch (err) {
             setMessage({ type: 'error', text: "An unexpected error occurred." });
         } finally {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import InputComponent from "@/components/ui/InputComponent";
@@ -14,7 +14,13 @@ import Button from "@/components/ui/Button";
 
 export default function SignUpComponent() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/events");
+    }
+  }, [user, authLoading, router]);
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
@@ -47,8 +53,9 @@ export default function SignUpComponent() {
       return;
     }
 
-    if (userData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(userData.password)) {
+      setError("Password must be at least 8 characters and include uppercase, lowercase, and numbers");
       setLoading(false);
       return;
     }
