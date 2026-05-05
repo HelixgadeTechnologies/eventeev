@@ -40,7 +40,12 @@
     "registration": "Usajili",
     "welcomeToEventeev": "Karibu Eventeev!",
     "orgSavedSuccess": "Maelezo ya shirika lako yamehifadhiwa kwa mafanikio. Uko tayari kuanza kuunda matukio ya ajabu!",
-    "getStarted": "Anza sasa"
+    "getStarted": "Anza sasa",
+    "firstName": "Jina la Kwanza",
+    "lastName": "Jina la Mwisho",
+    "elevateWorkflow": "Imarisha mtiririko wako wa kazi wa matukio na Eventeev",
+    "platformDescription": "Jukwaa letu pana la matukio linakupa anuwai isiyo na kifani ya vipengele vya matukio, ikichochea ubunifu na kuongeza ufanisi.",
+    "continueWithGoogle": "Endelea na Google"
   },
   "Common": {
     "loading": "Inapakia...",

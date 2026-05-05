@@ -40,7 +40,12 @@
     "registration": "Pendaftaran",
     "welcomeToEventeev": "Selamat datang di Eventeev!",
     "orgSavedSuccess": "Detail organisasi Anda telah berhasil disimpan. Anda siap untuk mulai membuat acara yang luar biasa!",
-    "getStarted": "Mulai"
+    "getStarted": "Mulai",
+    "firstName": "Nama Depan",
+    "lastName": "Nama Belakang",
+    "elevateWorkflow": "Tingkatkan alur kerja Acara Anda dengan Eventeev",
+    "platformDescription": "Platform Acara komprehensif kami menawarkan berbagai komponen acara yang tak tertandingi, memicu kreativitas dan meningkatkan efisiensi.",
+    "continueWithGoogle": "Lanjutkan dengan Google"
   },
   "Common": {
     "loading": "Memuat...",

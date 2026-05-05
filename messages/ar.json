@@ -40,7 +40,12 @@
     "registration": "التسجيل",
     "welcomeToEventeev": "مرحبًا بك في Eventeev!",
     "orgSavedSuccess": "تم حفظ تفاصيل منظمتك بنجاح. أنت الآن جاهز للبدء في إنشاء أحداث مذهلة!",
-    "getStarted": "ابدأ الآن"
+    "getStarted": "ابدأ الآن",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "elevateWorkflow": "ارتقِ بسير عمل أحداثك مع Eventeev",
+    "platformDescription": "توفر منصة الأحداث الشاملة لدينا مجموعة لا مثيل لها من مكونات الأحداث، مما يحفز الإبداع ويعزز الكفاءة.",
+    "continueWithGoogle": "المتابعة باستخدام Google"
   },
   "Common": {
     "loading": "جاري التحميل...",

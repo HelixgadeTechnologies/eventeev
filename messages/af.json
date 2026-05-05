@@ -40,7 +40,12 @@
     "registration": "Registrasie",
     "welcomeToEventeev": "Welkom by Eventeev!",
     "orgSavedSuccess": "Jou organisasie se besonderhede is suksesvol gestoor. Jy is gereed om ongelooflike geleenthede te begin skep!",
-    "getStarted": "Begin nou"
+    "getStarted": "Begin nou",
+    "firstName": "Voornaam",
+    "lastName": "Van",
+    "elevateWorkflow": "Verhoog jou gebeurtenis-werkvloei met Eventeev",
+    "platformDescription": "Ons omvattende geleentheidsplatform bied jou 'n ongeëwenaarde reeks geleentheidskomponente, wat kreatiwiteit aanwakker en doeltreffendheid verhoog.",
+    "continueWithGoogle": "Gaan voort met Google"
   },
   "Common": {
     "loading": "Laai tans...",

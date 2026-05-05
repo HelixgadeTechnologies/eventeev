@@ -1,12 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import SignUpComponent from "@/components/auth/SignUpComponent";
-
-export const metadata = {
-  title: "Eventeev | Sign up - Elevate Your Event Experience",
-  description: "Create an account to start using Eventeev",
-};
+import { useTranslations } from "next-intl";
 
 export default function SignUpPage() {
+  const t = useTranslations('Auth');
+  
   return (
     <section className="flex md:flex-col lg:flex-row items-center justify-center w-screen h-screen gap-10 overflow-hidden">
       <div className="w-2/4 h-full hidden md:flex items-center justify-center relative">
@@ -21,18 +21,17 @@ export default function SignUpPage() {
         />
         <Image
           src="/logo-white.svg"
-          alt="Eventeev 2024"
+          alt="Eventeev"
           width={150}
           height={100}
           className="absolute top-10 left-5 md:left-10"
         />
         <div className="flex flex-col gap-10 justify-center items-start absolute top-[40%] text-white/90">
-          <h1 className="text-6xl">
-            Elevate your Event <br /> workflow with <br /> Eventeev
+          <h1 className="text-5xl lg:text-6xl font-bold leading-tight max-w-[500px]">
+            {t('elevateWorkflow')}
           </h1>
-          <p className="w-[420px] font-extralight text-white/80 text-[15px]">
-            Our comprehensive Event platform offers you an unparalleled range of
-            event component, sparking creativity and boosting efficiency.
+          <p className="w-[420px] font-extralight text-white/80 text-[15px] leading-relaxed">
+            {t('platformDescription')}
           </p>
         </div>
       </div>

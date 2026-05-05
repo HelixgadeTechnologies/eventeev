@@ -40,7 +40,12 @@
     "registration": "Registro",
     "welcomeToEventeev": "¡Bienvenido a Eventeev!",
     "orgSavedSuccess": "Los detalles de su organización se han guardado con éxito. ¡Ya está listo para comenzar a crear eventos increíbles!",
-    "getStarted": "Empezar"
+    "getStarted": "Empezar",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "elevateWorkflow": "Mejore su flujo de trabajo de eventos con Eventeev",
+    "platformDescription": "Nuestra plataforma integral de eventos le ofrece una gama inigualable de componentes para eventos, impulsando la creatividad y mejorando la eficiencia.",
+    "continueWithGoogle": "Continuar con Google"
   },
   "Common": {
     "loading": "Cargando...",

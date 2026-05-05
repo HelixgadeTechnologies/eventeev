@@ -125,24 +125,24 @@ export default function SignUpComponent() {
 
       <form onSubmit={handleSubmit} className="space-y-2.5 md:space-y-5">
         <div className="flex gap-2.5 flex-col md:flex-row w-full">
-          <div className="w-full md:w-1/2">
-            <InputComponent
-              name="firstName"
-              label="First Name"
-              value={userData.firstName}
-              onChange={handleInputChange}
-              placeholder="John"
-            />
-          </div>
-          <div className="w-full md:w-1/2">
-            <InputComponent
-              name="lastName"
-              label="Last Name"
-              value={userData.lastName}
-              onChange={handleInputChange}
-              placeholder="Doe"
-            />
-          </div>
+            <div className="w-full md:w-1/2">
+              <InputComponent
+                name="firstName"
+                label={t('firstName')}
+                value={userData.firstName}
+                onChange={handleInputChange}
+                placeholder="John"
+              />
+            </div>
+            <div className="w-full md:w-1/2">
+              <InputComponent
+                name="lastName"
+                label={t('lastName')}
+                value={userData.lastName}
+                onChange={handleInputChange}
+                placeholder="Doe"
+              />
+            </div>
         </div>
         <EmailInput
           name="email"

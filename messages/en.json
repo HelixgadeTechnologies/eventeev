@@ -40,7 +40,12 @@
     "registration": "Registration",
     "welcomeToEventeev": "Welcome to Eventeev!",
     "orgSavedSuccess": "Your organization details have been saved successfully. You're all set to start creating amazing events!",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "elevateWorkflow": "Elevate your Event workflow with Eventeev",
+    "platformDescription": "Our comprehensive Event platform offers you an unparalleled range of event component, sparking creativity and boosting efficiency.",
+    "continueWithGoogle": "Continue with Google"
   },
   "Common": {
     "loading": "Loading...",
