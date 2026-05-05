@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Se connecter",
+    "signup": "S'inscrire",
+    "forgotPassword": "Mot de passe oublié ?",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "rememberMe": "Se souvenir de moi pendant 30 jours",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "welcomeBack": "Entrez vos identifiants pour accéder à votre compte",
+    "resetPassword": "Réinitialisation du mot de passe",
+    "resetDescription": "Ne vous inquiétez pas, cela arrive aux meilleurs d'entre nous 🔐",
+    "sendLink": "Envoyer le lien",
+    "sending": "Envoi en cours...",
+    "backToLogin": "Se connecter"
+  },
+  "Common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès"
+  }
+}

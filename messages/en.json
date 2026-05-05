@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Sign in",
+    "signup": "Sign up",
+    "forgotPassword": "Forgot Password?",
+    "email": "Email Address",
+    "password": "Password",
+    "rememberMe": "Remember me for 30 days",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "welcomeBack": "Enter your credentials to access your account",
+    "resetPassword": "Password Reset",
+    "resetDescription": "Don’t worry it happens to the best of us 🔐",
+    "sendLink": "Send Link",
+    "sending": "Sending...",
+    "backToLogin": "Log in"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  }
+}

@@ -2,13 +2,14 @@
 
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import EmailInput from "@/components/ui/EmailInput";
 import { MdMail } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ForgotPassword() {
+    const t = useTranslations('Auth');
     const { resetPassword, user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -81,9 +82,9 @@ export default function ForgotPassword() {
             <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center px-6 md:px-0">
                 <div className="w-full max-w-[440px] space-y-8">
                     <div className="space-y-2">
-                        <h2 className="text-[32px] md:text-[40px] font-bold text-[#1B1818] leading-tight mb-2">Password Reset</h2>
+                        <h2 className="text-[32px] md:text-[40px] font-bold text-[#1B1818] leading-tight mb-2">{t('resetPassword')}</h2>
                         <p className="text-[#667185] text-sm">
-                            Don’t worry it happens to the best of us 🔐
+                            {t('resetDescription')}
                         </p>
                     </div>
 
@@ -113,15 +114,15 @@ export default function ForgotPassword() {
                                     loading ? 'opacity-70 cursor-not-allowed' : ''
                                 }`}
                             >
-                                {loading ? "Sending..." : "Send Link"}
+                                {loading ? t('sending') : t('sendLink')}
                             </button>
                         </div>
                     </form>
 
             <p className="text-center md:text-start text-sm text-[#667185] font-medium pt-4">
-                <span>Remember your password?</span>
+                <span>{t('rememberMe')}</span>
                 <Link href="/" className="text-[#eb5017] font-bold hover:underline ml-2">
-                    Log in
+                    {t('backToLogin')}
                 </Link>
             </p>
         </div>

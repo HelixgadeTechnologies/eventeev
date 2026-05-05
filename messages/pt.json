@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Entrar",
+    "signup": "Cadastrar-se",
+    "forgotPassword": "Esqueceu a senha?",
+    "email": "Endereço de e-mail",
+    "password": "Senha",
+    "rememberMe": "Lembrar de mim por 30 dias",
+    "dontHaveAccount": "Não tem uma conta?",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "welcomeBack": "Insira suas credenciais para acessar sua conta",
+    "resetPassword": "Redefinir Senha",
+    "resetDescription": "Não se preocupe, acontece com os melhores de nós 🔐",
+    "sendLink": "Enviar Link",
+    "sending": "Enviando...",
+    "backToLogin": "Entrar"
+  },
+  "Common": {
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro",
+    "success": "Sucesso"
+  }
+}

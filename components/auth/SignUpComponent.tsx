@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import InputComponent from "@/components/ui/InputComponent";
 import EmailInput from "@/components/ui/EmailInput";
 import PasswordInput from "@/components/ui/PasswordInput";
@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
 
 export default function SignUpComponent() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const { signUp, user, loading: authLoading } = useAuth();
 
@@ -113,7 +114,7 @@ export default function SignUpComponent() {
   return (
     <div className="space-y-2 w-full md:w-[480px] m-4">
       <h2 className="text-4xl text-center md:text-start font-semibold text-[#1B1818] mb-10">
-        Sign up!
+        {t('signup')}!
       </h2>
       
       {error && (
@@ -147,18 +148,18 @@ export default function SignUpComponent() {
           name="email"
           value={userData.email}
           onChange={handleInputChange}
-          label="Email Address"
+          label={t('email')}
           type="email"
         />
         <PasswordInput
           value={userData.password}
           onChange={handleInputChange}
-          label="Password"
+          label={t('password')}
           name="password"
         />
         <div className="mt-5">
           <Button
-            content="Sign up"
+            content={t('signup')}
             isLoading={loading}
             type="submit"
           />
@@ -166,9 +167,9 @@ export default function SignUpComponent() {
       </form>
       <section className="space-y-5 mt-5 mb-3">
         <p className="text-center text-sm text-black leading-6 space-x-2">
-          <span>Already have an account?</span>
+          <span>{t('alreadyHaveAccount')}</span>
           <Link href="/" className="text-[#eb5017] custom-underline font-semibold">
-            Login
+            {t('login')}
           </Link>
         </p>
         <Divider />

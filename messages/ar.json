@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "forgotPassword": "هل نسيت كلمة السر؟",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "rememberMe": "تذكرني لمدة 30 يومًا",
+    "dontHaveAccount": "ليس لديك حساب؟",
+    "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "welcomeBack": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى حسابك",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "resetDescription": "لا تقلق، يحدث ذلك لأفضلنا 🔐",
+    "sendLink": "إرسال الرابط",
+    "sending": "جاري الإرسال...",
+    "backToLogin": "تسجيل الدخول"
+  },
+  "Common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "success": "تم بنجاح"
+  }
+}

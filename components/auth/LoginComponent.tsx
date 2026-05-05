@@ -2,8 +2,8 @@
 
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations } from 'next-intl';
 import EmailInput from "@/components/ui/EmailInput";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Checkbox from "@/components/ui/Checkbox";
@@ -15,6 +15,7 @@ import Modal from "@/components/ui/Modal";
 import { AlertCircle } from "lucide-react";
 
 export default function LoginComponent() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const { signIn } = useAuth();
   const [userData, setUserData] = useState({
@@ -89,9 +90,9 @@ export default function LoginComponent() {
       />
       <div className="w-full md:w-[380px] space-y-3 p-5 bg-white rounded-lg">
         <div className="text-center space-y-1">
-          <h1 className="text-xl md:text-2xl">Sign in</h1>
+          <h1 className="text-xl md:text-2xl">{t('login')}</h1>
           <p className="text-gray-500 text-xs md:text-sm">
-            Enter your credentials to access your account
+            {t('welcomeBack')}
           </p>
         </div>
         <ContinueWithGoogle />
@@ -127,19 +128,19 @@ export default function LoginComponent() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <EmailInput
             name="email"
-            label="Email Address"
+            label={t('email')}
             value={userData.email}
             onChange={handleInputChange}
           />
           <PasswordInput
             name="password"
-            label="Password"
+            label={t('password')}
             value={userData.password}
             onChange={handleInputChange}
           />
           <div className="flex items-center justify-between text-sm">
             <Checkbox
-              label="Remember me for 30 days"
+              label={t('rememberMe')}
               name="checkbox"
               onChange={handleInputChange}
               checked={userData.checkbox}
@@ -148,12 +149,12 @@ export default function LoginComponent() {
               href="/forgot-password"
               className="text-[#eb5017] custom-underline text-xs whitespace-nowrap"
             >
-              Forgot Password?
+              {t('forgotPassword')}
             </Link>
           </div>
           <div className="mt-5">
             <Button 
-              content="Sign in" 
+              content={t('login')} 
               isLoading={loading}
               type="submit"
             />
@@ -161,13 +162,13 @@ export default function LoginComponent() {
         </form>
       </div>
       <div className="text-center text-xs text-black leading-6 space-x-1 h-[52px] px-4 py-2 rounded-[30px] bg-white flex justify-center items-center">
-        <span>Don&apos;t have an account?</span>
-        <a
+        <span>{t('dontHaveAccount')}</span>
+        <Link
           href="/sign-up"
           className="text-[#eb5017] custom-underline font-semibold"
         >
-          Sign up
-        </a>
+          {t('signup')}
+        </Link>
       </div>
     </section>
   );

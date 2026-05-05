@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Meld aan",
+    "signup": "Registreer",
+    "forgotPassword": "Wagwoord vergeet?",
+    "email": "E-posadres",
+    "password": "Wagwoord",
+    "rememberMe": "Onthou my vir 30 dae",
+    "dontHaveAccount": "Het jy nie 'n rekening nie?",
+    "alreadyHaveAccount": "Het jy reeds 'n rekening?",
+    "welcomeBack": "Voer jou besonderhede in om toegang tot jou rekening te kry",
+    "resetPassword": "Wagwoord Herstel",
+    "resetDescription": "Moenie bekommerd wees nie, dit gebeur met die beste van ons 🔐",
+    "sendLink": "Stuur Skakel",
+    "sending": "Stuur tans...",
+    "backToLogin": "Meld aan"
+  },
+  "Common": {
+    "loading": "Laai tans...",
+    "error": "'n Fout het voorgekom",
+    "success": "Sukses"
+  }
+}

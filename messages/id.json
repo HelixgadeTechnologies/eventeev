@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Masuk",
+    "signup": "Daftar",
+    "forgotPassword": "Lupa Kata Sandi?",
+    "email": "Alamat Email",
+    "password": "Kata Sandi",
+    "rememberMe": "Ingat saya selama 30 hari",
+    "dontHaveAccount": "Belum punya akun?",
+    "alreadyHaveAccount": "Sudah punya akun?",
+    "welcomeBack": "Masukkan kredensial Anda untuk mengakses akun Anda",
+    "resetPassword": "Atur Ulang Kata Sandi",
+    "resetDescription": "Jangan khawatir, itu terjadi pada kita semua 🔐",
+    "sendLink": "Kirim Tautan",
+    "sending": "Mengirim...",
+    "backToLogin": "Masuk"
+  },
+  "Common": {
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "success": "Berhasil"
+  }
+}

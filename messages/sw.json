@@ -1,0 +1,23 @@
+{
+  "Auth": {
+    "login": "Ingia",
+    "signup": "Jisajili",
+    "forgotPassword": "Umesahau Nywila?",
+    "email": "Anwani ya Barua Pepe",
+    "password": "Nywila",
+    "rememberMe": "Nikumbuke kwa siku 30",
+    "dontHaveAccount": "Huna akaunti?",
+    "alreadyHaveAccount": "Tayari una akaunti?",
+    "welcomeBack": "Ingiza vitambulisho vyako ili kufikia akaunti yako",
+    "resetPassword": "Rudisha Nywila",
+    "resetDescription": "Usijali, hutokea kwa bora wetu 🔐",
+    "sendLink": "Tuma Kiungo",
+    "sending": "Inatuma...",
+    "backToLogin": "Ingia"
+  },
+  "Common": {
+    "loading": "Inapakia...",
+    "error": "Hitilafu imetokea",
+    "success": "Mafanikio"
+  }
+}
