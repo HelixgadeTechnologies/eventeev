@@ -2,13 +2,15 @@
 
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import PasswordInput from "@/components/ui/PasswordInput";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ResetPassword() {
+    const t = useTranslations('Auth');
     const params = useParams();
     const router = useRouter();
     const { updatePassword, user, loading: authLoading } = useAuth();
@@ -85,9 +87,9 @@ export default function ResetPassword() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-bold text-green-900 mb-2">Password Updated!</h2>
+                    <h2 className="text-2xl font-bold text-green-900 mb-2">{t('passwordUpdated')}</h2>
                     <p className="text-green-700">
-                        Your password has been successfully reset. You will be redirected to the login page in a few seconds.
+                        {t('redirectingToLogin')}
                     </p>
                 </div>
             </div>
@@ -105,9 +107,9 @@ export default function ResetPassword() {
                     priority={true}
                 />
                 <div className="space-y-4 w-full md:w-[400px]">
-                    <h2 className="text-2xl md:text-3xl text-center font-bold text-[#1B1818]">Create New Password</h2>
+                    <h2 className="text-2xl md:text-3xl text-center font-bold text-[#1B1818]">{t('createNewPassword')}</h2>
                     <p className="text-[#667185] text-sm text-center">
-                        One more step to go and you are back into your account
+                        {t('oneStepAway')}
                     </p>
 
                     {error && (
@@ -121,26 +123,26 @@ export default function ResetPassword() {
                             name="password"
                             value={userData.password}
                             onChange={handleInputChange}
-                            label="New Password"
+                            label={t('newPassword')}
                         />
                         <PasswordInput
                             name="confirmPassword"
                             value={userData.confirmPassword}
                             onChange={handleInputChange}
-                            label="Confirm Password"
+                            label={t('confirmPassword')}
                         />
                         <div className="mt-6">
                             <Button 
-                                content={loading ? "Resetting..." : "Reset Password"} 
+                                content={loading ? t('resetting') : t('resetPassword')} 
                                 type="submit" 
                                 disabled={loading}
                             />
                         </div>
                     </form>
                     <p className="text-start text-sm text-[#667185] leading-6 space-x-2 pt-4 font-medium">
-                        <span>Remember your password?</span>
+                        <span>{t('rememberMe')}</span>
                         <Link href="/" className="text-[#eb5017] font-bold hover:underline">
-                            Login
+                            {t('login')}
                         </Link>
                     </p>
                 </div>

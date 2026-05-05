@@ -3,12 +3,13 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import InputComponent from "@/components/ui/EmailInput";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import axiosInstance from "@/lib/axios";
 
 export default function OrganizationRegistrationForm() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const [userData, setUserData] = useState({
     orgName: "",
@@ -62,23 +63,23 @@ export default function OrganizationRegistrationForm() {
       <div className="space-y-2 w-full md:w-[480px] m-4">
         <div className="mb-10 space-y-2">
           <h2 className="text-3xl md:text-4xl text-center md:text-start font-semibold text-[#1B1818]">
-            Organization Details
+            {t('orgDetails')}
           </h2>
           <p className="text-sm text-black/70 text-center md:text-start">
-            Please tell us about your organisation
+            {t('tellUsAboutOrg')}
           </p>
         </div>
         <form className="space-y-2.5 md:space-y-5" onSubmit={handleSubmit}>
           <InputComponent
             name="orgName"
-            label="Organization Name"
+            label={t('orgName')}
             value={userData.orgName}
             onChange={handleInputChange}
             placeholder=""
           />
           <InputComponent
             name="orgWebsite"
-            label="Organization Website"
+            label={t('orgWebsite')}
             value={userData.orgWebsite}
             onChange={handleInputChange}
             type="url"
@@ -86,7 +87,7 @@ export default function OrganizationRegistrationForm() {
           />
           <InputComponent
             name="orgIndustry"
-            label="Organization Industry"
+            label={t('orgIndustry')}
             value={userData.orgIndustry}
             onChange={handleInputChange}
             placeholder=""
@@ -98,7 +99,7 @@ export default function OrganizationRegistrationForm() {
 
           <div className="mt-5">
             <Button 
-              content={loading ? "Saving..." : "Proceed"} 
+              content={loading ? t('saving') : t('proceed')} 
               type="submit"
               disabled={loading}
             />
@@ -106,12 +107,12 @@ export default function OrganizationRegistrationForm() {
         </form>
         <section className="space-y-5 mt-5 mb-3">
           <p className="text-center text-sm text-black leading-6 space-x-1">
-            <span>Back to</span>
+            <span>{t('backTo')}</span>
             <Link
               href="/sign-up"
               className="text-[#eb5017] custom-underline font-semibold"
             >
-              Registration
+              {t('registration')}
             </Link>
           </p>
         </section>
@@ -120,13 +121,13 @@ export default function OrganizationRegistrationForm() {
       {isModalOpen && (
         <Modal isOpen={isModalOpen} onClose={handleModalClose}>
           <h2 className="text-xl font-semibold mb-2 text-center text-[#1B1818]">
-            Welcome to Eventeev!
+            {t('welcomeToEventeev')}
           </h2>
           <p className="text-sm text-center text-black/70">
-            Your organization details have been saved successfully. You're all set to start creating amazing events!
+            {t('orgSavedSuccess')}
           </p>
           <div className="mt-6 flex justify-center">
-            <Button onClick={handleModalClose} content="Get Started" />
+            <Button onClick={handleModalClose} content={t('getStarted')} />
           </div>
         </Modal>
       )}

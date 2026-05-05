@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import Button from "@/components/ui/Button";
-import Link from "next/link";
+import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 export default function OTPVerificationComponent() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
@@ -121,10 +121,10 @@ export default function OTPVerificationComponent() {
     <div className="space-y-6 w-full md:w-[480px] m-4">
       <div className="space-y-2 text-center md:text-start">
         <h2 className="text-4xl font-semibold text-[#1B1818]">
-          Verify your email
+          {t('verifyEmail')}
         </h2>
         <p className="text-black/60 text-sm">
-          We've sent a 6-digit verification code to <br />
+          {t('otpSentTo')} <br />
           <span className="font-semibold text-black">{email}</span>
         </p>
       </div>
@@ -155,25 +155,25 @@ export default function OTPVerificationComponent() {
 
         <div className="space-y-4">
           <Button
-            content={loading ? "Verifying..." : "Verify Code"}
+            content={loading ? t('verifying') : t('verifyCode')}
             isLoading={loading}
             type="submit"
           />
           
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Didn't receive the code?{" "}
+              {t('didntReceiveCode')}{" "}
               {canResend ? (
                 <button
                   type="button"
                   onClick={handleResend}
                   className="text-[#eb5017] font-semibold hover:underline"
                 >
-                  Resend now
+                  {t('resendNow')}
                 </button>
               ) : (
                 <span className="text-gray-400 font-medium">
-                  Resend in {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
+                  {t('resendIn')} {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
                 </span>
               )}
             </p>
@@ -183,7 +183,7 @@ export default function OTPVerificationComponent() {
 
       <div className="text-center">
         <Link href="/sign-up" className="text-sm text-gray-500 hover:text-[#eb5017] transition-colors">
-          &larr; Back to Sign up
+          &larr; {t('backToSignup')}
         </Link>
       </div>
     </div>
