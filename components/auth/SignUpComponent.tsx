@@ -53,6 +53,13 @@ export default function SignUpComponent() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userData.email)) {
+      setError("Please enter a valid email address");
+      setLoading(false);
+      return;
+    }
+
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(userData.password)) {
       setError("Password must be at least 8 characters and include uppercase, lowercase, and numbers");

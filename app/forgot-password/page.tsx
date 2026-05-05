@@ -29,7 +29,18 @@ export default function ForgotPassword() {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!email) return;
+        setMessage(null);
+
+        if (!email) {
+            setMessage({ type: 'error', text: "Please enter your email address." });
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setMessage({ type: 'error', text: "Please enter a valid email address." });
+            return;
+        }
 
         setLoading(true);
         setMessage(null);
