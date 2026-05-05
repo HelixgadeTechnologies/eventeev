@@ -67,7 +67,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.className} ${featherFont.variable} antialiased`}
         suppressHydrationWarning
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
             <AuthProvider>
               <SidebarProvider>{children}</SidebarProvider>
