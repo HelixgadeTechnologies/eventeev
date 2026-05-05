@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import Button from "@/components/ui/Button";
 
 export default function OTPVerificationComponent() {
   const t = useTranslations('Auth');
