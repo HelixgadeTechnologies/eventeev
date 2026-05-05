@@ -8,19 +8,7 @@ import FreeTickets from "@/components/tickets/FreeTickets";
 import DonatedTickets from "@/components/tickets/DonatedTickets";
 import { useState } from "react";
 import AddTickets from "@/components/tickets/AddTicketModal";
-
-export interface TicketTier {
-  id?: string;
-  name: string;
-  type: "paid" | "free" | "donation";
-  price?: number;
-  quantity: number;
-  startDate?: string;
-  startTime?: string;
-  stopDate?: string;
-  stopTime?: string;
-  description?: string;
-}
+import { TicketTier } from "@/types/ticket";
 
 export default function TicketParentSwitcher() {
   const tabs = [

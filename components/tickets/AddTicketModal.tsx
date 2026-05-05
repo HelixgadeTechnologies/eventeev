@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DonatedTicketsForm from "./DonatedTicketsForm";
 import FreeTicketsForm from "./FreeTicketsForm";
 import PaidTicketsForm from "./PaidTicketsForm";
-import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+import { TicketTier } from "@/types/ticket";
 
 type AddProps = {
   isOpen: boolean;

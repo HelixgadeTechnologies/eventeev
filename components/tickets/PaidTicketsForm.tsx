@@ -8,7 +8,7 @@ import { ticketsService } from "@/lib/services/tickets.service";
 import { Loader2 } from "lucide-react";
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 
-import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+import { TicketTier } from "@/types/ticket";
 
 const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier, onSuccess?: () => void }) => {
   const params = useParams();

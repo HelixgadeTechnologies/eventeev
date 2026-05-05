@@ -10,7 +10,7 @@ import { Checkbox } from "../ui/check-box";
 import { useParams } from "next/navigation";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
 import { Loader2, AlertCircle, Trash2 } from "lucide-react";
-import { TicketTier } from "@/app/(app)/events/[_id]/tickets/parent-switcher";
+import { TicketTier } from "@/types/ticket";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 type Props = {
