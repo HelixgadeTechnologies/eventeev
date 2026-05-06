@@ -13,6 +13,10 @@ export default function Home() {
         <LanguageSwitcher />
       </div>
       <LoginComponent />
+      {/* Temporary Debug Info - Can be removed once resolved */}
+      <div className="absolute bottom-2 left-2 text-[10px] text-gray-400 opacity-20 hover:opacity-100 transition-opacity">
+        G-ID: {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? `Loaded (${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID.slice(0, 5)}...)` : 'Missing'}
+      </div>
     </section>
   );
 }
