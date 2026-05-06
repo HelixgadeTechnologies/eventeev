@@ -170,9 +170,9 @@ export class AuthService {
   /**
    * Login with Google
    */
-  async googleLogin(idToken: string) {
+  async googleLogin(code: string) {
     try {
-      const response = await axiosInstance.post('/api/auth/google', { idToken });
+      const response = await axiosInstance.post('/api/auth/google', { code });
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
       

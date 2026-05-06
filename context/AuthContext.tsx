@@ -15,7 +15,7 @@ interface AuthContextType {
   updatePassword: (token: string, newPassword: string) => Promise<{ error: any | null }>
   verifyOtp: (email: string, otp: string) => Promise<{ error: any | null }>
   resendOtp: (email: string) => Promise<{ error: any | null }>
-  googleLogin: (idToken: string) => Promise<{ error: any | null }>
+  googleLogin: (code: string) => Promise<{ error: any | null }>
   refreshUser: () => Promise<void>
 }
 
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const googleLogin = async (idToken: string) => {
-    const { user: googleUser, error } = await authService.googleLogin(idToken)
+  const googleLogin = async (code: string) => {
+    const { user: googleUser, error } = await authService.googleLogin(code)
     if (!error && googleUser) {
       setUser(googleUser)
       const { session: newSession } = await authService.getSession()

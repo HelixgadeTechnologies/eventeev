@@ -1,18 +1,24 @@
 "use client";
 
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
+import { FcGoogle } from "react-icons/fc";
+import { useTranslations } from "next-intl";
 
 export default function ContinueWithGoogle() {
+  const t = useTranslations('Auth');
   const { googleLogin } = useAuth();
   const router = useRouter();
 
-  const handleSuccess = async (credentialResponse: any) => {
-    if (credentialResponse.credential) {
+  const login = useGoogleLogin({
+    onSuccess: async (codeResponse) => {
+      console.log("[Google Auth] Code received:", codeResponse.code);
       try {
-        const { error } = await googleLogin(credentialResponse.credential);
+        // Send the authorization code to the backend
+        const { error } = await googleLogin(codeResponse.code);
+        
         if (error) {
           toast.error(error || "Google login failed");
         } else {
@@ -21,27 +27,24 @@ export default function ContinueWithGoogle() {
         }
       } catch (err) {
         console.error("Google Login Error:", err);
-        toast.error("An unexpected error occurred");
+        toast.error("An unexpected error occurred during login");
       }
-    }
-  };
-
-  const handleError = () => {
-    console.error("Google Login Failed");
-    toast.error("Google Sign-In failed. Please try again.");
-  };
+    },
+    onError: (error) => {
+      console.error("Google Login Failed:", error);
+      toast.error("Google Sign-In failed. Please try again.");
+    },
+    flow: 'auth-code',
+    scope: 'https://www.googleapis.com/auth/calendar.events openid email profile',
+  });
 
   return (
-    <div className="w-full flex justify-center">
-      <GoogleLogin
-        onSuccess={handleSuccess}
-        onError={handleError}
-        useOneTap
-        theme="outline"
-        shape="pill"
-        width="100%"
-        size="large"
-      />
+    <div 
+        onClick={() => login()}
+        className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#D0D5DD] bg-white text-[#344054] hover:bg-gray-50 transition-all duration-200 cursor-pointer shadow-sm group"
+    >
+        <FcGoogle className="text-2xl mr-3 group-hover:scale-110 transition-transform" />
+        <span className="text-base font-bold">{t('continueWithGoogle')}</span>
     </div>
   );
 }
