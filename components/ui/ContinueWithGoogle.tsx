@@ -7,11 +7,7 @@ import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslations } from "next-intl";
 
-/**
- * Sub-component that actually uses the Google Login hook.
- * This is separated to prevent crashes when the GoogleOAuthProvider is missing.
- */
-const GoogleLoginButton = () => {
+export default function ContinueWithGoogle() {
   const t = useTranslations('Auth');
   const { googleLogin } = useAuth();
   const router = useRouter();
@@ -34,7 +30,8 @@ const GoogleLoginButton = () => {
     },
     onError: (error) => {
       console.error("Google Login Failed:", error);
-      toast.error("Google Sign-In failed. Please try again.");
+      // If the Client ID is missing, Google's library will trigger onError or show a popup error
+      toast.error(`Google Sign-In failed: ${error.error_description || 'Check your configuration'}`);
     },
     flow: 'auth-code',
     scope: 'https://www.googleapis.com/auth/calendar.events openid email profile',
@@ -49,32 +46,4 @@ const GoogleLoginButton = () => {
         <span className="text-base font-bold">{t('continueWithGoogle')}</span>
     </div>
   );
-};
-
-/**
- * Placeholder button shown when Google Auth is not configured.
- */
-const DisabledGoogleButton = () => {
-  const t = useTranslations('Auth');
-  return (
-    <div 
-        className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#E4E7EC] bg-[#F9FAFB] text-[#98A2B3] cursor-not-allowed shadow-sm"
-        title="Google Sign-In is currently unavailable"
-    >
-        <FcGoogle className="text-2xl mr-3 opacity-50 grayscale" />
-        <span className="text-base font-bold">{t('continueWithGoogle')}</span>
-    </div>
-  );
-};
-
-export default function ContinueWithGoogle() {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-  // Only render the button that uses the hook if we have a Client ID.
-  // This prevents the app from crashing if the provider is missing.
-  if (!clientId) {
-    return <DisabledGoogleButton />;
-  }
-
-  return <GoogleLoginButton />;
 }
