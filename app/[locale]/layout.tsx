@@ -4,12 +4,14 @@ import "../globals.css";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ReduxProvider from "@/store/reduxProvider";
+import GoogleAuthProvider from "@/components/providers/GoogleAuthProvider";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import {routing} from '@/i18n/routing';
+import { Toaster } from 'sonner';
 
 const featherFont = localFont({
   src: "../../public/fonts/feather.ttf",
@@ -70,7 +72,10 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
             <AuthProvider>
-              <SidebarProvider>{children}</SidebarProvider>
+              <GoogleAuthProvider>
+                <SidebarProvider>{children}</SidebarProvider>
+                <Toaster position="top-center" richColors />
+              </GoogleAuthProvider>
             </AuthProvider>
           </ReduxProvider>
         </NextIntlClientProvider>

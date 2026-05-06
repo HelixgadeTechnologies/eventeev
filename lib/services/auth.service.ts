@@ -166,6 +166,25 @@ export class AuthService {
       return { data: null, error: error.response?.data?.message || 'Failed to resend OTP' }
     }
   }
+
+  /**
+   * Login with Google
+   */
+  async googleLogin(idToken: string) {
+    try {
+      const response = await axiosInstance.post('/api/auth/google', { idToken });
+      const { user, token } = response.data;
+      const mappedUser = user ? { ...user, id: user.id || user._id } : null;
+      
+      if (token) {
+        localStorage.setItem('x-auth-token', token);
+      }
+      
+      return { user: mappedUser, token, error: null }
+    } catch (error: any) {
+      return { user: null, token: null, error: error.response?.data?.message || 'Google login failed' }
+    }
+  }
 }
 
 export const authService = new AuthService()

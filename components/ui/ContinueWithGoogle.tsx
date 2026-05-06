@@ -1,24 +1,47 @@
-import { FcGoogle } from "react-icons/fc";
-import { useTranslations } from "next-intl";
+"use client";
+
+import { GoogleLogin } from "@react-oauth/google";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "@/i18n/routing";
+import { toast } from "sonner";
 
 export default function ContinueWithGoogle() {
-    const t = useTranslations('Auth');
-    
-    const handleGoogleLogin = () => {
-        const API_BASE_URL = process.env.NODE_ENV === 'development' 
-            ? 'http://localhost:5000' 
-            : 'https://eventeevapi.onrender.com';
-        
-        window.location.href = `${API_BASE_URL}/api/auth/google`;
-    };
-    
-    return (
-        <div 
-            onClick={handleGoogleLogin}
-            className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#D0D5DD] bg-white text-[#344054] hover:bg-gray-50 transition-all duration-200 cursor-pointer shadow-sm group"
-        >
-            <FcGoogle className="text-2xl mr-3 group-hover:scale-110 transition-transform" />
-            <span className="text-base font-bold">{t('continueWithGoogle')}</span>
-        </div>
-    )
+  const { googleLogin } = useAuth();
+  const router = useRouter();
+
+  const handleSuccess = async (credentialResponse: any) => {
+    if (credentialResponse.credential) {
+      try {
+        const { error } = await googleLogin(credentialResponse.credential);
+        if (error) {
+          toast.error(error || "Google login failed");
+        } else {
+          toast.success("Login successful!");
+          router.push("/events");
+        }
+      } catch (err) {
+        console.error("Google Login Error:", err);
+        toast.error("An unexpected error occurred");
+      }
+    }
+  };
+
+  const handleError = () => {
+    console.error("Google Login Failed");
+    toast.error("Google Sign-In failed. Please try again.");
+  };
+
+  return (
+    <div className="w-full flex justify-center">
+      <GoogleLogin
+        onSuccess={handleSuccess}
+        onError={handleError}
+        useOneTap
+        theme="outline"
+        shape="pill"
+        width="100%"
+        size="large"
+      />
+    </div>
+  );
 }
