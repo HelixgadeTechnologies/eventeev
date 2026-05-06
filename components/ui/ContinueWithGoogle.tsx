@@ -7,7 +7,11 @@ import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslations } from "next-intl";
 
-export default function ContinueWithGoogle() {
+/**
+ * Sub-component that actually uses the Google Login hook.
+ * This is separated to prevent crashes when the GoogleOAuthProvider is missing.
+ */
+const GoogleLoginButton = () => {
   const t = useTranslations('Auth');
   const { googleLogin } = useAuth();
   const router = useRouter();
@@ -16,9 +20,7 @@ export default function ContinueWithGoogle() {
     onSuccess: async (codeResponse) => {
       console.log("[Google Auth] Code received:", codeResponse.code);
       try {
-        // Send the authorization code to the backend
         const { error } = await googleLogin(codeResponse.code);
-        
         if (error) {
           toast.error(error || "Google login failed");
         } else {
@@ -47,4 +49,32 @@ export default function ContinueWithGoogle() {
         <span className="text-base font-bold">{t('continueWithGoogle')}</span>
     </div>
   );
+};
+
+/**
+ * Placeholder button shown when Google Auth is not configured.
+ */
+const DisabledGoogleButton = () => {
+  const t = useTranslations('Auth');
+  return (
+    <div 
+        className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#E4E7EC] bg-[#F9FAFB] text-[#98A2B3] cursor-not-allowed shadow-sm"
+        title="Google Sign-In is currently unavailable"
+    >
+        <FcGoogle className="text-2xl mr-3 opacity-50 grayscale" />
+        <span className="text-base font-bold">{t('continueWithGoogle')}</span>
+    </div>
+  );
+};
+
+export default function ContinueWithGoogle() {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+  // Only render the button that uses the hook if we have a Client ID.
+  // This prevents the app from crashing if the provider is missing.
+  if (!clientId) {
+    return <DisabledGoogleButton />;
+  }
+
+  return <GoogleLoginButton />;
 }
