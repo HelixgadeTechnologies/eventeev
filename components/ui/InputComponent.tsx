@@ -14,15 +14,16 @@ export default function InputComponent ({
   name,
 }: InputProps) {
   return (
-    <div className="space-y-1.5 md:space-y-2">
-        <label htmlFor="" className="text-xs font-medium leading-6 block">{label}</label>
+    <div className="space-y-2">
+        <label htmlFor={name} className="text-sm font-bold text-[#1B1818] block">{label}</label>
         <input
         type="text"
+        id={name}
         value={value}
         name={name}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full border border-gray-300 rounded-[6px] px-2 h-10 outline-none placeholder:text-gray-400 placeholder:font-light font-normal text-sm leading-6 focus:border-[#FA9874] focus:ring-0 focus:outline-none transition duration-200"
+        className="w-full border border-[#D0D5DD] rounded-xl px-4 h-11 outline-none placeholder:text-[#98A2B3] font-normal text-sm focus:border-[#eb5017] focus:ring-1 focus:ring-[#eb5017]/10 transition-all duration-200"
         autoComplete="text"
         />
     </div>
