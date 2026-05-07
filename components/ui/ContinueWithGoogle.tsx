@@ -12,6 +12,8 @@ export default function ContinueWithGoogle() {
   const { googleLogin } = useAuth();
   const router = useRouter();
 
+  const isConfigured = !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
   const login = useGoogleLogin({
     onSuccess: async (codeResponse) => {
       console.log("[Google Auth] Code received:", codeResponse.code);
@@ -30,17 +32,27 @@ export default function ContinueWithGoogle() {
     },
     onError: (error) => {
       console.error("Google Login Failed:", error);
-      // If the Client ID is missing, Google's library will trigger onError or show a popup error
       toast.error(`Google Sign-In failed: ${error.error_description || 'Check your configuration'}`);
     },
     flow: 'auth-code',
     scope: 'https://www.googleapis.com/auth/calendar.events openid email profile',
   });
 
+  const handleLoginClick = () => {
+    if (!isConfigured) {
+      toast.error("Google Sign-In is not configured. Please add NEXT_PUBLIC_GOOGLE_CLIENT_ID to your .env.local file and restart your server.", {
+        duration: 5000,
+        description: "Environment variable is missing or empty."
+      });
+      return;
+    }
+    login();
+  };
+
   return (
     <div 
-        onClick={() => login()}
-        className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#D0D5DD] bg-white text-[#344054] hover:bg-gray-50 transition-all duration-200 cursor-pointer shadow-sm group"
+        onClick={handleLoginClick}
+        className={`rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#D0D5DD] bg-white text-[#344054] hover:bg-gray-50 transition-all duration-200 cursor-pointer shadow-sm group ${!isConfigured ? 'opacity-70 grayscale-[0.5]' : ''}`}
     >
         <FcGoogle className="text-2xl mr-3 group-hover:scale-110 transition-transform" />
         <span className="text-base font-bold">{t('continueWithGoogle')}</span>
