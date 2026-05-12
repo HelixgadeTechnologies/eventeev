@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5000' 
-  : 'https://eventeevapi.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eventeevapi.onrender.com';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -45,17 +43,11 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const isLoginRequest = error.config?.url?.includes('/api/auth/login');
+      const url = error.config?.url || '';
+      const isAuthRequest = url.includes('/api/auth/');
       const isHomePage = typeof window !== 'undefined' && window.location.pathname === '/';
 
-      console.error('[Axios Response] 401 Unauthorized detected:', {
-        url: error.config?.url,
-        message: error.response?.data?.message || 'Unauthorized',
-        isLoginRequest,
-        isHomePage
-      });
-
-      if (typeof window !== 'undefined' && !isLoginRequest && !isHomePage) {
+      if (typeof window !== 'undefined' && !isAuthRequest && !isHomePage) {
         localStorage.removeItem('x-auth-token');
         // Force redirect to home page to refresh session for non-login related 401s
         window.location.href = '/';
