@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { useTranslations } from "next-intl";
 
-function GoogleLoginButton() {
+export default function ContinueWithGoogle() {
   const t = useTranslations('Auth');
   const { googleLogin } = useAuth();
   const router = useRouter();
@@ -44,20 +44,4 @@ function GoogleLoginButton() {
       <span className="text-base font-bold">{t('continueWithGoogle')}</span>
     </div>
   );
-}
-
-export default function ContinueWithGoogle() {
-  const t = useTranslations('Auth');
-  const isConfigured = !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-  if (!isConfigured) {
-    return (
-      <div className="rounded-xl h-12 w-full px-6 flex items-center justify-center border border-[#D0D5DD] bg-white text-[#344054] opacity-50 cursor-not-allowed shadow-sm">
-        <FcGoogle className="text-2xl mr-3 grayscale" />
-        <span className="text-base font-bold">{t('continueWithGoogle')}</span>
-      </div>
-    );
-  }
-
-  return <GoogleLoginButton />;
 }
