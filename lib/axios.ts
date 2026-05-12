@@ -45,11 +45,9 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
       const isAuthRequest = url.includes('/api/auth/');
-      const isHomePage = typeof window !== 'undefined' && window.location.pathname === '/';
 
-      if (typeof window !== 'undefined' && !isAuthRequest && !isHomePage) {
+      if (typeof window !== 'undefined' && !isAuthRequest) {
         localStorage.removeItem('x-auth-token');
-        // Force redirect to home page to refresh session for non-login related 401s
         window.location.href = '/';
       }
     }
