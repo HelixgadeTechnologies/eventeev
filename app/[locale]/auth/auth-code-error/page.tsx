@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { HiOutlineExclamationCircle, HiOutlineArrowLeft, HiOutlineMail } from 'react-icons/hi2';
+import { HiOutlineExclamationCircle, HiOutlineArrowLeft, HiOutlineEnvelope } from 'react-icons/hi2';
 
 export default function AuthCodeError() {
   return (
@@ -51,7 +51,7 @@ export default function AuthCodeError() {
             href="/sign-up"
             className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl border border-[#D0D5DD] text-[#344054] font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all"
           >
-            <HiOutlineMail />
+            <HiOutlineEnvelope />
             Create New Account
           </Link>
         </div>
