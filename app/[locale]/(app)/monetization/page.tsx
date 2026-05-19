@@ -5,6 +5,7 @@ import AnalyticsCard from "@/components/display/AnalyticsCard";
 import DataTable from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { HiOutlineTicket, HiOutlineHeart, HiOutlineShoppingBag, HiOutlineArrowUpRight, HiOutlineWallet } from "react-icons/hi2";
+import { toast } from "sonner";
 
 type Transaction = {
   id: string;
@@ -77,7 +78,6 @@ const transactions: Transaction[] = [
 export default function MonetizationPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-10 p-4 md:p-8 animate-in fade-in duration-700">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-black text-[#1B1818] tracking-tight">Monetization</h1>
@@ -85,23 +85,23 @@ export default function MonetizationPage() {
             Track your earnings, manage payout methods, and explore new ways to monetize your events.
           </p>
         </div>
-        <button className="bg-[#1B1818] text-white px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-gray-200 group">
+        <button
+          onClick={() => toast.info("Payout configuration coming soon.")}
+          className="bg-[#1B1818] text-white px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-gray-200 group"
+        >
           <HiOutlineWallet className="text-xl" />
           Configure Payouts
           <HiOutlineArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
         </button>
       </div>
 
-      {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <AnalyticsCard title="Total Revenue" value={1250000} percentage={12.5} icon="/icons/revenue-active.svg" isCurrency />
         <AnalyticsCard title="Pending Payouts" value={450000} percentage={-2.4} icon="/icons/payout-active.svg" isCurrency />
         <AnalyticsCard title="Total Donations" value={85000} percentage={18.2} icon="/icons/heart-active.svg" isCurrency />
       </div>
 
-      {/* Methods and History */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Monetization Methods */}
         <div className="lg:col-span-1 space-y-6">
           <h2 className="text-xl font-black text-[#1B1818] tracking-tight">Monetization Methods</h2>
           <div className="space-y-4">
@@ -126,11 +126,18 @@ export default function MonetizationPage() {
           </div>
         </div>
 
-        {/* Recent Transactions */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black text-[#1B1818] tracking-tight">Recent Transactions</h2>
-            <button className="text-[#eb5017] font-black text-xs uppercase tracking-widest hover:underline underline-offset-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-black text-[#1B1818] tracking-tight">Recent Transactions</h2>
+              <span className="text-[8px] font-black uppercase tracking-widest bg-orange-50 text-[#eb5017] px-2 py-0.5 rounded-full border border-orange-100">
+                Sample Data
+              </span>
+            </div>
+            <button
+              onClick={() => toast.info("Full transaction history coming soon.")}
+              className="text-[#eb5017] font-black text-xs uppercase tracking-widest hover:underline underline-offset-4"
+            >
               View All
             </button>
           </div>

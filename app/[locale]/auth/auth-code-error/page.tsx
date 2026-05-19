@@ -1,73 +1,69 @@
-import Link from 'next/link'
+import Link from 'next/link';
+import Image from 'next/image';
+import { HiOutlineExclamationCircle, HiOutlineArrowLeft, HiOutlineMail } from 'react-icons/hi2';
 
 export default function AuthCodeError() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <svg
-              className="h-8 w-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+    <section className="h-screen w-full flex items-center justify-center bg-login relative">
+      <div className="w-[90%] md:w-[420px] space-y-4 p-6 bg-white rounded-2xl shadow-xl">
+
+        <div className="flex justify-center mb-2">
+          <Image src="/logo-white.svg" alt="Eventeev" width={110} height={44} className="invert" />
+        </div>
+
+        <div className="flex flex-col items-center text-center space-y-2">
+          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center">
+            <HiOutlineExclamationCircle className="text-3xl text-red-500" />
           </div>
-          <h1 className="mb-2 text-2xl font-bold text-gray-900">
+          <h1 className="text-xl font-black text-[#1B1818] uppercase tracking-tight">
             Authentication Error
           </h1>
-          <p className="text-gray-600">
-          The code provided does not match the one sent to you. It might have expired or been entered incorrectly.
+          <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-xs">
+            The code provided is invalid or has expired. This can happen if the link was already used or has timed out.
           </p>
         </div>
 
-        <div className="mb-6 rounded-lg bg-red-50 p-4">
-          <h2 className="mb-2 font-semibold text-red-900">What happened?</h2>
-          <p className="text-sm text-red-700">
-            The authentication code was invalid or has expired. This can happen if:
-          </p>
-          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-red-700">
-            <li>The link has already been used</li>
-            <li>The link has expired</li>
-            <li>There was an error in the authentication process</li>
+        <div className="bg-[#FFF4ED] rounded-xl p-4 border border-orange-100 space-y-2">
+          <h2 className="text-[10px] font-black text-[#eb5017] uppercase tracking-widest">What happened?</h2>
+          <ul className="space-y-1.5">
+            {[
+              'The link has already been used',
+              'The link has expired',
+              'There was an error during authentication',
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2 text-xs text-[#C27E33] font-medium">
+                <span className="mt-0.5 w-1 h-1 rounded-full bg-[#eb5017] shrink-0 mt-1.5" />
+                {item}
+              </li>
+            ))}
           </ul>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 pt-1">
           <Link
             href="/"
-            className="block w-full rounded-lg bg-purple-600 px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-purple-700"
+            className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-[#1B1818] text-white font-black text-xs uppercase tracking-widest hover:bg-[#2d2525] transition-all active:scale-95"
           >
+            <HiOutlineArrowLeft />
             Try Signing In Again
           </Link>
           <Link
             href="/sign-up"
-            className="block w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-center font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+            className="flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl border border-[#D0D5DD] text-[#344054] font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all"
           >
+            <HiOutlineMail />
             Create New Account
-          </Link>
-          <Link
-            href="/"
-            className="block w-full text-center text-sm text-gray-600 hover:text-gray-900"
-          >
-            Return to Home
           </Link>
         </div>
 
-        <div className="mt-6 rounded-lg bg-blue-50 p-4">
-          <h3 className="mb-1 font-semibold text-blue-900">Need help?</h3>
-          <p className="text-sm text-blue-700">
-            If you continue to experience issues, please contact our support team.
-          </p>
-        </div>
+        <p className="text-center text-[10px] text-gray-400 font-medium">
+          Still having trouble?{' '}
+          <a href="mailto:support@eventeev.com" className="text-[#eb5017] font-bold custom-underline">
+            Contact support
+          </a>
+        </p>
+
       </div>
-    </div>
-  )
+    </section>
+  );
 }
