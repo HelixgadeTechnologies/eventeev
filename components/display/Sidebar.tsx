@@ -23,7 +23,7 @@ export default function Sidebar() {
   };
 
   const eventId = pathname.match(/^\/events\/([^/]+)/)?.[1] || "";
-  const dashboardHref = eventId ? `/events/${eventId}/dashboard` : "/events";
+  const dashboardHref = eventId ? `/events/${eventId}/dashboard` : "/dashboard";
 
   const currentNavGroup = isEventRoute(pathname)
     ? topNavigations

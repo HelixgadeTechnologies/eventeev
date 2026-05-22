@@ -20,7 +20,7 @@ export default function ContinueWithGoogle() {
           toast.error(error || "Google login failed");
         } else {
           toast.success("Login successful!");
-          router.push("/events");
+          router.push("/dashboard");
         }
       } catch (err) {
         console.error("Google Login Error:", err);

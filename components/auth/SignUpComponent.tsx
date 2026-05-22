@@ -19,7 +19,7 @@ export default function SignUpComponent() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/events");
+      router.push("/dashboard");
     }
   }, [user, authLoading, router]);
   const [userData, setUserData] = useState({

@@ -66,10 +66,16 @@ export const bottomNavigations = [
 
 export const eventNavigations = [
   {
-    name: "Home",
-    href: "/events",
+    name: "Dashboard",
+    href: "/dashboard",
     iconInactive: "/icons/dashboard-inactive.svg",
     iconActive: "/icons/dashboard-active.svg",
+  },
+  {
+    name: "Events",
+    href: "/events",
+    iconInactive: "/icons/tickets-inactive.svg",
+    iconActive: "/icons/tickets-active.svg",
   },
   {
     name: "Profile",

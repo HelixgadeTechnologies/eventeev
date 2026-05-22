@@ -2,6 +2,12 @@ const username = "{firstName}";
 
 export const breadcrumbMap = [
   {
+    pattern: "/dashboard",
+    title: `Welcome ${username}`,
+    subtitle: "It's a beautiful day to manage your events portfolio! 😊",
+    exact: true,
+  },
+  {
     pattern: "/events",
     title: `Welcome ${username}`,
     subtitle: "Control your profile setup and integrations",

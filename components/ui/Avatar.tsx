@@ -6,6 +6,7 @@ type AvatarProps = {
   name: string;
   href?: string;
   isBigger?: boolean;
+  disableLink?: boolean;
 };
 
 const bgColors = [
@@ -38,29 +39,35 @@ function getColorFromName(name?: string) {
   return bgColors[charCodeSum % bgColors.length];
 }
 
-export default function Avatar({ src, name, href = "/profile", isBigger }: AvatarProps) {
+export default function Avatar({ src, name, href = "/profile", isBigger, disableLink }: AvatarProps) {
   const initials = getInitials(name);
   const bgColor = getColorFromName(name);
 
+  const content = src ? (
+    <div className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full overflow-hidden`}>
+      <Image
+        src={src}
+        alt="Profile picture"
+        width={40}
+        height={40}
+        className="w-full h-full object-cover rounded-full"
+      />
+    </div>
+  ) : (
+    <div
+      className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full flex justify-center items-center text-xs md:text-sm font-medium text-white ${bgColor}`}
+    >
+      <span>{initials}</span>
+    </div>
+  );
+
+  if (disableLink) {
+    return content;
+  }
+
   return (
     <Link href={href}>
-      {src ? (
-        <div className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full overflow-hidden`}>
-          <Image
-            src={src}
-            alt="Profile picture"
-            width={40}
-            height={40}
-            className="w-full h-full object-cover rounded-full"
-          />
-        </div>
-      ) : (
-        <div
-          className={`${isBigger ? 'h-10 w-10 md:h-[50px] md:w-[50px]' : 'h-[30px] w-[30px] md:h-10 md:w-10'} rounded-full flex justify-center items-center text-xs md:text-sm font-medium text-white ${bgColor}`}
-        >
-          <span>{initials}</span>
-        </div>
-      )}
+      {content}
     </Link>
   );
 }

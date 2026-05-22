@@ -55,7 +55,7 @@ export default function OrganizationRegistrationForm() {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    router.push("/events"); // Redirect to events instead of home
+    router.push("/dashboard"); // Redirect to dashboard instead of home
   };
 
   return (

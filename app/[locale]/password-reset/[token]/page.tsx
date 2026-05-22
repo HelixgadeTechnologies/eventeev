@@ -18,7 +18,7 @@ export default function ResetPassword() {
 
     useEffect(() => {
         if (!authLoading && user) {
-            router.push("/events");
+            router.push("/dashboard");
         }
     }, [user, authLoading, router]);
 

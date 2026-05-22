@@ -26,9 +26,9 @@ export default function EventPreviewCard({
         <div>
           <div className="flex justify-between items-center">
             {imageURL ? (
-              <Avatar src={imageURL} name={name} />
+              <Avatar src={imageURL} name={name} disableLink={true} />
             ) : (
-              <Avatar name={name} />
+              <Avatar name={name} disableLink={true} />
             )}
             <CiCircleMore className="text-2xl md:text-3xl text-gray-400 hover:text-gray-600 hover:cursor-pointer" />
           </div>

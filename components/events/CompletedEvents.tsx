@@ -6,11 +6,13 @@ import EmptyState from "@/components/display/EmptyStateComponent";
 import img from "@/public/bitmap-icon.svg";
 import { eventsService } from "@/lib/services/events.service";
 import { isEventPassed } from "@/lib/utils/configure-date";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CompletedEvents() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
 
   const fetchEvents = async () => {
     try {
@@ -25,12 +27,20 @@ export default function CompletedEvents() {
       if (completedRes.error) {
         setError(completedRes.error.message || "Failed to load events");
       } else {
-        const completedEvents = completedRes.data || [];
+        const filterUserEvents = (eventsList: any[]) => {
+          return eventsList.filter((event: any) => {
+            if (!event) return false;
+            const eventOwnerId = typeof event.userId === 'object' ? (event.userId?.id || event.userId?._id) : event.userId;
+            return eventOwnerId === user?.id || eventOwnerId === user?._id;
+          });
+        };
+
+        const completedEvents = filterUserEvents(completedRes.data || []);
         
-        // Filter out published events that have already passed
-        const passedPublishedEvents = (publishedRes.data || []).filter(
+        // Filter out published events that have already passed and filter by user ownership
+        const passedPublishedEvents = filterUserEvents((publishedRes.data || []).filter(
           (event: any) => event && isEventPassed(event)
-        );
+        ));
 
         // Merge both lists
         setEvents([...completedEvents, ...passedPublishedEvents]);
@@ -44,10 +54,11 @@ export default function CompletedEvents() {
   };
 
   useEffect(() => {
+    if (authLoading) return;
     fetchEvents();
-  }, []);
+  }, [user, authLoading]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center h-40">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F56630]"></div>

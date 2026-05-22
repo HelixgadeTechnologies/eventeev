@@ -5,11 +5,13 @@ import EventPreviewCard from "./EventPreviewCard";
 import EmptyState from "@/components/display/EmptyStateComponent";
 import img from "@/public/ticket-icon.svg";
 import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DraftedEvents() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -17,16 +19,22 @@ export default function DraftedEvents() {
     if (error) {
       setError(error.message || "Failed to load events");
     } else {
-      setEvents(data || []);
+      const filtered = (data || []).filter((event: any) => {
+        if (!event) return false;
+        const eventOwnerId = typeof event.userId === 'object' ? (event.userId?.id || event.userId?._id) : event.userId;
+        return eventOwnerId === user?.id || eventOwnerId === user?._id;
+      });
+      setEvents(filtered);
     }
     setLoading(false);
   };
 
   useEffect(() => {
+    if (authLoading) return;
     fetchEvents();
-  }, []);
+  }, [user, authLoading]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center h-40">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F56630]"></div>

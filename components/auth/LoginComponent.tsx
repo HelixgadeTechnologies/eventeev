@@ -30,7 +30,7 @@ export default function LoginComponent() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/events");
+      router.push("/dashboard");
     }
   }, [user, authLoading, router]);
 
@@ -69,7 +69,7 @@ export default function LoginComponent() {
         setShowErrorModal(true);
         setLoading(false);
       } else {
-        router.push("/events");
+        router.push("/dashboard");
       }
     } catch (err) {
       console.error("Login failed:", err);

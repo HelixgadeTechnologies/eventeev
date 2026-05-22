@@ -89,7 +89,9 @@ export class AttendeesService {
       const response = await axiosInstance.get(`/api/attendee/event/${eventId}/stats`);
       return { data: response.data, error: null };
     } catch (error: any) {
-      console.error('Failed to fetch attendee stats:', error);
+      if (error.response?.status !== 403) {
+        console.error('Failed to fetch attendee stats:', error);
+      }
       return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } };
     }
   }
