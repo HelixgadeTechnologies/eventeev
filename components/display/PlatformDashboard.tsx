@@ -413,19 +413,39 @@ export default function PlatformDashboard() {
             <h4 className="font-black text-sm text-[#EB5017] uppercase tracking-wider">Quick Checklist</h4>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <input type="checkbox" defaultChecked disabled className="mt-1 accent-[#EB5017]" />
+                <input 
+                  type="checkbox" 
+                  checked={!!user} 
+                  readOnly
+                  className="mt-1 accent-[#EB5017] pointer-events-none" 
+                />
                 <p className="text-xs font-bold text-[#1B1818] leading-tight">Create Organizer Account</p>
               </div>
               <div className="flex items-start gap-3">
-                <input type="checkbox" defaultChecked disabled className="mt-1 accent-[#EB5017]" />
+                <input 
+                  type="checkbox" 
+                  checked={!!user?.firstName && !!user?.lastName} 
+                  readOnly
+                  className="mt-1 accent-[#EB5017] pointer-events-none" 
+                />
                 <p className="text-xs font-bold text-[#1B1818] leading-tight">Configure Organization Details</p>
               </div>
               <div className="flex items-start gap-3">
-                <input type="checkbox" disabled className="mt-1 accent-[#EB5017]" />
+                <input 
+                  type="checkbox" 
+                  checked={portfolioStats.totalEvents > 0} 
+                  readOnly
+                  className="mt-1 accent-[#EB5017] pointer-events-none" 
+                />
                 <p className="text-xs font-bold text-[#1B1818] leading-tight">Publish Your First Event</p>
               </div>
               <div className="flex items-start gap-3">
-                <input type="checkbox" disabled className="mt-1 accent-[#EB5017]" />
+                <input 
+                  type="checkbox" 
+                  checked={publishedEvents.length > 0} 
+                  readOnly
+                  className="mt-1 accent-[#EB5017] pointer-events-none" 
+                />
                 <p className="text-xs font-bold text-[#1B1818] leading-tight">Share Public Registration Link</p>
               </div>
             </div>

@@ -24,7 +24,7 @@ export const topNavigations = [
     iconActive: "/icons/service-games-active.svg",
   },
   {
-    name: "Speaker List",
+    name: "Speakers",
     href: "/events/:id/speakers",
     iconInactive: "/icons/speakers-inactive.svg",
     iconActive: "/icons/speakers-active.svg",
@@ -40,6 +40,42 @@ export const topNavigations = [
     href: "/events/:id/analytics",
     iconInactive: "/icons/analytics-inactive.svg",
     iconActive: "/icons/analytics-active.svg",
+  },
+  {
+    name: "Polls",
+    href: "/events/:id/polls",
+    iconInactive: "/icons/service-polls.svg",
+    iconActive: "/icons/service-polls.svg",
+  },
+  {
+    name: "Networking",
+    href: "/events/:id/networking",
+    iconInactive: "/icons/service-networking.svg",
+    iconActive: "/icons/service-networking.svg",
+  },
+  {
+    name: "Links",
+    href: "/events/:id/links",
+    iconInactive: "/icons/service-links.svg",
+    iconActive: "/icons/service-links.svg",
+  },
+  {
+    name: "Calendar",
+    href: "/events/:id/calendar",
+    iconInactive: "/icons/service-calendar.svg",
+    iconActive: "/icons/service-calendar.svg",
+  },
+  {
+    name: "Checklist",
+    href: "/events/:id/checklist",
+    iconInactive: "/icons/service-checklist.svg",
+    iconActive: "/icons/service-checklist.svg",
+  },
+  {
+    name: "Schedule",
+    href: "/events/:id/schedule",
+    iconInactive: "/icons/service-calendar.svg",
+    iconActive: "/icons/service-calendar.svg",
   },
 ];
 
