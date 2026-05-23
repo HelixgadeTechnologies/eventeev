@@ -12,21 +12,30 @@ import { useSidebar } from "@/context/SidebarContext";
 import Avatar from "@/components/ui/Avatar";
 import { LuLogOut } from "react-icons/lu";
 import { useAuth } from "@/context/AuthContext";
+import { useEvent } from "@/context/EventContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { mobileOpen, closeMobile } = useSidebar();
   const { user, signOut } = useAuth();
+  const { activePowerups } = useEvent();
 
   const isEventRoute = (pathname: string) => {
-    return pathname.startsWith("/events/") && pathname.split("/").length > 3;
+    const cleanPath = pathname.replace(/^\/[a-zA-Z]{2}/, "");
+    return cleanPath.startsWith("/events/") && cleanPath.split("/").length > 3;
   };
 
-  const eventId = pathname.match(/^\/events\/([^/]+)/)?.[1] || "";
+  const match = pathname.match(/(?:\/[a-zA-Z]{2})?\/events\/([^/]+)/);
+  const eventId = match ? match[1] : "";
   const dashboardHref = eventId ? `/events/${eventId}/dashboard` : "/dashboard";
 
+  const filteredTopNavigations = topNavigations.filter((nav) => {
+    if (!eventId) return true;
+    return activePowerups.has(nav.name);
+  });
+
   const currentNavGroup = isEventRoute(pathname)
-    ? topNavigations
+    ? filteredTopNavigations
     : eventNavigations;
 
   const fullName = user ? `${user.firstName} ${user.lastName}` : "User";

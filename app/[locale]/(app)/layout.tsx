@@ -6,6 +6,7 @@ import Breadcrumb from "@/components/ui/BreadcrumbComponent";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
+import { EventProvider } from "@/context/EventContext";
 
 export default function UserLayout({
   children,
@@ -54,22 +55,24 @@ export default function UserLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Sidebar */}
-      <div className="w-64 flex-none transition-all duration-300 ease-in-out">
-        <Sidebar />
-      </div>
-
-      {/* Main content */}
-      <section className="flex-grow flex flex-col overflow-hidden">
-        <Navigation />
-        <div className="flex-grow overflow-y-auto p-6 bg-gray-50">
-          <Breadcrumb />
-          <div className="my-5">
-            {children}
-          </div>
+    <EventProvider>
+      <div className="flex min-h-screen flex-col md:flex-row">
+        {/* Sidebar */}
+        <div className="w-64 flex-none transition-all duration-300 ease-in-out">
+          <Sidebar />
         </div>
-      </section>
-    </div>
+
+        {/* Main content */}
+        <section className="flex-grow flex flex-col overflow-hidden">
+          <Navigation />
+          <div className="flex-grow overflow-y-auto p-6 bg-gray-50">
+            <Breadcrumb />
+            <div className="my-5">
+              {children}
+            </div>
+          </div>
+        </section>
+      </div>
+    </EventProvider>
   );
 }
