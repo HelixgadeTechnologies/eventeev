@@ -940,34 +940,80 @@ const ShowProfile = () => {
   // ----------------------------------------------------
   // SUB-PANE COMPONENT 3: Teams
   // ----------------------------------------------------
-  const [teamMembers, setTeamMembers] = useState([
-    { name: "Michael Rodriguez", email: "rodriguez@gmail.com", role: "Owner", status: "Active" },
-    { name: "Sarah Connor", email: "sconnor@eventeev.com", role: "Organizer", status: "Active" },
-    { name: "David Lee", email: "dlee@helixgade.org", role: "Coordinator", status: "Pending" }
-  ]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loadingTeams, setLoadingTeams] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Organizer");
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
 
-  const handleSendInvite = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail) return;
-    const newMember = {
-      name: inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: inviteRole,
-      status: "Pending"
-    };
-    setTeamMembers(prev => [...prev, newMember]);
-    setInviteEmail("");
-    setStatusModal({
-      isOpen: true,
-      title: "Team Invite Dispatched!",
-      description: `An official invitation credential has been sent to ${inviteEmail} as role ${inviteRole}.`,
-      variant: "success"
-    });
+  // Fetch all teammates from the live database
+  const fetchTeammates = async () => {
+    setLoadingTeams(true);
+    const { data, error } = await profileService.getTeammates();
+    setLoadingTeams(false);
+    if (!error && data) {
+      const mapped = data.map((item: any) => {
+        const userObj = item.user;
+        const name = userObj ? `${userObj.firstName} ${userObj.lastName}` : "Invited Teammate";
+        const email = userObj ? userObj.email : "";
+        const id = userObj ? (userObj.id || userObj._id) : "";
+        return {
+          id,
+          name,
+          email,
+          role: item.role || "Organizer",
+          status: item.status || "Pending"
+        };
+      });
+      setTeamMembers(mapped);
+    }
   };
 
-  const handleDeleteTeamMember = (index: number) => {
+  useEffect(() => {
+    if (activeTab === "teams") {
+      fetchTeammates();
+    }
+  }, [activeTab]);
+
+  const handleSendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail)) {
+      setStatusModal({
+        isOpen: true,
+        title: "Validation Error",
+        description: "Please enter a valid email address.",
+        variant: "error"
+      });
+      return;
+    }
+
+    setIsSendingInvite(true);
+    const { data, error } = await profileService.inviteTeammate(inviteEmail.toLowerCase().trim(), inviteRole);
+    setIsSendingInvite(false);
+
+    if (error) {
+      setStatusModal({
+        isOpen: true,
+        title: "Invitation Failed",
+        description: error.message || "Failed to invite teammate. Please try again.",
+        variant: "error"
+      });
+    } else {
+      setInviteEmail("");
+      setStatusModal({
+        isOpen: true,
+        title: "Team Invite Dispatched!",
+        description: data.message || `An official invitation has been sent to ${inviteEmail} as role ${inviteRole}.`,
+        variant: "success"
+      });
+      fetchTeammates(); // Refresh list
+    }
+  };
+
+  const handleDeleteTeamMember = async (index: number) => {
     const memberToDelete = teamMembers[index];
     if (memberToDelete.role === "Owner") {
       setStatusModal({
@@ -979,13 +1025,25 @@ const ShowProfile = () => {
       return;
     }
 
-    setTeamMembers(prev => prev.filter((_, idx) => idx !== index));
-    setStatusModal({
-      isOpen: true,
-      title: "Team Member Removed",
-      description: `${memberToDelete.name} has been removed from the team workspace.`,
-      variant: "success"
-    });
+    // Direct removal
+    const { error } = await profileService.removeTeammate(memberToDelete.id);
+
+    if (error) {
+      setStatusModal({
+        isOpen: true,
+        title: "Action Malfunction",
+        description: error.message || "Failed to remove teammate. Please try again.",
+        variant: "error"
+      });
+    } else {
+      setStatusModal({
+        isOpen: true,
+        title: "Team Member Removed",
+        description: `${memberToDelete.name} has been removed from the team workspace.`,
+        variant: "success"
+      });
+      fetchTeammates(); // Refresh list
+    }
   };
 
   const renderTeamsTab = () => {
@@ -1007,11 +1065,16 @@ const ShowProfile = () => {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 className="h-10 border-[#D0D5DD] bg-white rounded-lg focus-visible:ring-[#eb5017]/25 focus-visible:border-[#eb5017]"
+                disabled={isSendingInvite}
               />
             </div>
             <div className="w-full sm:w-48 space-y-1">
               <Label className="text-xs font-semibold text-[#344054]">Assign Access Role</Label>
-              <Select value={inviteRole} onValueChange={(val) => setInviteRole(val)}>
+              <Select 
+                value={inviteRole} 
+                onValueChange={(val) => setInviteRole(val)}
+                disabled={isSendingInvite}
+              >
                 <SelectTrigger className="h-10 w-full border-[#D0D5DD] bg-white rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
@@ -1024,10 +1087,15 @@ const ShowProfile = () => {
             </div>
             <button
               type="submit"
-              className="w-full sm:w-auto h-10 px-5 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-[#eb5017] rounded-lg hover:bg-[#eb5017]/90 transition-colors shadow-sm"
+              disabled={isSendingInvite || !inviteEmail}
+              className="w-full sm:w-auto h-10 px-5 flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-[#eb5017] rounded-lg hover:bg-[#eb5017]/90 transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              Send Invite
+              {isSendingInvite ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              {isSendingInvite ? "Inviting..." : "Send Invite"}
             </button>
           </form>
         </div>
@@ -1038,44 +1106,57 @@ const ShowProfile = () => {
             <h4 className="text-md font-bold text-[#1D2739]">Active Teammates</h4>
             <p className="text-xs text-[#667185] mt-0.5">Management permissions for members assigned to your workspace.</p>
           </div>
-          <div className="divide-y divide-[#F0F2F5] overflow-x-auto">
-            {teamMembers.map((m, idx) => (
-              <div key={idx} className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F9FAFB]/50 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#eb5017]/10 flex items-center justify-center font-bold text-[#eb5017]">
-                    {m.name.charAt(0).toUpperCase()}
+          
+          {loadingTeams ? (
+            <div className="p-12 flex flex-col items-center justify-center space-y-3">
+              <Loader2 className="w-8 h-8 text-[#eb5017] animate-spin" />
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading Teammates...</p>
+            </div>
+          ) : teamMembers.length === 0 ? (
+            <div className="p-12 text-center text-gray-400 space-y-2">
+              <p className="text-sm font-bold">No teammates found</p>
+              <p className="text-xs">Invite colleagues above to build your event organization team!</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#F0F2F5] overflow-x-auto">
+              {teamMembers.map((m, idx) => (
+                <div key={idx} className="p-4 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F9FAFB]/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#eb5017]/10 flex items-center justify-center font-bold text-[#eb5017]">
+                      {m.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-semibold text-[#1D2739]">{m.name}</h5>
+                      <p className="text-xs text-[#667185]">{m.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h5 className="text-sm font-semibold text-[#1D2739]">{m.name}</h5>
-                    <p className="text-xs text-[#667185]">{m.email}</p>
+
+                  <div className="flex items-center gap-4 justify-between sm:justify-end w-full sm:w-auto">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
+                        {m.role}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${m.status === "Active" ? "bg-green-50 border-green-200 text-green-700" : "bg-orange-50 border-orange-200 text-orange-700"}`}>
+                        {m.status}
+                      </span>
+                    </div>
+
+                    {m.role !== "Owner" ? (
+                      <button
+                        onClick={() => handleDeleteTeamMember(idx)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0 cursor-pointer"
+                        title="Remove Teammate"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <div className="w-8 shrink-0" />
+                    )}
                   </div>
                 </div>
-
-                <div className="flex items-center gap-4 justify-between sm:justify-end w-full sm:w-auto">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full border border-gray-200">
-                      {m.role}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide ${m.status === "Active" ? "bg-green-50 border-green-200 text-green-700" : "bg-orange-50 border-orange-200 text-orange-700"}`}>
-                      {m.status}
-                    </span>
-                  </div>
-
-                  {m.role !== "Owner" ? (
-                    <button
-                      onClick={() => handleDeleteTeamMember(idx)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0"
-                      title="Remove Teammate"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <div className="w-8 shrink-0" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );

@@ -80,6 +80,45 @@ class ProfileService {
       };
     }
   }
+
+  /**
+   * Get all teammates for the authenticated user's workspace
+   */
+  async getTeammates() {
+    try {
+      const response = await axiosInstance.get("/api/user/teammates");
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error("Failed to fetch teammates:", error);
+      return { data: [], error: error.response?.data || { message: "Failed to fetch teammates" } };
+    }
+  }
+
+  /**
+   * Invite a new teammate to the workspace
+   */
+  async inviteTeammate(email: string, role: string) {
+    try {
+      const response = await axiosInstance.post("/api/user/teammates", { email, role });
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error("Failed to invite teammate:", error);
+      return { data: null, error: error.response?.data || { message: "Failed to invite teammate" } };
+    }
+  }
+
+  /**
+   * Remove a teammate from the workspace
+   */
+  async removeTeammate(userId: string) {
+    try {
+      const response = await axiosInstance.delete(`/api/user/teammates/${userId}`);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error("Failed to remove teammate:", error);
+      return { data: null, error: error.response?.data || { message: "Failed to remove teammate" } };
+    }
+  }
 }
 
 export const profileService = new ProfileService();
