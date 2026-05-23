@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { HiOutlineCog, HiOutlinePuzzlePiece, HiOutlineChatBubbleLeftRight, HiOutlineShare, HiOutlineCreditCard } from "react-icons/hi2";
+import { HiOutlineCog, HiOutlinePuzzlePiece, HiOutlineChatBubbleLeftRight, HiOutlineShare, HiOutlineCreditCard, HiOutlineUsers } from "react-icons/hi2";
 
 const settingsNav = [
   {
@@ -35,6 +35,11 @@ const settingsNav = [
     name: "Payment Settings",
     href: "/payments",
     icon: HiOutlineCreditCard,
+  },
+  {
+    name: "Collaborators",
+    href: "/collaborators",
+    icon: HiOutlineUsers,
   },
 ];
 
