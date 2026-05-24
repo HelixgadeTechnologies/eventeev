@@ -24,7 +24,9 @@ export class AttendeesService {
       }));
       return { data: mappedData as ApiAttendee[], error: null };
     } catch (error: any) {
-      console.error('Failed to fetch attendees:', error);
+      if (error.response?.status !== 403) {
+        console.error('Failed to fetch attendees:', error);
+      }
       return { data: [], error: error.response?.data || { message: 'Failed to fetch attendees' } };
     }
   }
