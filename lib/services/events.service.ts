@@ -27,6 +27,7 @@ export class EventsService {
       endTime: event.endTime || 'N/A',
       is_published: event.status === 'Published',
       organizer_id: 'backend-user',
+      userId: event.owner, // Map backend 'owner' field to frontend 'userId' so that dashboard filtering succeeds
       profiles: {
         full_name: "Event Organizer",
         avatar_url: null
