@@ -8,6 +8,7 @@ import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import { eventsService } from "@/lib/services/events.service";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface AttendeesPageProps {
   params: Promise<{
@@ -17,19 +18,29 @@ interface AttendeesPageProps {
 
 export default function CheckInPage({ params }: AttendeesPageProps) {
   const { _id } = use(params);
+  const { user } = useAuth();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
+      if (!user) return;
       try {
         setLoading(true);
         const { data, error: fetchError } = await eventsService.getEventById(_id);
         if (fetchError) {
           setError(fetchError.message || "Event Not Found");
         } else {
-          setEvent(data);
+          // Verify ownership
+          const eventOwnerId = typeof data?.userId === 'object' ? (data.userId?.id || data.userId?._id) : data?.userId;
+          const isOwner = eventOwnerId === user?.id || eventOwnerId === user?._id;
+
+          if (!isOwner) {
+            setError("Event Not Found");
+          } else {
+            setEvent(data);
+          }
         }
       } catch (err) {
         setError("Connection Issue");
@@ -41,7 +52,7 @@ export default function CheckInPage({ params }: AttendeesPageProps) {
     if (_id) {
       fetchEvent();
     }
-  }, [_id]);
+  }, [_id, user]);
 
   if (loading) {
     return (

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { eventsService } from "@/lib/services/events.service";
 import { ticketsService } from "@/lib/services/tickets.service";
 import { speakersService } from "@/lib/services/speakers.service";
@@ -22,6 +23,8 @@ const EventContext = createContext<EventContextType | undefined>(undefined);
 
 export const EventProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
   const [event, setEvent] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [activePowerups, setActivePowerups] = useState<Set<string>>(new Set());
@@ -50,6 +53,19 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const eventData = eventRes.data;
+
+      // Verify ownership (only allow event creator)
+      const eventOwnerId = typeof eventData.userId === 'object' ? (eventData.userId?.id || eventData.userId?._id) : eventData.userId;
+      const isOwner = eventOwnerId === user?.id || eventOwnerId === user?._id;
+      
+      if (!isOwner) {
+        setEvent(null);
+        setActivePowerups(new Set());
+        setLoading(false);
+        router.push("/events");
+        return;
+      }
+
       setEvent(eventData);
 
       // Always active power-ups

@@ -14,6 +14,7 @@ import Calendar from "@/components/ui/Calendar";
 import DashboardActionButtons from "@/components/events/DashboardActionButtons";
 import { eventsService } from "@/lib/services/events.service";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
+import { useAuth } from "@/context/AuthContext";
 
 interface EventDetailsProps {
   params: Promise<{
@@ -24,6 +25,7 @@ interface EventDetailsProps {
 export default function EventsDashboard({ params }: EventDetailsProps) {
   const resolvedParams = use(params);
   const _id = resolvedParams._id;
+  const { user } = useAuth();
 
   const [event, setEvent] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
@@ -33,6 +35,7 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
 
   useEffect(() => {
     async function loadDashboardData() {
+      if (!user) return;
       setLoading(true);
       try {
         const [eventRes, statsRes, attendeesRes] = await Promise.all([
@@ -44,9 +47,19 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
         if (eventRes.error) {
           setError(eventRes.error.message);
         } else {
-          setEvent(eventRes.data);
-          setStats(statsRes.data);
-          setAttendees(attendeesRes.data.slice(0, 8));
+          const eventData = eventRes.data;
+          
+          // Verify ownership
+          const eventOwnerId = typeof eventData?.userId === 'object' ? (eventData.userId?.id || eventData.userId?._id) : eventData?.userId;
+          const isOwner = eventOwnerId === user?.id || eventOwnerId === user?._id;
+
+          if (!isOwner) {
+            setError("Event not found");
+          } else {
+            setEvent(eventData);
+            setStats(statsRes.data);
+            setAttendees(attendeesRes.data.slice(0, 8));
+          }
         }
       } catch (err: any) {
         console.error("Dashboard data load error:", err);
@@ -57,7 +70,7 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
     }
 
     loadDashboardData();
-  }, [_id]);
+  }, [_id, user]);
 
   if (loading) {
     return (
