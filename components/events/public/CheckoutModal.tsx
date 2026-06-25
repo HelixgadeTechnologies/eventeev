@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ApiTicket, ticketsService } from '@/lib/services/tickets.service';
-import PaystackCheckout from './PaystackCheckout';
+import PaystackCheckout from '@/components/tickets/PaystackCheckout';
 import { Loader2 } from 'lucide-react';
 
 interface CheckoutModalProps {

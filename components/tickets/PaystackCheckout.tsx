@@ -42,7 +42,7 @@ const PaystackCheckout: React.FC<PaystackCheckoutProps> = ({
   const handlePayment = () => {
     setLoading(true);
     initializePayment({
-      onSuccess: (reference) => {
+      onSuccess: (reference: any) => {
         setLoading(false);
         onSuccess(reference);
       },
