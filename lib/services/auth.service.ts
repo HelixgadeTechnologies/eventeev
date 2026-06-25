@@ -1,4 +1,5 @@
 import axiosInstance from "../axios"
+import axios from "axios"
 
 export interface SignUpData {
   firstName: string
@@ -18,13 +19,9 @@ export class AuthService {
    */
   async signUp(data: SignUpData) {
     try {
-      const response = await axiosInstance.post('/api/auth/register', data);
+      const response = await axios.post('/api/auth/register', data);
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
-      
-      if (token) {
-        localStorage.setItem('x-auth-token', token);
-      }
       
       return { user: mappedUser, error: null }
     } catch (error: any) {
@@ -37,14 +34,10 @@ export class AuthService {
    */
   async signIn(data: SignInData) {
     try {
-      const response = await axiosInstance.post('/api/auth/login', data);
+      const response = await axios.post('/api/auth/login', data);
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
       
-      if (token) {
-        localStorage.setItem('x-auth-token', token);
-      }
-
       return { user: mappedUser, session: { access_token: token, user: mappedUser }, error: null }
     } catch (error: any) {
       return { user: null, session: null, error: error.response?.data?.message || 'Login failed' }
@@ -55,7 +48,11 @@ export class AuthService {
    * Sign out the current user
    */
   async signOut() {
-    localStorage.removeItem('x-auth-token');
+    try {
+      await axios.post('/api/auth/logout');
+    } catch (e) {
+      // ignore
+    }
     return { error: null }
   }
 
@@ -64,7 +61,7 @@ export class AuthService {
    */
   async resetPassword(email: string) {
     try {
-      await axiosInstance.post('/api/auth/forgotpassword', { email });
+      await axiosInstance.post('/auth/forgotpassword', { email });
       return { error: null }
     } catch (error: any) {
       return { error: error.response?.data?.message || 'Failed to send reset email' }
@@ -76,7 +73,7 @@ export class AuthService {
    */
   async updatePassword(token: string, password: string) {
     try {
-      await axiosInstance.post(`/api/auth/resetpassword/${token}`, { password });
+      await axiosInstance.post(`/auth/resetpassword/${token}`, { password });
       return { error: null }
     } catch (error: any) {
       return { error: error.response?.data?.message || 'Failed to update password' }
@@ -88,7 +85,7 @@ export class AuthService {
    */
   async getCurrentUser() {
     try {
-      const response = await axiosInstance.get('/api/user/me');
+      const response = await axiosInstance.get('/user/me');
       const user = response.data ? { ...response.data, id: response.data.id || response.data._id } : null;
       return { user, error: null }
     } catch (error: any) {
@@ -100,13 +97,11 @@ export class AuthService {
    * Get current session
    */
   async getSession() {
-    const token = localStorage.getItem('x-auth-token');
-    if (!token) return { session: null, error: 'No session' };
-    
+    // Session is handled by HttpOnly cookie now. We just check if we can get the user.
     try {
       const { user, error } = await this.getCurrentUser();
-      if (error) return { session: null, error };
-      return { session: { access_token: token, user }, error: null };
+      if (error || !user) return { session: null, error: error || 'No session' };
+      return { session: { access_token: 'http-only-cookie', user }, error: null };
     } catch (error: any) {
       return { session: null, error: 'Failed to get session' };
     }
@@ -117,7 +112,7 @@ export class AuthService {
    */
   async updateProfile(userId: string, updates: any) {
     try {
-      const response = await axiosInstance.put(`/api/user/updateuser/${userId}`, updates);
+      const response = await axiosInstance.put(`/user/updateuser/${userId}`, updates);
       return { data: response.data, error: null }
     } catch (error: any) {
       return { data: null, error: error.response?.data?.message || 'Update failed' }
@@ -129,7 +124,7 @@ export class AuthService {
    */
   async getProfile(userId: string) {
     try {
-      const response = await axiosInstance.get(`/api/user/${userId}`);
+      const response = await axiosInstance.get(`/user/${userId}`);
       return { data: response.data, error: null }
     } catch (error: any) {
       return { data: null, error: error.response?.data?.message || 'Failed to get profile' }
@@ -141,13 +136,9 @@ export class AuthService {
    */
   async verifyOtp(email: string, otp: string) {
     try {
-      const response = await axiosInstance.post('/api/auth/verify-otp', { email, otp });
+      const response = await axios.post('/api/auth/verify-otp', { email, otp });
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
-      
-      if (token) {
-        localStorage.setItem('x-auth-token', token);
-      }
       
       return { user: mappedUser, token, error: null }
     } catch (error: any) {
@@ -160,7 +151,7 @@ export class AuthService {
    */
   async resendOtp(email: string) {
     try {
-      const response = await axiosInstance.post('/api/auth/resend-otp', { email });
+      const response = await axiosInstance.post('/auth/resend-otp', { email });
       return { data: response.data, error: null }
     } catch (error: any) {
       return { data: null, error: error.response?.data?.message || 'Failed to resend OTP' }
@@ -172,13 +163,9 @@ export class AuthService {
    */
   async googleLogin(code: string) {
     try {
-      const response = await axiosInstance.post('/api/auth/google', { code });
+      const response = await axios.post('/api/auth/google', { code });
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
-      
-      if (token) {
-        localStorage.setItem('x-auth-token', token);
-      }
       
       return { user: mappedUser, token, error: null }
     } catch (error: any) {

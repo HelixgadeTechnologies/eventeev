@@ -36,12 +36,37 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Eventeev - Elevate Your Event Experience",
-  description: "Eventeev is a platform for creating and managing events.",
+  description: "Eventeev is the premier platform for creating, managing, and discovering events. Join us to find tickets to your next favorite event or manage your own.",
+  keywords: ["events", "ticketing", "event management", "event platform", "buy tickets"],
+  authors: [{ name: "Eventeev" }],
+  openGraph: {
+    title: "Eventeev - Elevate Your Event Experience",
+    description: "Eventeev is the premier platform for creating, managing, and discovering events.",
+    url: "https://eventeev.com",
+    siteName: "Eventeev",
+    images: [
+      {
+        url: "/favicon.png",
+        width: 800,
+        height: 600,
+        alt: "Eventeev Platform",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Eventeev - Elevate Your Event Experience",
+    description: "Eventeev is the premier platform for creating, managing, and discovering events.",
+    images: ["/favicon.png"],
+  },
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
   },
 };
+
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export default async function RootLayout({
   children,
@@ -62,6 +87,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
@@ -79,6 +105,7 @@ export default async function RootLayout({
             </AuthProvider>
           </ReduxProvider>
         </NextIntlClientProvider>
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );
