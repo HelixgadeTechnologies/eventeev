@@ -136,6 +136,26 @@ export class TicketsService {
       return { data: null, error: error.response?.data || { message: 'Failed to update ticket status' } };
     }
   }
+
+  /**
+   * Purchase/Register a ticket
+   */
+  async purchaseTicket(payload: {
+    eventId: string;
+    ticketId: string;
+    quantity: number;
+    buyerName: string;
+    buyerEmail: string;
+    paymentReference?: string;
+  }) {
+    try {
+      const response = await axiosInstance.post('/api/ticket/purchase', payload);
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to purchase ticket:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to purchase ticket' } };
+    }
+  }
 }
 
 export const ticketsService = new TicketsService();
