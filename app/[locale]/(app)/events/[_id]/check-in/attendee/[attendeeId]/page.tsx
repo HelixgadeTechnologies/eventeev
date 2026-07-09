@@ -6,7 +6,7 @@ import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import { eventsService } from "@/lib/services/events.service";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
-import { Loader2, Printer, User, Mail, Calendar, CheckCircle, Clock } from "lucide-react";
+import { Loader2, Printer, User, Mail, Calendar, CheckCircle, Clock, ScanLine } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface AttendeeBadgePageProps {
