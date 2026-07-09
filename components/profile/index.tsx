@@ -16,7 +16,6 @@ import {
 import { profileService } from "@/lib/services/profile.service";
 import { uploadService } from "@/lib/services/upload.service";
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
-import { Country, State } from 'country-state-city';
 import { 
   User, 
   Lock, 
@@ -63,8 +62,6 @@ const INDUSTRIES = [
   "Legal",
   "Other"
 ];
-
-const allCountries = Country.getAllCountries();
 
 const TIMEZONES = Intl.supportedValuesOf('timeZone');
 
@@ -154,6 +151,19 @@ const ShowProfile = () => {
     postalCode: "100001",
     taxId: "TX-9988223",
   });
+
+  const [countryData, setCountryData] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("https://countriesnow.space/api/v0.1/countries/states")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error && data.data) {
+          setCountryData(data.data);
+        }
+      })
+      .catch(err => console.error("Error fetching countries:", err));
+  }, []);
 
   // Load profile state
   useEffect(() => {
@@ -634,15 +644,15 @@ const ShowProfile = () => {
                         <SelectValue placeholder="Select Country" />
                       </SelectTrigger>
                       <SelectContent className="bg-white max-h-60 overflow-y-auto">
-                        {allCountries.map(c => <SelectItem key={c.isoCode} value={c.name}>{c.name}</SelectItem>)}
+                        {countryData.map((c: any) => <SelectItem key={c.iso3 || c.name} value={c.name}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-[#344054]">City / State</Label>
                     {(() => {
-                      const selectedCountryIso = allCountries.find(c => c.name === formData.country)?.isoCode;
-                      const availableStates = selectedCountryIso ? State.getStatesOfCountry(selectedCountryIso) : [];
+                      const selectedCountryObj = countryData.find((c: any) => c.name === formData.country);
+                      const availableStates = selectedCountryObj?.states || [];
                       
                       return availableStates.length > 0 ? (
                         <Select 
@@ -653,7 +663,7 @@ const ShowProfile = () => {
                             <SelectValue placeholder="Select State/City" />
                           </SelectTrigger>
                           <SelectContent className="bg-white max-h-60 overflow-y-auto">
-                            {availableStates.map(s => <SelectItem key={s.isoCode} value={s.name}>{s.name}</SelectItem>)}
+                            {availableStates.map((s: any) => <SelectItem key={s.state_code || s.name} value={s.name}>{s.name}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       ) : (
