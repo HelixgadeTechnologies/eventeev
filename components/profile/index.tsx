@@ -16,6 +16,7 @@ import {
 import { profileService } from "@/lib/services/profile.service";
 import { uploadService } from "@/lib/services/upload.service";
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
+import { Country, State } from 'country-state-city';
 import { 
   User, 
   Lock, 
@@ -63,21 +64,7 @@ const INDUSTRIES = [
   "Other"
 ];
 
-const COUNTRIES = [
-  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
-  "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
-  "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
-  "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
-  "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
-  "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan",
-  "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
-  "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
-  "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
-  "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
-  "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
-  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
-  "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-];
+const allCountries = Country.getAllCountries();
 
 const TIMEZONES = Intl.supportedValuesOf('timeZone');
 
@@ -638,23 +625,46 @@ const ShowProfile = () => {
                     <Label className="text-xs font-semibold text-[#344054]">Country</Label>
                     <Select 
                       value={formData.country} 
-                      onValueChange={(val) => handleInputChange("country", val)}
+                      onValueChange={(val) => {
+                        handleInputChange("country", val);
+                        handleInputChange("cityState", "");
+                      }}
                     >
                       <SelectTrigger className="h-10 w-full border-[#D0D5DD] rounded-lg">
-                        <SelectValue />
+                        <SelectValue placeholder="Select Country" />
                       </SelectTrigger>
                       <SelectContent className="bg-white max-h-60 overflow-y-auto">
-                        {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        {allCountries.map(c => <SelectItem key={c.isoCode} value={c.name}>{c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-[#344054]">City / State</Label>
-                    <Input 
-                      value={formData.cityState}
-                      onChange={(e) => handleInputChange("cityState", e.target.value)}
-                      className="h-10 border-[#D0D5DD] rounded-lg focus-visible:ring-[#eb5017]/25 focus-visible:border-[#eb5017]"
-                    />
+                    {(() => {
+                      const selectedCountryIso = allCountries.find(c => c.name === formData.country)?.isoCode;
+                      const availableStates = selectedCountryIso ? State.getStatesOfCountry(selectedCountryIso) : [];
+                      
+                      return availableStates.length > 0 ? (
+                        <Select 
+                          value={formData.cityState}
+                          onValueChange={(val) => handleInputChange("cityState", val)}
+                        >
+                          <SelectTrigger className="h-10 w-full border-[#D0D5DD] rounded-lg">
+                            <SelectValue placeholder="Select State/City" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white max-h-60 overflow-y-auto">
+                            {availableStates.map(s => <SelectItem key={s.isoCode} value={s.name}>{s.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input 
+                          value={formData.cityState}
+                          onChange={(e) => handleInputChange("cityState", e.target.value)}
+                          className="h-10 border-[#D0D5DD] rounded-lg focus-visible:ring-[#eb5017]/25 focus-visible:border-[#eb5017]"
+                          placeholder="Type city/state"
+                        />
+                      );
+                    })()}
                   </div>
                 </div>
 
