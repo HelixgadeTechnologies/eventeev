@@ -5,9 +5,6 @@ const API_BASE_URL = '/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Add a response interceptor to handle shared errors (like 401 and 429 rate limits)
