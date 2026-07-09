@@ -11,11 +11,7 @@ export class UploadService {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await axiosInstance.post('/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axiosInstance.post('/api/upload', formData);
 
       return { data: response.data, error: null };
     } catch (error: any) {

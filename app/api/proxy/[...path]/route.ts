@@ -41,9 +41,9 @@ async function handleProxyRequest(req: NextRequest, params: { path: string[] }) 
 
   let body = null;
   if (req.method !== 'GET' && req.method !== 'HEAD') {
-    const text = await req.text();
-    if (text) {
-      body = text;
+    const arrayBuffer = await req.arrayBuffer();
+    if (arrayBuffer.byteLength > 0) {
+      body = arrayBuffer;
     }
   }
 
