@@ -4,7 +4,30 @@ import axios from 'axios';
 const API_BASE_URL = '/api';
 
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: '',
+});
+
+// Add a request interceptor to automatically route requests through the Next.js proxy
+axiosInstance.interceptors.request.use((config) => {
+  let url = config.url || '';
+  
+  // Only intercept if not already going through the proxy
+  if (!url.startsWith('/api/proxy')) {
+    // Strip leading slash
+    if (url.startsWith('/')) {
+      url = url.substring(1);
+    }
+    
+    // Ensure it starts with 'api/' for the backend
+    if (!url.startsWith('api/')) {
+      url = 'api/' + url;
+    }
+    
+    // Reroute through the Next.js proxy
+    config.url = '/api/proxy/' + url;
+  }
+  
+  return config;
 });
 
 // Add a response interceptor to handle shared errors (like 401 and 429 rate limits)
