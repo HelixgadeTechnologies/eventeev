@@ -7,6 +7,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 import { eventsService } from "@/lib/services/events.service";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 import { Loader2, Printer, User, Mail, Calendar, CheckCircle, Clock, ScanLine } from "lucide-react";
+import QRCode from "react-qr-code";
 import { useAuth } from "@/context/AuthContext";
 
 interface AttendeeBadgePageProps {
@@ -164,10 +165,15 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
             
             <div className="flex flex-col items-center justify-center pt-4 pb-2 border-t border-dashed border-gray-200 print:border-gray-400">
               <div className="w-32 h-32 bg-gray-50 border-2 border-gray-100 rounded-xl flex items-center justify-center p-2 mb-4 print:border-gray-300">
-                {/* QR Placeholder since we don't have a specific QR generator library */}
-                <div className="text-center">
-                  <ScanLine size={48} className="mx-auto text-gray-300 print:text-gray-400" />
-                  <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mt-2">Scan to Verify</p>
+                <div className="text-center flex flex-col items-center">
+                  <QRCode 
+                    value={attendee.id} 
+                    size={80}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    viewBox={`0 0 80 80`}
+                    className="mx-auto text-black"
+                  />
+                  <p className="text-[8px] font-black uppercase text-gray-400 tracking-widest mt-2 print:text-gray-500">Scan to Verify</p>
                 </div>
               </div>
               
