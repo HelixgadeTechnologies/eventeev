@@ -485,8 +485,8 @@ const AttendeesList = () => {
               disabled={isActionLoading}
               className="px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#AD3307] transition-all shadow-lg shadow-[#EB5017]/20 flex items-center justify-center gap-2 disabled:opacity-80"
             >
-              {isActionLoading ? <Loader2 size={12} className="animate-spin" /> : null}
-              {isActionLoading ? "Processing..." : "Yes, Check In"}
+              {isActionLoading && <Loader2 size={12} className="animate-spin" />}
+              <span>{isActionLoading ? "Processing..." : "Yes, Check In"}</span>
             </button>
           </div>
         </div>
@@ -565,7 +565,7 @@ const AttendeesList = () => {
             className="w-full mt-2 bg-[#EB5017] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isAdding ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-            {isAdding ? "Adding..." : "Add to Guestlist"}
+            <span>{isAdding ? "Adding..." : "Add to Guestlist"}</span>
           </button>
         </form>
       </Modal>
