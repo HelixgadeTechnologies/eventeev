@@ -19,7 +19,7 @@ import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 import { FilterConfig } from "../ui/data-table";
 import Modal from "../ui/Modal";
 import QRScannerModal from "./QRScannerModal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
 
@@ -37,6 +37,7 @@ const filters: FilterConfig[] = [
 
 const AttendeesList = () => {
   const params = useParams();
+  const router = useRouter();
   const eventId = params?._id as string;
   
   const [attendees, setAttendees] = useState<AttendeesDataType[]>([]);
@@ -374,7 +375,10 @@ const AttendeesList = () => {
               <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
                 View Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
+              <DropdownMenuItem 
+                className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3"
+                onClick={() => router.push(`/events/${eventId}/check-in/attendee/${row.original.id}`)}
+              >
                 Print Badge
               </DropdownMenuItem>
               <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
