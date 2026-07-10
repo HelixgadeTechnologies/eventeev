@@ -20,6 +20,22 @@ export default function HelpPage() {
     {
       question: "Is there a mobile app?",
       answer: "We offer a fully responsive web experience, and a dedicated mobile app for on-the-go event management."
+    },
+    {
+      question: "Is Eventeev free to use?",
+      answer: "Eventeev offers a free tier for basic event planning, as well as premium plans with advanced features tailored for large-scale conferences and enterprise needs."
+    },
+    {
+      question: "Can I sell tickets for my event?",
+      answer: "Absolutely! Our platform supports seamless ticketing and secure payment integrations to help you manage sales effortlessly."
+    },
+    {
+      question: "Does Eventeev provide analytics?",
+      answer: "Yes, organizers get access to a comprehensive dashboard with real-time analytics, including attendance tracking, ticket sales, and engagement metrics."
+    },
+    {
+      question: "How do I get help if I run into issues?",
+      answer: "You can reach out to our team at any time using the contact information on this page, including our WhatsApp number or email address."
     }
   ];
 
