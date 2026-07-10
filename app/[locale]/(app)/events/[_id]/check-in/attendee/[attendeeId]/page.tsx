@@ -144,12 +144,18 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           {/* Badge Header - Image and Title */}
           <div className="bg-white rounded-t-3xl p-2 pb-6 print:bg-white print:border-b-0">
             <div className="h-48 rounded-2xl w-full overflow-hidden relative print:hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-blue-500 to-yellow-400 opacity-90" />
-              <div className="absolute inset-0 flex justify-center items-end pb-4 space-x-2">
-                 <div className="w-12 h-32 bg-gradient-to-t from-red-500 to-pink-500 rounded-full shadow-lg"></div>
-                 <div className="w-16 h-24 bg-gradient-to-t from-blue-400 to-blue-200 rounded-full shadow-lg"></div>
-                 <div className="w-12 h-40 bg-gradient-to-t from-yellow-400 to-orange-400 rounded-full shadow-lg"></div>
-              </div>
+              {event.imageUrl ? (
+                <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-blue-500 to-yellow-400 opacity-90" />
+                  <div className="absolute inset-0 flex justify-center items-end pb-4 space-x-2">
+                     <div className="w-12 h-32 bg-gradient-to-t from-red-500 to-pink-500 rounded-full shadow-lg"></div>
+                     <div className="w-16 h-24 bg-gradient-to-t from-blue-400 to-blue-200 rounded-full shadow-lg"></div>
+                     <div className="w-12 h-40 bg-gradient-to-t from-yellow-400 to-orange-400 rounded-full shadow-lg"></div>
+                  </div>
+                </>
+              )}
             </div>
             <h2 className="text-2xl font-black text-center mt-6 text-[#1B1818] tracking-tight print:text-3xl">
               {event.title}
@@ -179,16 +185,22 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
                   {event.startDate ? new Date(event.startDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBA'}
                 </p>
               </div>
-              <div>
+              <div className="col-span-2">
                 <p className="text-gray-400 text-sm font-medium">Location</p>
-                <p className="font-bold text-[#1B1818] truncate max-w-[120px]">
+                <p className="font-bold text-[#1B1818]">
                   {event.location || "Online"}
                 </p>
               </div>
-              <div className="text-right">
+              <div>
                 <p className="text-gray-400 text-sm font-medium">Type</p>
                 <p className="font-bold text-[#1B1818]">
                   {attendee.status === "VIP" ? "VIP GUEST" : "GENERAL"}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-gray-400 text-sm font-medium">Status</p>
+                <p className={`font-bold ${attendee.isCheckedIn ? 'text-green-600' : 'text-orange-500'}`}>
+                  {attendee.isCheckedIn ? "Checked In" : "Pending"}
                 </p>
               </div>
               <div className="col-span-2">
@@ -197,16 +209,10 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
                   {attendee.email}
                 </p>
               </div>
-              <div>
+              <div className="col-span-2 text-center mt-2">
                 <p className="text-gray-400 text-sm font-medium">Registered</p>
                 <p className="font-bold text-[#1B1818]">
                   {(attendee.registrationDate || attendee.createdAt) ? new Date(attendee.registrationDate || attendee.createdAt!).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm font-medium">Status</p>
-                <p className={`font-bold ${attendee.isCheckedIn ? 'text-green-600' : 'text-orange-500'}`}>
-                  {attendee.isCheckedIn ? "Checked In" : "Pending"}
                 </p>
               </div>
             </div>
@@ -226,15 +232,9 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
             </p>
             <div className="w-full flex flex-col items-center justify-center">
               <img 
-                src={`https://barcode.tec-it.com/barcode.ashx?data=${attendee.id}&code=Code128&translate-esc=on`} 
-                alt="Barcode" 
-                className="h-20 w-full object-contain" 
-              />
-              {/* Fallback to QR for print, since barcode image might not load in time for printing */}
-              <img 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${attendee.id}`}
                 alt={`QR Code for ${attendee.name}`}
-                className="hidden print:block w-32 h-32 mx-auto mt-4"
+                className="w-32 h-32 mx-auto"
               />
             </div>
           </div>
