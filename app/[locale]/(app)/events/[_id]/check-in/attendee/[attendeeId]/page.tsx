@@ -139,8 +139,8 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
       </div>
 
       {/* Printable Badge Area */}
-      <div className="flex justify-center mt-10 print:mt-0 print:p-0 bg-[#004acc] p-8 rounded-3xl print:bg-white">
-        <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl">
+      <div className="flex justify-center mt-10 print:mt-0 print:p-0">
+        <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
           {/* Badge Header - Image and Title */}
           <div className="bg-white rounded-t-3xl p-2 pb-6 print:bg-white print:border-b-0">
             <div className="h-48 rounded-2xl w-full overflow-hidden relative print:hidden">
@@ -164,10 +164,8 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           </div>
           
           {/* Separator 1 */}
-          <div className="relative h-8 bg-white flex items-center print:hidden">
-            <div className="absolute -left-4 w-8 h-8 bg-[#004acc] rounded-full" />
-            <div className="absolute -right-4 w-8 h-8 bg-[#004acc] rounded-full" />
-            <div className="w-full border-t-2 border-dashed border-blue-200 mx-6" />
+          <div className="h-8 bg-white flex items-center print:hidden">
+            <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
           </div>
           
           {/* Middle Body */}
@@ -219,10 +217,8 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           </div>
           
           {/* Separator 2 */}
-          <div className="relative h-8 bg-white flex items-center print:hidden">
-            <div className="absolute -left-4 w-8 h-8 bg-[#004acc] rounded-full" />
-            <div className="absolute -right-4 w-8 h-8 bg-[#004acc] rounded-full" />
-            <div className="w-full border-t-2 border-dashed border-blue-200 mx-6" />
+          <div className="h-8 bg-white flex items-center print:hidden">
+            <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
           </div>
 
           {/* Bottom Barcode Area */}
