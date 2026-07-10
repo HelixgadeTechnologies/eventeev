@@ -65,6 +65,35 @@ export default function HelpPage() {
                 ))}
               </ul>
             </div>
+            
+            {/* Contact Information Section */}
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-10 mb-6">Contact Us</h2>
+            <div className="bg-white dark:bg-neutral-800 p-8 rounded-2xl shadow-sm border border-neutral-100 dark:border-neutral-700">
+              <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-6">
+                Still have questions? Feel free to reach out to our team directly. We are always happy to help!
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-center text-neutral-700 dark:text-neutral-200">
+                  <svg className="w-5 h-5 text-indigo-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                  </svg>
+                  <span><strong>WhatsApp:</strong> +2347032951044</span>
+                </li>
+                <li className="flex items-center text-neutral-700 dark:text-neutral-200">
+                  <svg className="w-5 h-5 text-indigo-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  <span><strong>Email:</strong> weareeventeev@gmail.com</span>
+                </li>
+                <li className="flex items-center text-neutral-700 dark:text-neutral-200">
+                  <svg className="w-5 h-5 text-indigo-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path>
+                    <circle cx="4" cy="4" r="2"></circle>
+                  </svg>
+                  <span><strong>Social Media:</strong> @weareeventeev</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
