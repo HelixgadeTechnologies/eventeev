@@ -94,6 +94,34 @@ export default function HelpPage() {
                 </li>
               </ul>
             </div>
+            
+            {/* Download the App Section */}
+            <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-10 mb-6">Get the App</h2>
+            <div className="bg-white dark:bg-neutral-800 p-8 rounded-2xl shadow-sm border border-neutral-100 dark:border-neutral-700">
+              <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed mb-6">
+                Take Eventeev wherever you go. Manage your events and attendees right from your phone.
+              </p>
+              <div className="flex flex-col xl:flex-row gap-3">
+                <a href="#" className="flex-1 flex items-center justify-center bg-black dark:bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white rounded-xl px-4 py-3 transition-colors">
+                  <svg className="w-7 h-7 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.56.09 2.76.65 3.5 1.76-3.05 1.76-2.52 5.56.46 6.78-.75 1.95-1.74 3.65-2.54 4.43zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.36-1.87 4.39-3.74 4.25z"/>
+                  </svg>
+                  <div className="text-left flex-1">
+                    <div className="text-[10px] leading-tight text-neutral-300">Download on the</div>
+                    <div className="text-sm font-semibold">App Store</div>
+                  </div>
+                </a>
+                <a href="#" className="flex-1 flex items-center justify-center bg-black dark:bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white rounded-xl px-4 py-3 transition-colors">
+                  <svg className="w-7 h-7 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.3 2.5C4 2.8 3.9 3.2 3.9 3.8v16.4c0 .6.1 1 .4 1.3l.1.1 9.2-9.2v-.2L4.4 2.4l-.1.1zm9.9 9.5l3.1 3.1-12.8 7.3c-.6.3-1.2 0-1.4-.4l11.1-10zm.1-.2L4.1 2.2c.2-.4.8-.7 1.4-.4l12.8 7.3-4 2.7zm4.3 2.5l-4-2.7v.4l4 2.7c.6.4.6 1 0 1.4l-4 2.7v-.4l4-2.7c.6-.4.6-1 0-1.4z"/>
+                  </svg>
+                  <div className="text-left flex-1">
+                    <div className="text-[10px] leading-tight text-neutral-300">GET IT ON</div>
+                    <div className="text-sm font-semibold">Google Play</div>
+                  </div>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

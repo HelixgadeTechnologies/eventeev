@@ -87,9 +87,9 @@ class ChatService {
     return response.data;
   }
 
-  async getMessages(roomId: string) {
-    const response = await axiosInstance.get(`/api/chat/messages/${roomId}`);
-    return response.data;
+  async getMessages(roomId: string, page = 1, limit = 50) {
+    const response = await axiosInstance.get(`/api/chat/messages/${roomId}?page=${page}&limit=${limit}`);
+    return response.data?.pagination ? { messages: response.data.data, pagination: response.data.pagination } : response.data;
   }
 
   async createRoom(data: { event: string; name: string; type: string; leadParticipant?: string }) {

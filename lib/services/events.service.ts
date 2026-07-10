@@ -38,12 +38,13 @@ export class EventsService {
   /**
    * Get all published events
    */
-  async getPublishedEvents() {
+  async getPublishedEvents(page = 1, limit = 20) {
     try {
-      const response = await axiosInstance.get('/api/event/published')
-      const rawData = Array.isArray(response.data) ? response.data : [];
+      const response = await axiosInstance.get(`/api/event/published?page=${page}&limit=${limit}`)
+      const rawResponseData = response.data?.data || response.data || [];
+      const rawData = Array.isArray(rawResponseData) ? rawResponseData : [];
       const data = rawData.map((event: any) => this.mapEvent(event))
-      return { data, error: null }
+      return { data, pagination: response.data?.pagination, error: null }
     } catch (error: any) {
       const respData = error.response?.data;
       const respMsg = (typeof respData === 'string' ? respData : respData?.message) || '';

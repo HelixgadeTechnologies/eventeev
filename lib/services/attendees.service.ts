@@ -15,14 +15,15 @@ export class AttendeesService {
   /**
    * List all attendees for a specific event
    */
-  async getAttendees(eventId: string) {
+  async getAttendees(eventId: string, page = 1, limit = 50) {
     try {
-      const response = await axiosInstance.get(`/api/attendee/event/${eventId}`);
-      const mappedData = (response.data as any[]).map(a => ({
+      const response = await axiosInstance.get(`/api/attendee/event/${eventId}?page=${page}&limit=${limit}`);
+      const rawData = response.data?.data || response.data || [];
+      const mappedData = (Array.isArray(rawData) ? rawData : []).map(a => ({
         ...a,
         id: a.id || a._id
       }));
-      return { data: mappedData as ApiAttendee[], error: null };
+      return { data: mappedData as ApiAttendee[], pagination: response.data?.pagination, error: null };
     } catch (error: any) {
       if (error.response?.status !== 403) {
         console.error('Failed to fetch attendees:', error);
