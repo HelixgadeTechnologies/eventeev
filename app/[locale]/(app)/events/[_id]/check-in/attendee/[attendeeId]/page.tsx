@@ -141,30 +141,18 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
       {/* Printable Badge Area */}
       <div className="flex justify-center mt-10 print:mt-0 print:p-0">
         <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
-          {/* Badge Header - Image and Title */}
-          <div className="bg-white rounded-t-3xl p-2 pb-6 print:bg-white print:border-b-0">
-            <div className="h-48 rounded-2xl w-full overflow-hidden relative print:hidden">
-              {event.imageUrl ? (
-                <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
-              ) : (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-blue-500 to-yellow-400 opacity-90" />
-                  <div className="absolute inset-0 flex justify-center items-end pb-4 space-x-2">
-                     <div className="w-12 h-32 bg-gradient-to-t from-red-500 to-pink-500 rounded-full shadow-lg"></div>
-                     <div className="w-16 h-24 bg-gradient-to-t from-blue-400 to-blue-200 rounded-full shadow-lg"></div>
-                     <div className="w-12 h-40 bg-gradient-to-t from-yellow-400 to-orange-400 rounded-full shadow-lg"></div>
-                  </div>
-                </>
-              )}
-            </div>
-            <h2 className="text-2xl font-black text-center mt-6 text-[#1B1818] tracking-tight print:text-3xl">
+          {/* Badge Header - Title */}
+          <div className="bg-white rounded-t-3xl p-6 pb-4 pt-10 print:bg-white print:border-b-0">
+            <h2 className="text-3xl font-black text-center text-[#1B1818] tracking-tight print:text-3xl">
               {event.title}
             </h2>
-            <h3 className="text-lg font-bold text-center text-gray-600 mt-1 print:text-xl">{attendee.name}</h3>
+            <h3 className="text-xl font-bold text-center text-gray-500 mt-2 print:text-xl">{attendee.name}</h3>
           </div>
           
           {/* Separator 1 */}
-          <div className="h-8 bg-white flex items-center print:hidden">
+          <div className="relative h-8 bg-white flex items-center print:hidden">
+            <div className="absolute -left-4 w-8 h-8 bg-background rounded-full border-r border-gray-100 shadow-[inset_-3px_0_5px_rgba(0,0,0,0.05)]" />
+            <div className="absolute -right-4 w-8 h-8 bg-background rounded-full border-l border-gray-100 shadow-[inset_3px_0_5px_rgba(0,0,0,0.05)]" />
             <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
           </div>
           
@@ -217,7 +205,9 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           </div>
           
           {/* Separator 2 */}
-          <div className="h-8 bg-white flex items-center print:hidden">
+          <div className="relative h-8 bg-white flex items-center print:hidden">
+            <div className="absolute -left-4 w-8 h-8 bg-background rounded-full border-r border-gray-100 shadow-[inset_-3px_0_5px_rgba(0,0,0,0.05)]" />
+            <div className="absolute -right-4 w-8 h-8 bg-background rounded-full border-l border-gray-100 shadow-[inset_3px_0_5px_rgba(0,0,0,0.05)]" />
             <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
           </div>
 
