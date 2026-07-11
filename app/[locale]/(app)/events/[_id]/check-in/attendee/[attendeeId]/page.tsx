@@ -149,7 +149,7 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
             <p className="text-[#EB5017] text-xs font-bold text-center uppercase tracking-widest mt-2">
               {event.startDate ? new Date(event.startDate).toLocaleDateString() : 'TBA'}
             </p>
-            <h3 className="text-xl font-medium text-center text-gray-500 mt-4 print:text-xl border-b border-dashed border-gray-300 pb-2 inline-block w-full">{attendee.name}</h3>
+            <h3 className="text-xl font-medium text-center text-gray-500 mt-4 print:text-xl">{attendee.name}</h3>
           </div>
           
           {/* Separator 1 */}
