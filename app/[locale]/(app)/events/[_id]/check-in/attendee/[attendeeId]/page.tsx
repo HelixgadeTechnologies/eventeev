@@ -140,7 +140,7 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
 
       {/* Printable Badge Area */}
       <div className="flex justify-center mt-10 print:mt-0 print:p-0">
-        <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-2xl rounded-3xl overflow-hidden border border-gray-100">
+        <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-[0_25px_65px_-10px_rgba(0,0,0,0.25)] rounded-3xl overflow-hidden border border-gray-200">
           {/* Badge Header - Title */}
           <div className="bg-white rounded-t-3xl p-6 pb-4 pt-10 print:bg-white print:border-b-0">
             <h2 className="text-3xl font-black text-center text-[#1B1818] tracking-tight print:text-3xl">
@@ -150,10 +150,10 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           </div>
           
           {/* Separator 1 */}
-          <div className="relative h-8 bg-white flex items-center print:hidden">
-            <div className="absolute -left-4 w-8 h-8 bg-background rounded-full border-r border-gray-100 shadow-[inset_-3px_0_5px_rgba(0,0,0,0.05)]" />
-            <div className="absolute -right-4 w-8 h-8 bg-background rounded-full border-l border-gray-100 shadow-[inset_3px_0_5px_rgba(0,0,0,0.05)]" />
-            <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
+          <div className="relative h-10 bg-white flex items-center print:hidden">
+            <div className="absolute -left-5 w-10 h-10 bg-background rounded-full border-r border-gray-200 shadow-[inset_-5px_0_10px_rgba(0,0,0,0.12)]" />
+            <div className="absolute -right-5 w-10 h-10 bg-background rounded-full border-l border-gray-200 shadow-[inset_5px_0_10px_rgba(0,0,0,0.12)]" />
+            <div className="w-full border-t-[3px] border-dashed border-gray-200 mx-8" />
           </div>
           
           {/* Middle Body */}
@@ -205,10 +205,10 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           </div>
           
           {/* Separator 2 */}
-          <div className="relative h-8 bg-white flex items-center print:hidden">
-            <div className="absolute -left-4 w-8 h-8 bg-background rounded-full border-r border-gray-100 shadow-[inset_-3px_0_5px_rgba(0,0,0,0.05)]" />
-            <div className="absolute -right-4 w-8 h-8 bg-background rounded-full border-l border-gray-100 shadow-[inset_3px_0_5px_rgba(0,0,0,0.05)]" />
-            <div className="w-full border-t-2 border-dashed border-gray-200 mx-6" />
+          <div className="relative h-10 bg-white flex items-center print:hidden">
+            <div className="absolute -left-5 w-10 h-10 bg-background rounded-full border-r border-gray-200 shadow-[inset_-5px_0_10px_rgba(0,0,0,0.12)]" />
+            <div className="absolute -right-5 w-10 h-10 bg-background rounded-full border-l border-gray-200 shadow-[inset_5px_0_10px_rgba(0,0,0,0.12)]" />
+            <div className="w-full border-t-[3px] border-dashed border-gray-200 mx-8" />
           </div>
 
           {/* Bottom Barcode Area */}
