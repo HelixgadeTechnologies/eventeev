@@ -372,7 +372,10 @@ const AttendeesList = () => {
             <DropdownMenuContent className="rounded-2xl border-gray-100 shadow-xl p-2 bg-white/95 backdrop-blur-xl">
               <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3 py-2">Management</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-gray-50" />
-              <DropdownMenuItem className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
+              <DropdownMenuItem 
+                className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3"
+                onClick={() => router.push(`/events/${eventId}/check-in/attendee/${row.original.id}/profile`)}
+              >
                 View Profile
               </DropdownMenuItem>
               <DropdownMenuItem 
