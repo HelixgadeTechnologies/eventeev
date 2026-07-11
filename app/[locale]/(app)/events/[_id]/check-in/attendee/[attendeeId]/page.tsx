@@ -140,13 +140,16 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
 
       {/* Printable Badge Area */}
       <div className="flex justify-center mt-10 print:mt-0 print:p-0">
-        <div className="w-full max-w-sm mx-auto bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-[0_25px_65px_-10px_rgba(0,0,0,0.25)] rounded-3xl overflow-hidden border border-gray-200">
+        <div className="w-full max-w-sm mx-auto font-mono bg-transparent print:shadow-none print:border-2 print:border-black print:rounded-xl shadow-[0_25px_65px_-10px_rgba(0,0,0,0.25)] rounded-3xl overflow-hidden border border-gray-200">
           {/* Badge Header - Title */}
           <div className="bg-white rounded-t-3xl p-6 pb-4 pt-10 print:bg-white print:border-b-0">
-            <h2 className="text-3xl font-black text-center text-[#1B1818] tracking-tight print:text-3xl">
+            <h2 className="text-2xl font-bold text-center text-[#1B1818] tracking-tight print:text-3xl">
               {event.title}
             </h2>
-            <h3 className="text-xl font-bold text-center text-gray-500 mt-2 print:text-xl">{attendee.name}</h3>
+            <p className="text-[#EB5017] text-xs font-bold text-center uppercase tracking-widest mt-2">
+              {event.startDate ? new Date(event.startDate).toLocaleDateString() : 'TBA'}
+            </p>
+            <h3 className="text-xl font-medium text-center text-gray-500 mt-4 print:text-xl border-b border-dashed border-gray-300 pb-2 inline-block w-full">{attendee.name}</h3>
           </div>
           
           {/* Separator 1 */}
@@ -158,45 +161,45 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
           
           {/* Middle Body */}
           <div className="p-8 py-2 bg-white print:bg-white print:border-y print:border-dashed print:border-black">
-            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+            <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-sm">
               <div>
-                <p className="text-gray-400 text-sm font-medium">Date</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Date</p>
                 <p className="font-bold text-[#1B1818]">
                   {event.startDate ? new Date(event.startDate).toLocaleDateString() : 'TBA'}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-gray-400 text-sm font-medium">Time</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Time</p>
                 <p className="font-bold text-[#1B1818]">
                   {event.startDate ? new Date(event.startDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBA'}
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-gray-400 text-sm font-medium">Location</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Location</p>
                 <p className="font-bold text-[#1B1818]">
                   {event.location || "Online"}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm font-medium">Type</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Type</p>
                 <p className="font-bold text-[#1B1818]">
                   {attendee.status === "VIP" ? "VIP GUEST" : "GENERAL"}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-gray-400 text-sm font-medium">Status</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Status</p>
                 <p className={`font-bold ${attendee.isCheckedIn ? 'text-green-600' : 'text-orange-500'}`}>
                   {attendee.isCheckedIn ? "Checked In" : "Pending"}
                 </p>
               </div>
               <div className="col-span-2">
-                <p className="text-gray-400 text-sm font-medium">Email</p>
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Email</p>
                 <p className="font-bold text-[#1B1818] truncate">
                   {attendee.email}
                 </p>
               </div>
-              <div className="col-span-2 text-center mt-2">
-                <p className="text-gray-400 text-sm font-medium">Registered</p>
+              <div className="col-span-2 text-center mt-2 border-t border-dashed border-gray-200 pt-4">
+                <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">Registered</p>
                 <p className="font-bold text-[#1B1818]">
                   {(attendee.registrationDate || attendee.createdAt) ? new Date(attendee.registrationDate || attendee.createdAt!).toLocaleDateString() : 'N/A'}
                 </p>
