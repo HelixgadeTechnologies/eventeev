@@ -134,7 +134,7 @@ export default function AttendeeProfilePage({ params }: AttendeeProfilePageProps
         <div className="col-span-1 space-y-6">
           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center text-center">
             <div className="w-32 h-32 mb-6 shadow-xl rounded-full overflow-hidden border-4 border-white ring-4 ring-gray-50">
-              <Avatar name={attendee.name} size={128} />
+              <Avatar name={attendee.name} />
             </div>
             <h2 className="text-2xl font-black text-[#1B1818] tracking-tight">{attendee.name}</h2>
             <p className="text-sm text-gray-500 font-medium mt-2">{attendee.email}</p>
