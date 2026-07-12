@@ -11,6 +11,7 @@ import ContinueWithGoogle from "@/components/ui/ContinueWithGoogle";
 import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
 import Button from "@/components/ui/Button";
+import ConnectEventForm from "@/components/events/public/ConnectEventForm";
 
 export default function SignUpComponent() {
   const t = useTranslations('Auth');
@@ -174,6 +175,14 @@ export default function SignUpComponent() {
         </p>
         <Divider />
         <ContinueWithGoogle />
+        <Divider text="OR" />
+        <div className="w-full bg-white rounded-lg space-y-4">
+          <div className="text-center">
+            <h2 className="text-lg font-bold">Have an Event Code?</h2>
+            <p className="text-xs text-gray-500">Connect directly using your event ID</p>
+          </div>
+          <ConnectEventForm />
+        </div>
       </section>
     </div>
   );

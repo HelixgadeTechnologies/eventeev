@@ -13,6 +13,7 @@ import Divider from "@/components/ui/Divider";
 import { useAuth } from "@/context/AuthContext";
 import Modal from "@/components/ui/Modal";
 import { AlertCircle } from "lucide-react";
+import ConnectEventForm from "@/components/events/public/ConnectEventForm";
 
 export default function LoginComponent() {
   const t = useTranslations('Auth');
@@ -169,6 +170,14 @@ export default function LoginComponent() {
         >
           {t('signup')}
         </Link>
+      </div>
+
+      <div className="w-full md:w-[380px] p-5 bg-white rounded-lg space-y-4">
+        <div className="text-center">
+          <h2 className="text-lg font-bold">Have an Event Code?</h2>
+          <p className="text-xs text-gray-500">Connect directly using your event ID</p>
+        </div>
+        <ConnectEventForm />
       </div>
     </section>
   );

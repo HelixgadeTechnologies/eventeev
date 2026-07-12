@@ -150,6 +150,12 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
                   <span className="text-[10px] font-bold text-gray-500">{event.slug}</span>
                 </div>
               )}
+              {event.connectCode && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Event ID:</span>
+                  <span className="text-[10px] font-bold text-gray-500 tracking-widest">{event.connectCode}</span>
+                </div>
+              )}
               {event.publicUrl && (
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Public Link:</span>
