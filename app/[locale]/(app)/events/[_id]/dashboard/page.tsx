@@ -144,6 +144,12 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
                   <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
                   Back to events
               </Link>
+              {event.slug && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Slug:</span>
+                  <span className="text-[10px] font-bold text-gray-500">{event.slug}</span>
+                </div>
+              )}
               {event.publicUrl && (
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-widest">Public Link:</span>

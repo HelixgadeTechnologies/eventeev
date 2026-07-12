@@ -11,6 +11,7 @@ type EventCardProps = {
   date: string;
   imageURL?: string;
   id: string;
+  slug?: string;
 };
 
 export default function EventPreviewCard({
@@ -19,6 +20,7 @@ export default function EventPreviewCard({
   date,
   imageURL,
   id,
+  slug,
 }: EventCardProps) {
   return (
     <Link href={`/events/${id}/dashboard`}>
@@ -41,7 +43,7 @@ export default function EventPreviewCard({
         </div>
         <footer className="text-[10px] md:text-xs flex justify-between items-center">
           <p>You created this event</p>
-          <p>RSVP</p>
+          {slug ? <p className="text-gray-400 font-bold">/{slug}</p> : <p>RSVP</p>}
         </footer>
       </div>
     </Link>

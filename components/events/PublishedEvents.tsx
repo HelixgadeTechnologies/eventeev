@@ -83,6 +83,7 @@ export default function PublishedEvents() {
           time={event.startTime}
           date={event.startDate}
           id={event._id}
+          slug={event.slug}
         />
       ))}
     </section>
