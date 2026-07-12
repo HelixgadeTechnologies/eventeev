@@ -227,6 +227,19 @@ export class EventsService {
   }
 
   /**
+   * Connect to an event via its connect code and verify user email
+   */
+  async connectToEvent(connectCode: string, email: string) {
+    try {
+      const response = await axiosInstance.post('/api/event/connect', { connectCode, email });
+      return { data: response.data, error: null };
+    } catch (error: any) {
+      console.error('Failed to connect to event:', error);
+      return { data: null, error: error.response?.data || { message: 'Failed to connect to event' } };
+    }
+  }
+
+  /**
    * Delete an event
    */
   async deleteEvent(eventId: string) {
