@@ -22,14 +22,17 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [buyerName, setBuyerName] = useState('');
   const [buyerEmail, setBuyerEmail] = useState('');
+  const [customAmount, setCustomAmount] = useState<string>(ticket.type.toLowerCase() === 'donation' ? String(ticket.price || '') : '');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const totalAmount = ticket.price * quantity;
-  const isPaid = ticket.type.toLowerCase() === 'paid' && totalAmount > 0;
+  const isDonation = ticket.type.toLowerCase() === 'donation';
+  const effectivePrice = isDonation ? (Number(customAmount) || 0) : ticket.price;
+  const totalAmount = effectivePrice * quantity;
+  const isPaid = (ticket.type.toLowerCase() === 'paid' || isDonation) && totalAmount > 0;
 
   const handleFreeCheckout = async () => {
     setLoading(true);
@@ -122,6 +125,20 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     className="w-full h-12 border border-gray-200 bg-gray-50 rounded-2xl px-4 focus:outline-none focus:ring-2 focus:ring-[#EB5017]/20 focus:border-[#EB5017] transition-all"
                   />
                 </div>
+                {isDonation && (
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Donation Amount per Ticket (USD)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={customAmount}
+                      onChange={(e) => setCustomAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full h-12 border border-gray-200 bg-gray-50 rounded-2xl px-4 focus:outline-none focus:ring-2 focus:ring-[#EB5017]/20 focus:border-[#EB5017] transition-all"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-2">

@@ -152,7 +152,6 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
               name="price"
               type="number"
               step="0.01"
-              required
               placeholder="25.00"
               defaultValue={initialData?.price}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all pl-8"
