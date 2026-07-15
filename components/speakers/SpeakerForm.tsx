@@ -8,6 +8,7 @@ import { SpeakerDataType } from "@/lib/demo-data/speakers";
 
 import { uploadService } from "@/lib/services/upload.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 interface SpeakerFormProps {
   initialData?: SpeakerDataType;
@@ -24,6 +25,12 @@ const SpeakerForm = ({
 }: SpeakerFormProps) => {
   const [isUploading, setIsUploading] = React.useState(false);
   const [photoUrl, setPhotoUrl] = React.useState(initialData?.avatar || "");
+  const [alertModal, setAlertModal] = React.useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,7 +44,7 @@ const SpeakerForm = ({
       setPhotoUrl(data.url);
     } else {
       console.error("Upload error:", error);
-      alert("Failed to upload image. Please try again.");
+      setAlertModal({ isOpen: true, title: "Upload Failed", description: "Failed to upload image. Please try again.", variant: "error" });
     }
   };
 
@@ -229,6 +236,17 @@ const SpeakerForm = ({
           {submitLabel}
         </button>
       </div>
+
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </form>
   );
 };

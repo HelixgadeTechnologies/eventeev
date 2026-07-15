@@ -11,6 +11,7 @@ import Avatar from "@/components/ui/Avatar";
 import AddScheduleModal, { ScheduleItem } from "@/components/events/AddScheduleModal";
 import PreviewScheduleModal from "@/components/events/PreviewScheduleModal";
 import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import DeleteConfirmationModal from "@/components/ui/DeleteConfirmationModal";
 import { scheduleService } from "@/lib/services/schedule.service";
 import { eventsService } from "@/lib/services/events.service";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ export default function SchedulePage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | null>(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: "", title: "" });
 
   // Fetch schedules and event details from database
   const fetchData = async () => {
@@ -89,8 +91,13 @@ export default function SchedulePage() {
   };
 
   // Handle deleting schedule item
-  const handleDeleteSchedule = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this schedule item?")) return;
+  const confirmDelete = (item: ScheduleItem) => {
+    setDeleteModal({ isOpen: true, id: item.id, title: item.title });
+  };
+
+  const handleDeleteSchedule = async () => {
+    const id = deleteModal.id;
+    setDeleteModal(prev => ({ ...prev, isOpen: false }));
     try {
       await scheduleService.deleteItem(id);
       toast.success("Schedule item removed");
@@ -171,6 +178,13 @@ export default function SchedulePage() {
         onAdd={handleAddSchedule}
         onEdit={handleEditSchedule}
         editItem={editItem}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleDeleteSchedule}
+        title={deleteModal.title}
       />
 
       {/* Schedule List */}
@@ -264,7 +278,7 @@ export default function SchedulePage() {
                         <FiEdit2 className="text-sm" />
                       </button>
                       <button
-                        onClick={() => handleDeleteSchedule(item.id)}
+                        onClick={() => confirmDelete(item)}
                         className="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm"
                       >
                         <FiTrash2 className="text-sm" />

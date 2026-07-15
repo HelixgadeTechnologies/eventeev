@@ -24,6 +24,7 @@ import {
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { eventsService } from "@/lib/services/events.service";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 interface Option {
   text: string;
@@ -68,6 +69,12 @@ export default function CreateQuizPage() {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [maxQuestions, setMaxQuestions] = useState(DEFAULT_MAX_QUESTIONS);
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
   const [questions, setQuestions] = useState<Question[]>([
     { 
       id: 1, 
@@ -105,7 +112,7 @@ export default function CreateQuizPage() {
 
   const handleAddQuestion = () => {
     if (questions.length >= maxQuestions) {
-      alert(`Maximum of ${maxQuestions} questions allowed.`);
+      setAlertModal({ isOpen: true, title: "Limit Reached", description: `Maximum of ${maxQuestions} questions allowed.`, variant: "error" });
       return;
     }
     const newId = Math.max(...questions.map(q => q.id), 0) + 1;
@@ -161,7 +168,7 @@ export default function CreateQuizPage() {
   const handleDuplicate = () => {
     if (!activeQuestion) return;
     if (questions.length >= maxQuestions) {
-      alert(`Maximum of ${maxQuestions} questions allowed.`);
+      setAlertModal({ isOpen: true, title: "Limit Reached", description: `Maximum of ${maxQuestions} questions allowed.`, variant: "error" });
       return;
     }
     const newId = Math.max(...questions.map(q => q.id), 0) + 1;
@@ -274,11 +281,10 @@ export default function CreateQuizPage() {
 
     try {
       await quizzesService.createQuiz(payload);
-      alert("Quiz saved successfully!");
-      router.push(`/events/${_id}/games/quiz`);
+      setAlertModal({ isOpen: true, title: "Success", description: "Quiz saved successfully!", variant: "success" });
     } catch (error) {
       console.error("Save Quiz Error:", error);
-      alert("Failed to save quiz. Please check all fields.");
+      setAlertModal({ isOpen: true, title: "Error", description: "Failed to save quiz. Please check all fields.", variant: "error" });
     } finally {
       setIsSaving(false);
     }
@@ -652,6 +658,26 @@ export default function CreateQuizPage() {
           background: #D0D5DD;
         }
       `}</style>
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => {
+          setAlertModal(prev => ({ ...prev, isOpen: false }));
+          if (alertModal.variant === "success") {
+            router.push(`/events/${_id}/games/quiz`);
+          }
+        }}
+        onConfirm={() => {
+          setAlertModal(prev => ({ ...prev, isOpen: false }));
+          if (alertModal.variant === "success") {
+            router.push(`/events/${_id}/games/quiz`);
+          }
+        }}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </div>
   );
 }

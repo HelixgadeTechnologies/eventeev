@@ -4,6 +4,7 @@ import Image from "next/image";
 import img from "@/public/file-upload.svg";
 import { uploadService } from "@/lib/services/upload.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 interface FileInputProps {
   onChange: (url: string, file: File | null) => void;
@@ -15,6 +16,7 @@ const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(defaultValue || null);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", description: "" });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
@@ -38,7 +40,7 @@ const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
       onChange?.(data.url, selectedFile);
     } else {
       console.error("Upload error:", error);
-      alert("Failed to upload image. Please try again.");
+      setAlertModal({ isOpen: true, title: "Error", description: "Failed to upload image. Please try again." });
     }
   };
   return (
@@ -101,6 +103,17 @@ const FileInput = ({ onChange, defaultValue, className }: FileInputProps) => {
           </label>
         </>
       )}
+
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant="error"
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </div>
   );
 };

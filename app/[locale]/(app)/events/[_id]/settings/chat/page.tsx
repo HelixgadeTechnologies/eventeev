@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useParams } from "next/navigation";
 import { eventsService } from "@/lib/services/events.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 export default function ChatSettings() {
   const params = useParams();
@@ -17,6 +18,12 @@ export default function ChatSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [eventData, setEventData] = useState<any>(null);
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
 
   const [enableLiveChat, setEnableLiveChat] = useState(true);
   const [profanityFilter, setProfanityFilter] = useState("Medium");
@@ -71,9 +78,9 @@ export default function ChatSettings() {
     const { error } = await eventsService.updateEvent(_id, updatePayload);
     setSaving(false);
     if (error) {
-      alert("Failed to save chat settings: " + (error.message || "Unknown error"));
+      setAlertModal({ isOpen: true, title: "Error", description: "Failed to save chat settings: " + (error.message || "Unknown error"), variant: "error" });
     } else {
-      alert("Chat settings updated successfully!");
+      setAlertModal({ isOpen: true, title: "Success", description: "Chat settings updated successfully!", variant: "success" });
     }
   };
 
@@ -253,6 +260,16 @@ export default function ChatSettings() {
           border-radius: 10px;
         }
       `}</style>
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </div>
   );
 }

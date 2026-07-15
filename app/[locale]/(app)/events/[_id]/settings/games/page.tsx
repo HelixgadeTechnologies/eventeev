@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useParams } from "next/navigation";
 import { eventsService } from "@/lib/services/events.service";
 import { Loader2 } from "lucide-react";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 export default function GameSettings() {
   const params = useParams();
@@ -18,6 +19,12 @@ export default function GameSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [eventData, setEventData] = useState<any>(null);
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
 
   const [showLeaderboard, setShowLeaderboard] = useState(true);
   const [enableBonusPoints, setEnableBonusPoints] = useState(true);
@@ -75,9 +82,9 @@ export default function GameSettings() {
     const { error } = await eventsService.updateEvent(_id, updatePayload);
     setSaving(false);
     if (error) {
-      alert("Failed to save game settings: " + (error.message || "Unknown error"));
+      setAlertModal({ isOpen: true, title: "Error", description: "Failed to save game settings: " + (error.message || "Unknown error"), variant: "error" });
     } else {
-      alert("Game settings updated successfully!");
+      setAlertModal({ isOpen: true, title: "Success", description: "Game settings updated successfully!", variant: "success" });
     }
   };
 
@@ -300,6 +307,16 @@ export default function GameSettings() {
           border-radius: 10px;
         }
       `}</style>
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </div>
   );
 }

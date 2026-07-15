@@ -24,6 +24,7 @@ import { HiOutlineCheckCircle } from "react-icons/hi2";
 import { speakersService, ApiSpeaker } from "@/lib/services/speakers.service";
 import { useParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
 
 const Speakers = () => {
   const params = useParams();
@@ -41,6 +42,12 @@ const Speakers = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
 
   const fetchSpeakers = async () => {
     setLoading(true);
@@ -112,7 +119,7 @@ const Speakers = () => {
     const { error } = await speakersService.updateSpeaker(speakerToEdit.id, data);
     
     if (error) {
-      alert(error.message || "Failed to update speaker");
+      setAlertModal({ isOpen: true, title: "Error", description: error.message || "Failed to update speaker", variant: "error" });
     } else {
       await fetchSpeakers();
       setIsEditModalOpen(false);
@@ -129,7 +136,7 @@ const Speakers = () => {
     });
     
     if (error) {
-      alert(error.message || "Failed to add speaker");
+      setAlertModal({ isOpen: true, title: "Error", description: error.message || "Failed to add speaker", variant: "error" });
     } else {
       await fetchSpeakers();
       setIsAddModalOpen(false);
@@ -297,6 +304,17 @@ const Speakers = () => {
           </button>
         </DialogContent>
       </Dialog>
+
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
+      />
     </div>
   );
 };

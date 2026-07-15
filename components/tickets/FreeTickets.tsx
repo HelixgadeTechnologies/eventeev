@@ -111,10 +111,10 @@ export default function FreeTickets({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // States for branded delete confirmation
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: "", description: "" });
 
   useEffect(() => {
     if (eventId) {
@@ -185,7 +185,7 @@ export default function FreeTickets({
       setTicketToDelete(null);
     } catch (err: any) {
       console.error("Failed to delete ticket:", err);
-      alert(err.message || "Failed to delete ticket");
+      setAlertModal({ isOpen: true, title: "Error", description: err.message || "Failed to delete ticket" });
     } finally {
       setIsDeleting(false);
     }
@@ -318,6 +318,17 @@ export default function FreeTickets({
         cancelLabel="Keep Ticket"
         isLoading={isDeleting}
         variant="danger"
+      />
+
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant="error"
+        confirmLabel="OK"
+        hideCancelButton
       />
     </section>
   );

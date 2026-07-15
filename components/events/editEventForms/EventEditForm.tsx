@@ -28,6 +28,12 @@ interface EventEditFormProps {
 const EventEditForm = ({ initialData }: EventEditFormProps) => {
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [alertModal, setAlertModal] = React.useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    variant: "primary" as "primary" | "danger" | "success" | "error"
+  });
 
   const {
     control,
@@ -46,9 +52,19 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
     setShowConfirmModal(false);
 
     if (error) {
-      alert("Failed to save changes: " + (error.message || "Unknown error"));
+      setAlertModal({
+        isOpen: true,
+        title: "Error",
+        description: "Failed to save changes: " + (error.message || "Unknown error"),
+        variant: "error"
+      });
     } else {
-      alert("Changes saved successfully!");
+      setAlertModal({
+        isOpen: true,
+        title: "Success",
+        description: "Changes saved successfully!",
+        variant: "success"
+      });
     }
   };
 
@@ -375,6 +391,16 @@ const EventEditForm = ({ initialData }: EventEditFormProps) => {
         description="This will update the event details. Previous versions will be overwritten."
         confirmLabel="Save Now"
         isLoading={isSaving}
+      />
+      <ActionConfirmationModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant={alertModal.variant}
+        confirmLabel="OK"
+        hideCancelButton
       />
     </form>
   );
