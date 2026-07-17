@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 import EmojiPicker from "@/components/chat/EmojiPicker";
 import { chatService, Message, Room } from "@/lib/services/chat.service";
 import { authService } from "@/lib/services/auth.service";
+import { attendeesService } from "@/lib/services/attendees.service";
 import { toast } from "sonner";
 
 export default function ChatPage() {
@@ -26,6 +27,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [roomCount, setRoomCount] = useState(0);
   const [isActivated, setIsActivated] = useState(false);
+  const [hasEnoughAttendees, setHasEnoughAttendees] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -47,6 +49,17 @@ export default function ChatPage() {
         }
         
         if (!eventId) return;
+
+        // Check if there are enough attendees to activate the room
+        try {
+          const res = await attendeesService.getAttendees(eventId as string, 1, 2);
+          const totalAttendees = res.pagination?.total || res.data?.length || 0;
+          if (totalAttendees >= 2) {
+            setHasEnoughAttendees(true);
+          }
+        } catch (err) {
+          console.error("Error fetching attendees:", err);
+        }
 
         const fetchedRooms = await chatService.getRooms(eventId as string);
         setRooms(fetchedRooms);
@@ -260,7 +273,7 @@ export default function ChatPage() {
         )}
           
           {/* Room Activation Overlay */}
-          {activeRoom && !isActivated && (
+          {activeRoom && !isActivated && !hasEnoughAttendees && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex items-center justify-center p-8">
               <div className="text-center max-w-sm bg-white p-8 rounded-[32px] shadow-2xl shadow-[#EB5017]/10 border border-gray-50 transform hover:scale-[1.02] transition-transform">
                 <div className="w-16 h-16 bg-[#FFF8F2] rounded-2xl flex items-center justify-center text-[#EB5017] mx-auto mb-6">
@@ -284,7 +297,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${(!activeRoom || !isActivated) ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${(!activeRoom || (!isActivated && !hasEnoughAttendees)) ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
           <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50 relative">
             <button 
               disabled={!activeRoom}
