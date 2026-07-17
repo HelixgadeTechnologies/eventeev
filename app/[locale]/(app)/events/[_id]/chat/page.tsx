@@ -76,7 +76,8 @@ export default function ChatPage() {
       const fetchHistory = async () => {
         try {
           const history = await chatService.getMessages(activeRoom.id || (activeRoom as any)._id);
-          setMessages(history);
+          const msgs = Array.isArray(history) ? history : (history?.messages || history?.data || []);
+          setMessages(Array.isArray(msgs) ? msgs : []);
           scrollToBottom();
         } catch (error) {
           toast.error("Failed to load message history");
