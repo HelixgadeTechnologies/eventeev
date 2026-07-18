@@ -144,6 +144,13 @@ const EventFormPreview = () => {
             )}
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            
+            {/* Thumbnail Overlay */}
+            {formData.thumbnail && (
+              <div className="absolute bottom-4 left-4 w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 border-white shadow-lg overflow-hidden bg-white z-10">
+                <Image src={formData.thumbnail} alt="thumbnail" fill className="object-cover" />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 pt-2">
