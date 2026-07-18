@@ -7,8 +7,8 @@ let globalSchedules: any[] = [
   { id: "3", event: "6a55d72b4ff0c7f2856c7708", startTime: "11:30", endTime: "12:30", title: "Networking Session", type: "Networking", speakers: [] },
 ];
 
-if (global && !(global as any).mockSchedules) {
-  (global as any).mockSchedules = globalSchedules;
+if (typeof globalThis !== 'undefined' && !(globalThis as any).mockSchedules) {
+  (globalThis as any).mockSchedules = globalSchedules;
 }
 
 export async function POST(req: NextRequest) {
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
       id: `s-${Date.now()}`
     };
 
-    (global as any).mockSchedules.push(newSchedule);
+    const store = (typeof globalThis !== 'undefined' ? (globalThis as any).mockSchedules : globalSchedules);
+    store.push(newSchedule);
     
     return NextResponse.json(newSchedule, { status: 201 });
   } catch (error) {
