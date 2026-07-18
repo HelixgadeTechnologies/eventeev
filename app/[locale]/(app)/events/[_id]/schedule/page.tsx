@@ -66,8 +66,9 @@ export default function SchedulePage() {
   // Handle adding new schedule item
   const handleAddSchedule = async (newSchedule: Omit<ScheduleItem, 'id'>) => {
     try {
+      const { id, ...scheduleData } = newSchedule as any;
       await scheduleService.createItem({
-        ...newSchedule,
+        ...scheduleData,
         event: eventId
       });
       toast.success("Schedule item added");
