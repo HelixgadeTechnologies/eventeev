@@ -11,8 +11,8 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use((config) => {
   let url = config.url || '';
   
-  // Only intercept if not already going through the proxy
-  if (!url.startsWith('/api/proxy')) {
+  // Only intercept if not already going through the proxy and not a local schedule route
+  if (!url.startsWith('/api/proxy') && !url.startsWith('/api/schedule')) {
     // Strip leading slash
     if (url.startsWith('/')) {
       url = url.substring(1);
