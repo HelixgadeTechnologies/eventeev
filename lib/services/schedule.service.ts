@@ -20,6 +20,11 @@ export class ScheduleService {
     const response = await axiosInstance.delete(`/api/schedule/${id}`);
     return response.data;
   }
+
+  async reorderItems(eventId: string, orderedIds: string[]) {
+    const response = await axiosInstance.put(`/api/schedule/reorder`, { eventId, orderedIds });
+    return response.data;
+  }
 }
 
 export const scheduleService = new ScheduleService();

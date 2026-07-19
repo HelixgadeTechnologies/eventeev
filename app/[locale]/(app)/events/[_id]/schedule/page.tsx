@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
@@ -27,6 +27,22 @@ export default function SchedulePage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<ScheduleItem | null>(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: "", title: "" });
+  const schedulesRef = useRef(schedules);
+
+  useEffect(() => {
+    schedulesRef.current = schedules;
+  }, [schedules]);
+
+  const handleReorderEnd = async () => {
+    try {
+      if (!eventId) return;
+      const orderedIds = schedulesRef.current.map(s => s.id);
+      await scheduleService.reorderItems(eventId as string, orderedIds);
+    } catch (error) {
+      console.error("Error saving new order:", error);
+      toast.error("Failed to save schedule order");
+    }
+  };
 
   // Fetch schedules and event details from database
   const fetchData = async () => {
@@ -214,7 +230,7 @@ export default function SchedulePage() {
         ) : (
           <Reorder.Group axis="y" values={schedules} onReorder={setSchedules} className="relative border-l-4 border-gray-100/60 ml-4 md:ml-6 space-y-8 py-4">
             {schedules.map((item) => (
-              <Reorder.Item value={item} key={item.id} className="relative pl-8 md:pl-12 group cursor-grab active:cursor-grabbing">
+              <Reorder.Item value={item} key={item.id} onDragEnd={handleReorderEnd} className="relative pl-8 md:pl-12 group cursor-grab active:cursor-grabbing">
                 {/* Timeline dot */}
                 <div className={`absolute -left-[14px] top-6 h-6 w-6 rounded-full border-[6px] border-white transition-colors duration-300 shadow-sm ${
                   item.type === "Break" || item.type === "Networking" ? "bg-gray-300" : "bg-[#EB5017]"
