@@ -17,12 +17,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
   ticket,
-  quantity,
+  quantity: initialQuantity,
   eventId
 }) => {
   const [buyerName, setBuyerName] = useState('');
   const [buyerEmail, setBuyerEmail] = useState('');
   const [customAmount, setCustomAmount] = useState<string>(ticket.type.toLowerCase() === 'donation' ? String(ticket.price || '') : '');
+  const [localQuantity, setLocalQuantity] = useState(initialQuantity);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const isDonation = ticket.type.toLowerCase() === 'donation';
   const effectivePrice = isDonation ? (Number(customAmount) || 0) : ticket.price;
-  const totalAmount = effectivePrice * quantity;
+  const totalAmount = effectivePrice * localQuantity;
   const isPaid = (ticket.type.toLowerCase() === 'paid' || isDonation) && totalAmount > 0;
 
   const handleFreeCheckout = async () => {
@@ -40,7 +41,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const res = await ticketsService.purchaseTicket({
       eventId,
       ticketId: ticket.id || ticket._id || '',
-      quantity,
+      quantity: localQuantity,
       buyerName,
       buyerEmail,
     });
@@ -59,7 +60,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const res = await ticketsService.purchaseTicket({
       eventId,
       ticketId: ticket.id || ticket._id || '',
-      quantity,
+      quantity: localQuantity,
       buyerName,
       buyerEmail,
       paymentReference: reference.reference,
@@ -81,7 +82,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-black text-gray-900 tracking-tight">Checkout</h2>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{ticket.name} x {quantity}</p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{ticket.name}</p>
             </div>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 transition-colors">
               ✕
@@ -105,6 +106,24 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           ) : (
             <div className="space-y-6">
               <div className="space-y-4">
+                <div className="space-y-1.5 flex items-center justify-between">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Number of Tickets</label>
+                  <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => setLocalQuantity(Math.max(1, localQuantity - 1))}
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-lg font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="font-bold text-gray-900">{localQuantity}</span>
+                    <button 
+                      onClick={() => setLocalQuantity(localQuantity + 1)}
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-lg font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
                   <input
