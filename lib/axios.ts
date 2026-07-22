@@ -12,7 +12,7 @@ axiosInstance.interceptors.request.use((config) => {
   let url = config.url || '';
   
   // Only intercept if not already going through the proxy and not a local mocked route
-  if (!url.startsWith('/api/proxy') && !url.startsWith('/api/schedule')) {
+  if (!url.startsWith('/api/proxy')) {
     // Strip leading slash
     if (url.startsWith('/')) {
       url = url.substring(1);
