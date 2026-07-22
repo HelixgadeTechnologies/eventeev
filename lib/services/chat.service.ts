@@ -67,9 +67,29 @@ class ChatService {
     }
   }
 
+  offReceiveMessage(callback?: (message: any) => void) {
+    if (this.socket) {
+      if (callback) {
+        this.socket.off('receive_message', callback);
+      } else {
+        this.socket.off('receive_message');
+      }
+    }
+  }
+
   onRoomStatus(callback: (status: { activated: boolean; count: number; roomId: string }) => void) {
     if (this.socket) {
       this.socket.on('room_status', callback);
+    }
+  }
+
+  offRoomStatus(callback?: (status: any) => void) {
+    if (this.socket) {
+      if (callback) {
+        this.socket.off('room_status', callback);
+      } else {
+        this.socket.off('room_status');
+      }
     }
   }
 
