@@ -20,10 +20,16 @@ export class SpeakersService {
   async getSpeakers(eventId: string) {
     try {
       const response = await axiosInstance.get(`/api/speaker/event/${eventId}`);
-      return { data: response.data as ApiSpeaker[], error: null };
+      const rawData = response.data?.data || response.data;
+      const data = Array.isArray(rawData) ? rawData : [];
+      return { data: data as ApiSpeaker[], error: null };
     } catch (error: any) {
+      const respData = error.response?.data;
+      const respMsg = (typeof respData === 'string' ? respData : respData?.message) || '';
+      const isNotFound = error.response?.status === 404 || respMsg.toLowerCase().includes('no speaker');
+      if (isNotFound) return { data: [], error: null };
       console.error('Failed to fetch speakers:', error);
-      return { data: [], error: error.response?.data || { message: 'Failed to fetch speakers' } };
+      return { data: [], error: { message: respMsg || 'Failed to fetch speakers' } };
     }
   }
 
@@ -102,6 +108,7 @@ export class SpeakersService {
       return { data: null, error: error.response?.data || { message: 'Failed to manage sessions' } };
     }
   }
+
   /**
    * Get speaker statistics for an event
    */
