@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaAngleLeft } from "react-icons/fa6";
-import { HiOutlinePlus, HiOutlineChartBar, HiOutlineClock, HiOutlineCheck, HiOutlineX, HiOutlineTrash, HiOutlineEye } from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineChartBar, HiOutlineClock, HiOutlineCheck, HiOutlineX, HiOutlineTrash, HiOutlineEye, HiOutlinePlay } from "react-icons/hi";
 import { pollsService } from "@/lib/services/polls.service";
 import { toast } from "sonner";
 
@@ -183,6 +183,16 @@ export default function PollsPage() {
     }
   };
 
+  const handleGoLive = async (pollId: string) => {
+    try {
+      await pollsService.updateStatus(pollId, "LIVE");
+      setPolls(polls.map((p) => (p.id === pollId ? { ...p, status: "active" as const } : p)));
+      toast.success("Poll is now live!");
+    } catch (error) {
+      toast.error("Failed to activate poll");
+    }
+  };
+
   const handleEndPoll = async (pollId: string) => {
     try {
       await pollsService.updateStatus(pollId, "ENDED");
@@ -324,9 +334,19 @@ export default function PollsPage() {
                       <button
                         onClick={() => setViewingPoll(viewingPoll?.id === poll.id ? null : poll)}
                         className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-[#EB5017] hover:border-[#EB5017]/20 transition-all"
+                        title="View Results"
                       >
                         <HiOutlineEye className="text-sm" />
                       </button>
+                      {poll.status === "ended" && (
+                        <button
+                          onClick={() => handleGoLive(poll.id)}
+                          className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-green-500 hover:border-green-200 transition-all"
+                          title="Go Live"
+                        >
+                          <HiOutlinePlay className="text-sm" />
+                        </button>
+                      )}
                       {poll.status === "active" && (
                         <button
                           onClick={() => handleEndPoll(poll.id)}
