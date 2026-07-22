@@ -1,9 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import axiosInstance from "../axios";
 
-const SOCKET_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5000' 
-  : 'https://eventeevapi.onrender.com';
+const SOCKET_URL = 'https://eventeevapi.onrender.com';
 
 export interface Message {
   id?: string;
@@ -83,18 +81,40 @@ class ChatService {
   }
 
   async getRooms(eventId: string) {
-    const response = await axiosInstance.get(`/api/chat/rooms/${eventId}`);
-    return response.data;
+    try {
+      const response = await axiosInstance.get(`/api/chat/rooms/${eventId}`);
+      const rawData = response.data?.data || response.data;
+      return Array.isArray(rawData) ? rawData : [];
+    } catch (error: any) {
+      const status = error.response?.status;
+      if (status === 404) return [];
+      console.error('Failed to fetch chat rooms:', error);
+      throw error;
+    }
   }
 
   async getMessages(roomId: string, page = 1, limit = 50) {
-    const response = await axiosInstance.get(`/api/chat/messages/${roomId}?page=${page}&limit=${limit}`);
-    return response.data?.pagination ? { messages: response.data.data, pagination: response.data.pagination } : response.data;
+    try {
+      const response = await axiosInstance.get(`/api/chat/messages/${roomId}?page=${page}&limit=${limit}`);
+      return response.data?.pagination
+        ? { messages: response.data.data, pagination: response.data.pagination }
+        : response.data;
+    } catch (error: any) {
+      const status = error.response?.status;
+      if (status === 404) return { messages: [], pagination: null };
+      console.error('Failed to fetch messages:', error);
+      throw error;
+    }
   }
 
   async createRoom(data: { event: string; name: string; type: string; leadParticipant?: string }) {
-    const response = await axiosInstance.post('/api/chat/room', data);
-    return response.data;
+    try {
+      const response = await axiosInstance.post('/api/chat/room', data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Failed to create chat room:', error);
+      throw error;
+    }
   }
 }
 
