@@ -41,6 +41,9 @@ const Speakers = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [speakerToDelete, setSpeakerToDelete] = useState<any | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [alertModal, setAlertModal] = useState({
     isOpen: false,
@@ -142,6 +145,25 @@ const Speakers = () => {
       setIsAddModalOpen(false);
     }
     setIsUpdating(false);
+  };
+
+  const handleDeleteClick = (speaker: SpeakerDataType) => {
+    setSpeakerToDelete(speaker);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!speakerToDelete?.id) return;
+    setIsDeleting(true);
+    const { error } = await speakersService.deleteSpeaker(speakerToDelete.id);
+    if (error) {
+      setAlertModal({ isOpen: true, title: "Error", description: error.message || "Failed to delete speaker", variant: "error" });
+    } else {
+      await fetchSpeakers();
+    }
+    setIsDeleting(false);
+    setIsDeleteConfirmOpen(false);
+    setSpeakerToDelete(null);
   };
 
   const filteredSpeakers = speakers.filter((speaker) =>
@@ -260,12 +282,14 @@ const Speakers = () => {
               data={filteredSpeakers} 
               onSpeakerClick={handleSpeakerClick} 
               onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
             />
           ) : (
             <TableList 
               data={filteredSpeakers} 
               onSpeakerClick={handleSpeakerClick} 
               onEditClick={handleEditClick}
+              onDeleteClick={handleDeleteClick}
             />
           )}
         </div>
@@ -304,6 +328,18 @@ const Speakers = () => {
           </button>
         </DialogContent>
       </Dialog>
+
+      <ActionConfirmationModal
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => !isDeleting && setIsDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Speaker?"
+        description={`Are you sure you want to remove ${speakerToDelete?.name || 'this speaker'} from your event? This action cannot be undone.`}
+        confirmLabel="Yes, Delete"
+        cancelLabel="Keep Speaker"
+        isLoading={isDeleting}
+        variant="danger"
+      />
 
       <ActionConfirmationModal
         isOpen={alertModal.isOpen}

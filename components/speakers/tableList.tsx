@@ -16,7 +16,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 
-const TableList = ({ data, onSpeakerClick, onEditClick }: { data: SpeakerDataType[], onSpeakerClick: (speaker: SpeakerDataType) => void, onEditClick: (speaker: SpeakerDataType) => void }) => {
+const TableList = ({
+  data,
+  onSpeakerClick,
+  onEditClick,
+  onDeleteClick,
+}: {
+  data: SpeakerDataType[];
+  onSpeakerClick: (speaker: SpeakerDataType) => void;
+  onEditClick: (speaker: SpeakerDataType) => void;
+  onDeleteClick: (speaker: SpeakerDataType) => void;
+}) => {
   const columns: ColumnDef<SpeakerDataType>[] = [
     {
       id: "select",
@@ -138,8 +148,11 @@ const TableList = ({ data, onSpeakerClick, onEditClick }: { data: SpeakerDataTyp
                 Manage Session
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-gray-50" />
-              <DropdownMenuItem className="rounded-xl focus:bg-red-50 focus:text-red-500 cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3">
-                De-list Speaker
+              <DropdownMenuItem 
+                onClick={() => onDeleteClick(item)}
+                className="rounded-xl focus:bg-red-50 focus:text-red-500 cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3 text-red-400"
+              >
+                Delete Speaker
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
