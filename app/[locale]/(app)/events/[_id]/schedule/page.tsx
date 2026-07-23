@@ -80,31 +80,25 @@ export default function SchedulePage() {
   }, [eventId]);
 
   // Handle adding new schedule item
-  const handleAddSchedule = async (newSchedule: Omit<ScheduleItem, 'id'>) => {
-    try {
-      const { id, ...scheduleData } = newSchedule as any;
-      await scheduleService.createItem({
-        ...scheduleData,
-        event: eventId
-      });
-      toast.success("Schedule item added");
-      fetchData();
-    } catch (error) {
-      console.error("Error adding schedule:", error);
-      toast.error("Failed to add schedule item");
-    }
+  const handleAddSchedule = async (newSchedule: ScheduleItem) => {
+    // Strip the temp local id (s-timestamp) before sending to backend
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _tempId, ...scheduleData } = newSchedule;
+    await scheduleService.createItem({
+      ...scheduleData,
+      event: eventId
+    });
+    toast.success("Schedule item added successfully");
+    fetchData();
   };
 
   // Handle editing schedule item
   const handleEditSchedule = async (updatedSchedule: ScheduleItem) => {
-    try {
-      await scheduleService.updateItem(updatedSchedule.id, updatedSchedule);
-      toast.success("Schedule item updated");
-      fetchData();
-    } catch (error) {
-      console.error("Error updating schedule:", error);
-      toast.error("Failed to update schedule item");
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...updateData } = updatedSchedule;
+    await scheduleService.updateItem(id, { ...updateData, event: eventId });
+    toast.success("Schedule item updated successfully");
+    fetchData();
   };
 
   // Handle deleting schedule item

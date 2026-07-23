@@ -21,7 +21,9 @@ export class ScheduleService {
       const response = await axiosInstance.post('/api/schedule', data);
       return response.data;
     } catch (error: any) {
-      console.error('Failed to create schedule item:', error);
+      const backendMsg = error.response?.data?.message || error.response?.data?.error || error.message;
+      const status = error.response?.status;
+      console.error(`Failed to create schedule item [${status}]:`, backendMsg, '\nPayload:', JSON.stringify(data));
       throw error;
     }
   }

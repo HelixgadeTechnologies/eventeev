@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import TimePicker from '@/components/ui/TimePicker';
 
 export interface ScheduleItem {
@@ -19,8 +21,8 @@ export interface ScheduleItem {
 interface AddScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (schedule: ScheduleItem) => void;
-  onEdit?: (schedule: ScheduleItem) => void;
+  onAdd: (schedule: ScheduleItem) => Promise<void> | void;
+  onEdit?: (schedule: ScheduleItem) => Promise<void> | void;
   editItem?: ScheduleItem | null;
 }
 
@@ -34,6 +36,8 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
     speakerName: "",
     speakerRole: "",
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<{ startTime?: string; endTime?: string }>({});
 
   React.useEffect(() => {
     if (editItem && isOpen) {
@@ -58,10 +62,21 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
         speakerRole: "",
       });
     }
+    setErrors({});
   }, [editItem, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validate = () => {
+    const newErrors: { startTime?: string; endTime?: string } = {};
+    if (!formData.startTime) newErrors.startTime = "Start time is required";
+    if (!formData.endTime) newErrors.endTime = "End time is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     const newSchedule: ScheduleItem = {
       id: editItem?.id || `s-${Date.now()}`,
       startTime: formData.startTime,
@@ -76,23 +91,32 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
         }]
       })
     };
-    
-    if (editItem && onEdit) {
-      onEdit(newSchedule);
-    } else {
-      onAdd(newSchedule);
+
+    setIsSaving(true);
+    try {
+      if (editItem && onEdit) {
+        await onEdit(newSchedule);
+      } else {
+        await onAdd(newSchedule);
+      }
+      // Only reset & close on success
+      setFormData({
+        startTime: "",
+        endTime: "",
+        title: "",
+        description: "",
+        type: "Activity",
+        speakerName: "",
+        speakerRole: "",
+      });
+      onClose();
+    } catch (error: any) {
+      // Keep modal open on error so user doesn't lose their data
+      const msg = error?.response?.data?.message || error?.message || 'Failed to save schedule. Please try again.';
+      toast.error(msg);
+    } finally {
+      setIsSaving(false);
     }
-    
-    setFormData({
-      startTime: "",
-      endTime: "",
-      title: "",
-      description: "",
-      type: "Activity",
-      speakerName: "",
-      speakerRole: "",
-    });
-    onClose();
   };
 
   return (
@@ -117,8 +141,10 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">{editItem ? "Update this activity" : "Create an activity"}</p>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all shadow-sm"
+                disabled={isSaving}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-100 text-gray-500 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all shadow-sm disabled:opacity-50"
               >
                 <FiX className="text-xl" />
               </button>
@@ -128,18 +154,34 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Start Time</label>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                    Start Time <span className="text-red-500">*</span>
+                  </label>
                   <TimePicker
                     value={formData.startTime}
-                    onChange={(time) => setFormData({ ...formData, startTime: time })}
+                    onChange={(time) => {
+                      setFormData({ ...formData, startTime: time });
+                      if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined }));
+                    }}
                   />
+                  {errors.startTime && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">{errors.startTime}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">End Time</label>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                    End Time <span className="text-red-500">*</span>
+                  </label>
                   <TimePicker
                     value={formData.endTime}
-                    onChange={(time) => setFormData({ ...formData, endTime: time })}
+                    onChange={(time) => {
+                      setFormData({ ...formData, endTime: time });
+                      if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined }));
+                    }}
                   />
+                  {errors.endTime && (
+                    <p className="text-[10px] text-red-500 font-bold ml-1">{errors.endTime}</p>
+                  )}
                 </div>
               </div>
 
@@ -209,19 +251,22 @@ export default function AddScheduleModal({ isOpen, onClose, onAdd, onEdit, editI
               </div>
 
               {/* Footer */}
-              <div className="pt-4  flex justify-end gap-3">
+              <div className="pt-4 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest text-[#1B1818] bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200"
+                  disabled={isSaving}
+                  className="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest text-[#1B1818] bg-gray-100 hover:bg-gray-200 transition-all border border-gray-200 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#d64815] transition-all shadow-xl shadow-[#EB5017]/20 active:scale-95"
+                  disabled={isSaving}
+                  className="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest text-white bg-[#EB5017] hover:bg-[#d64815] transition-all shadow-xl shadow-[#EB5017]/20 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {editItem ? "Save Changes" : "Add Schedule"}
+                  {isSaving && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {isSaving ? "Saving..." : editItem ? "Save Changes" : "Add Schedule"}
                 </button>
               </div>
             </form>
