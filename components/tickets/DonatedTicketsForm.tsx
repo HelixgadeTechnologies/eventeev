@@ -5,8 +5,15 @@ import DatePicker from "../ui/DatePicker";
 import TimePicker from "../ui/TimePicker";
 import { useParams, useRouter } from "next/navigation";
 import { ticketsService } from "@/lib/services/tickets.service";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowRightLeft } from "lucide-react";
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
+import {
+  SUPPORTED_CURRENCIES,
+  DEFAULT_CURRENCY,
+  getCurrencySymbol,
+  convertCurrency,
+  formatCurrency,
+} from "@/lib/utils/currency";
 
 import { TicketTier } from "@/types/ticket";
 
@@ -16,6 +23,8 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [currency, setCurrency] = useState<string>(initialData?.currency || DEFAULT_CURRENCY);
+  const [price, setPrice] = useState<number>(initialData?.price || 0);
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
   const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
@@ -41,14 +50,16 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
     const formData = new FormData(e.currentTarget);
     const name = formData.get("ticketName") as string;
     const quantity = parseInt(formData.get("ticketQuantity") as string) || 0;
-    const price = parseFloat(formData.get("price") as string) || 0;
+    const parsedPrice = parseFloat(formData.get("price") as string) || 0;
+    const finalPrice = isNaN(parsedPrice) ? 0 : parsedPrice;
 
     try {
       if (initialData?.id) {
         const { error } = await ticketsService.updateTicket(initialData.id, {
           name,
           type: "Donation",
-          price: isNaN(price) ? 0 : price,
+          price: finalPrice,
+          currency,
           quantity: isNaN(quantity) ? 0 : quantity,
           startDate,
           endDate,
@@ -69,7 +80,8 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
           eventId,
           name,
           type: "Donation",
-          price: isNaN(price) ? 0 : price,
+          price: finalPrice,
+          currency,
           quantity: isNaN(quantity) ? 0 : quantity,
           status: "Active",
           startDate,
@@ -99,6 +111,10 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
       setLoading(false);
     }
   };
+
+  const currencySymbol = getCurrencySymbol(currency);
+  const equivalentTarget = currency === 'NGN' ? 'USD' : 'NGN';
+  const convertedAmount = convertCurrency(price, currency, equivalentTarget);
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -139,26 +155,71 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
           </div>
         </div>
 
-        <div className="space-y-1.5 flex flex-col">
-          <Label
-            htmlFor="price"
-            className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
-          >
-            Suggested Amount (USD)
-          </Label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-            <Input
-              name="price"
-              type="number"
-              step="0.01"
-              placeholder="25.00"
-              defaultValue={initialData?.price}
-              className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all pl-8"
-              id="price"
-            />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-1.5 flex flex-col md:col-span-1">
+            <Label
+              htmlFor="currency"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Currency
+            </Label>
+            <select
+              name="currency"
+              id="currency"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="h-12 border border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all px-3 text-xs font-bold text-gray-900 appearance-none cursor-pointer"
+            >
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name} ({c.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5 flex flex-col md:col-span-2">
+            <Label
+              htmlFor="price"
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1"
+            >
+              Suggested Amount ({currency})
+            </Label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-black text-sm">
+                {currencySymbol}
+              </span>
+              <Input
+                name="price"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={price || ''}
+                onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+                className="h-12 border-gray-100 bg-white/50 rounded-2xl focus-visible:ring-1 focus-visible:ring-[#EB5017] transition-all pl-10 font-bold"
+                id="price"
+              />
+            </div>
           </div>
         </div>
+
+        {price > 0 && (
+          <div className="flex items-center gap-3 bg-[#EB5017]/5 border border-[#EB5017]/10 rounded-2xl px-4 py-3 text-xs text-[#1B1818] font-medium">
+            <ArrowRightLeft className="w-4 h-4 text-[#EB5017] shrink-0" />
+            <div>
+              <span className="font-bold text-gray-500 text-[10px] uppercase tracking-wider block">
+                Direct Conversion Estimate:
+              </span>
+              <span className="font-black text-[#EB5017]">
+                {formatCurrency(price, currency)}
+              </span>
+              <span className="text-gray-400 mx-1.5">≈</span>
+              <span className="font-bold text-gray-800">
+                {formatCurrency(convertedAmount, equivalentTarget)}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5 flex flex-col">

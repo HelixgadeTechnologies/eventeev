@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ApiTicket, ticketsService } from '@/lib/services/tickets.service';
+import { formatCurrency } from '@/lib/utils/currency';
 import PaystackCheckout from '@/components/tickets/PaystackCheckout';
 import { Loader2 } from 'lucide-react';
 
@@ -73,6 +74,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       setSuccess(true);
     }
   };
+
+  const ticketCurrency = ticket.currency || 'NGN';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -146,7 +149,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
                 {isDonation && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Donation Amount per Ticket (USD)</label>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Donation Amount per Ticket ({ticketCurrency})</label>
                     <input
                       type="number"
                       step="0.01"
@@ -163,15 +166,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500 font-medium">Subtotal</span>
-                  <span className="font-bold text-gray-900">${totalAmount.toFixed(2)}</span>
+                  <span className="font-bold text-gray-900">{formatCurrency(totalAmount, ticketCurrency)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500 font-medium">Fees</span>
-                  <span className="font-bold text-gray-900">$0.00</span>
+                  <span className="font-bold text-gray-900">{formatCurrency(0, ticketCurrency)}</span>
                 </div>
                 <div className="pt-2 border-t border-gray-200 flex justify-between">
                   <span className="text-gray-900 font-black uppercase tracking-wide">Total</span>
-                  <span className="text-lg font-black text-[#EB5017]">${totalAmount.toFixed(2)}</span>
+                  <span className="text-lg font-black text-[#EB5017]">{formatCurrency(totalAmount, ticketCurrency)}</span>
                 </div>
               </div>
 
@@ -186,10 +189,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <PaystackCheckout
                     email={buyerEmail}
                     amount={totalAmount * 100} // Convert to lowest currency unit (e.g. kobo)
+                    currency={ticketCurrency}
                     disabled={!buyerName || !buyerEmail || loading}
                     onSuccess={handlePaystackSuccess}
                     onClose={() => {}}
-                    buttonText={`Pay $${totalAmount.toFixed(2)}`}
+                    buttonText={`Pay ${formatCurrency(totalAmount, ticketCurrency)}`}
                   />
                 ) : (
                   <button

@@ -9,6 +9,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import { useParams } from "next/navigation";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { formatCurrency } from "@/lib/utils/currency";
 import { Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { TicketTier } from "@/types/ticket";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
@@ -109,13 +110,9 @@ const columns: ColumnDef<SoldTicketType>[] = [
     accessorKey: "amountPaid",
     header: () => <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Amount</span>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amountPaid"));
-      const formatAmount = new Intl.NumberFormat("en-us", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <span className="font-black text-xs text-[#1B1818]">{formatAmount}</span>;
+      const amount = parseFloat(row.getValue("amountPaid")) || 0;
+      const currency = (row.original as any).currency || 'NGN';
+      return <span className="font-black text-xs text-[#1B1818]">{formatCurrency(amount, currency)}</span>;
     },
   },
 ];
@@ -278,6 +275,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
                         name: tier.name,
                         type: "paid",
                         price: tier.price,
+                        currency: tier.currency,
                         quantity: tier.quantity,
                         startDate: tier.startDate,
                         startTime: tier.startTime,
@@ -301,7 +299,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
                     <div>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-2">{tier.name}</p>
                       <p className="text-3xl font-black text-[#1B1818] tracking-tighter leading-none">
-                        ${tier.price.toFixed(2)}<span className="text-xs text-gray-400 ml-1">/ticket</span>
+                        {formatCurrency(tier.price, tier.currency)}<span className="text-xs text-gray-400 ml-1">/ticket</span>
                       </p>
                     </div>
                     
@@ -317,7 +315,7 @@ export default function PaidTickets({ addTicket, onEdit, refreshKey }: Props) {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-black text-[#1B1818] uppercase tracking-tight">{tierArrivals.length} Sold</span>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Revenue: ${revenue.toLocaleString()}</span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Revenue: {formatCurrency(revenue, tier.currency)}</span>
                       </div>
                     </div>
                   </div>

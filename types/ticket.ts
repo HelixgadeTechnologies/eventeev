@@ -3,6 +3,7 @@ export interface TicketTier {
   name: string;
   type: "paid" | "free" | "donation";
   price?: number;
+  currency?: string;
   quantity: number;
   startDate?: string;
   startTime?: string;

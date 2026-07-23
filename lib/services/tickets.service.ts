@@ -5,6 +5,7 @@ export interface ApiTicket {
   _id?: string; // Backend identifier
   name: string;
   price: number;
+  currency?: string;
   quantity: number;
   type: string; // 'paid', 'free', 'donation'
   soldOut: boolean;
@@ -26,7 +27,8 @@ export class TicketsService {
       const response = await axiosInstance.get(`/api/ticket/event/${eventId}`);
       const tickets = (response.data as any[]).map(t => ({
         ...t,
-        id: t.id || t._id // Ensure id is always populated for frontend consistency
+        id: t.id || t._id, // Ensure id is always populated for frontend consistency
+        currency: t.currency || 'NGN'
       }));
       return { data: tickets as ApiTicket[], error: null };
     } catch (error: any) {
@@ -56,6 +58,7 @@ export class TicketsService {
     name: string;
     type: string;
     price: number;
+    currency?: string;
     quantity: number;
     status: string;
     startDate?: string;
@@ -78,6 +81,7 @@ export class TicketsService {
         name: payload.name,
         type: payload.type.charAt(0).toUpperCase() + payload.type.slice(1),
         price: cleanPrice,
+        currency: payload.currency || 'NGN',
         quantity: cleanQuantity,
         startDate: payload.startDate,
         startTime: payload.startTime,

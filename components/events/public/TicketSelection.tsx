@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ApiTicket, ticketsService } from '@/lib/services/tickets.service';
+import { formatCurrency } from '@/lib/utils/currency';
 import CheckoutModal from './CheckoutModal';
 import { Loader2 } from 'lucide-react';
 
@@ -61,7 +62,7 @@ const TicketSelection: React.FC<TicketSelectionProps> = ({ eventId }) => {
             <div className="flex items-center gap-6">
               <div className="text-right">
                 <p className="font-black text-[#EB5017] text-lg">
-                  {ticket.price > 0 ? `$${ticket.price.toFixed(2)}` : 'FREE'}
+                  {ticket.price > 0 ? formatCurrency(ticket.price, ticket.currency) : 'FREE'}
                 </p>
                 <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{ticket.type}</p>
               </div>

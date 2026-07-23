@@ -258,6 +258,8 @@ export default function DonatedTickets({
                         id: tier.id,
                         name: tier.name,
                         type: "donation",
+                        price: tier.price,
+                        currency: tier.currency,
                         quantity: tier.quantity,
                         startDate: tier.startDate,
                         startTime: tier.startTime,
