@@ -14,7 +14,13 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: response.statusText || 'Upstream server error' };
+    }
 
     if (response.ok && data.token) {
       const res = NextResponse.json(data);

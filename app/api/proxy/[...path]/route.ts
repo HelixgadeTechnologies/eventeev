@@ -54,15 +54,16 @@ async function handleProxyRequest(req: NextRequest, params: { path: string[] }) 
       body,
     });
 
-    const data = await response.text();
-    let parsedData = data;
-    try {
-      parsedData = JSON.parse(data);
-    } catch (e) {
-      // not json
-    }
+    const responseHeaders = new Headers();
+    const contentType = response.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+    const cacheControl = response.headers.get('cache-control');
+    if (cacheControl) responseHeaders.set('cache-control', cacheControl);
 
-    return NextResponse.json(parsedData, { status: response.status });
+    return new Response(response.body, {
+      status: response.status,
+      headers: responseHeaders,
+    });
   } catch (error) {
     console.error('Proxy error:', error);
     return NextResponse.json({ message: 'Proxy Error' }, { status: 500 });

@@ -56,9 +56,9 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401) {
       const url = config?.url || '';
-      const isAuthRequest = url.includes('/auth/');
+      const isAuthRequest = url.includes('/auth/') || url.includes('/user/me');
 
-      if (typeof window !== 'undefined' && !isAuthRequest) {
+      if (typeof window !== 'undefined' && !isAuthRequest && window.location.pathname !== '/') {
         window.location.href = '/';
       }
     }

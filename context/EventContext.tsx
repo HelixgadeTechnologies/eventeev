@@ -4,13 +4,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { eventsService } from "@/lib/services/events.service";
-import { ticketsService } from "@/lib/services/tickets.service";
-import { speakersService } from "@/lib/services/speakers.service";
-import { quizzesService } from "@/lib/services/quizzes.service";
-import { pollsService } from "@/lib/services/polls.service";
-import { checklistService } from "@/lib/services/checklist.service";
-import { scheduleService } from "@/lib/services/schedule.service";
-import { linksService } from "@/lib/services/links.service";
 
 interface EventContextType {
   event: any | null;
@@ -68,84 +61,32 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
 
       setEvent(eventData);
 
-      // Always active power-ups
-      const active = new Set<string>(["Dashboard", "Analytics", "Networking"]);
-
-      // 2. Concurrently check data for other powerups/services
-      const results = await Promise.allSettled([
-        ticketsService.getTickets(eventId),
-        speakersService.getSpeakers(eventId),
-        quizzesService.getQuizzesByEvent(eventId),
-        pollsService.getPolls(eventId),
-        checklistService.getChecklist(eventId),
-        scheduleService.getSchedule(eventId),
-        linksService.getLinks(eventId),
+      // Default active power-ups for event organizers
+      const active = new Set<string>([
+        "Dashboard",
+        "Tickets",
+        "Check-in",
+        "Analytics",
+        "Networking",
+        "Speakers",
+        "Chat Room",
+        "Games",
+        "Polls",
+        "Schedule",
+        "Checklist",
+        "Calendar",
+        "Links",
       ]);
 
-      // Helper to extract clean array from Promise.allSettled response
-      const getArrayData = (result: any) => {
-        if (result.status === "fulfilled" && result.value) {
-          const val = result.value;
-          if (Array.isArray(val)) return val;
-          if (Array.isArray(val.data)) return val.data;
-        }
-        return [];
-      };
-
-      const tickets = getArrayData(results[0]);
-      const speakers = getArrayData(results[1]);
-      const quizzes = getArrayData(results[2]);
-      const polls = getArrayData(results[3]);
-      const checklist = getArrayData(results[4]);
-      const schedule = getArrayData(results[5]);
-      const links = getArrayData(results[6]);
-
-      // Tickets & Check-in
-      if (tickets.length > 0) {
-        active.add("Tickets");
-        active.add("Check-in");
-      }
-
-      // Speakers
-      if (speakers.length > 0) {
-        active.add("Speakers");
-      }
-
-      // Games
-      const showLeaderboard = eventData.settings?.showLeaderboard ?? eventData.settings?.game?.showLeaderboard ?? true;
-      if (quizzes.length > 0 || showLeaderboard) {
-        active.add("Games");
-      }
-
-      // Chat Room
+      // Respect explicit event settings disablements if present
       const chatEnabled = eventData.settings?.enableChat ?? eventData.settings?.chat?.enabled ?? true;
-      if (chatEnabled) {
-        active.add("Chat Room");
+      if (!chatEnabled) {
+        active.delete("Chat Room");
       }
 
-      // Polls
-      if (polls.length > 0) {
-        active.add("Polls");
-      }
-
-      // Checklist
-      if (checklist.length > 0) {
-        active.add("Checklist");
-      }
-
-      // Schedule
-      if (schedule.length > 0) {
-        active.add("Schedule");
-      }
-
-      // Calendar
-      if (checklist.length > 0 || schedule.length > 0) {
-        active.add("Calendar");
-      }
-
-      // Links
-      if (links.length > 0) {
-        active.add("Links");
+      const gamesEnabled = eventData.settings?.showLeaderboard ?? eventData.settings?.game?.showLeaderboard ?? true;
+      if (!gamesEnabled) {
+        active.delete("Games");
       }
 
       setActivePowerups(active);
