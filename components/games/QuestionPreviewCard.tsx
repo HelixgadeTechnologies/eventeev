@@ -9,7 +9,7 @@ interface QuestionPreviewCardProps {
   question: string;
   options: string[];
   correctOptionIndex: number;
-  thumbnail: string;
+  thumbnail?: string | null;
   showAnswer?: boolean;
 }
 
@@ -22,17 +22,26 @@ export default function QuestionPreviewCard({
   thumbnail,
   showAnswer = false,
 }: QuestionPreviewCardProps) {
+  const hasValidThumbnail = typeof thumbnail === "string" && thumbnail.trim().length > 0;
+
   return (
     <div className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col md:flex-row gap-6 font-sans">
       {/* Thumbnail */}
-      <div className="relative w-full md:w-[120px] h-32 md:h-[120px] flex-shrink-0 rounded-2xl overflow-hidden">
-        <Image
-          src={thumbnail}
-          alt={`Question ${number}`}
-          fill
-          className="object-cover"
-        />
-      </div>
+      {hasValidThumbnail ? (
+        <div className="relative w-full md:w-[120px] h-32 md:h-[120px] flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100">
+          <Image
+            src={thumbnail}
+            alt={`Question ${number}`}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div className="w-full md:w-[120px] h-32 md:h-[120px] flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#FFF2F0] to-[#FFF8E6] flex flex-col items-center justify-center text-[#EB5017] border border-[#EB5017]/10 shadow-inner">
+          <span className="text-2xl font-black">{number}</span>
+          <span className="text-[9px] font-black tracking-widest uppercase opacity-70">Question</span>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-grow space-y-4">

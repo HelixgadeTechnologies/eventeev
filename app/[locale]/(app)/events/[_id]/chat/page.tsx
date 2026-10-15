@@ -175,7 +175,7 @@ export default function ChatPage() {
       // 2. Fetch history from backend
       try {
         const history = await chatService.getMessages(currentRoomId);
-        const msgs = Array.isArray(history) ? history : (history?.messages || history?.data || []);
+        const msgs = Array.isArray(history) ? history : (history?.messages || (history as any)?.data || []);
         const backendMessages = Array.isArray(msgs) ? msgs : [];
 
         if (backendMessages.length > 0) {

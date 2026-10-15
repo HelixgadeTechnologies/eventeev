@@ -17,6 +17,7 @@ import {
   HiOutlinePuzzle as HiPuzzle,
 } from "react-icons/hi";
 import Avatar from "@/components/ui/Avatar";
+import { attendeesService } from "@/lib/services/attendees.service";
 
 // ─── Networking Categories ───────────────────────────────────────────
 const NETWORKING_CATEGORIES = [
@@ -132,15 +133,15 @@ const ALL_QUESTIONS = [
   },
 ];
 
-// ─── Mock matched attendees ────────────────────────────────────────────
-const MOCK_MATCHES = [
-  { id: 1, name: "Sarah Chen", role: "Founder / CEO", industry: "AI / Machine Learning", goal: "Find a co-founder", matchScore: 94, avatar: null },
-  { id: 2, name: "Marcus Johnson", role: "Developer / Engineer", industry: "SaaS / Software", goal: "Get feedback on my project", matchScore: 88, avatar: null },
-  { id: 3, name: "Aisha Patel", role: "Investor / VC", industry: "Fintech", goal: "Meet investors", matchScore: 85, avatar: null },
-  { id: 4, name: "David Kim", role: "Product Manager", industry: "EdTech", goal: "Learn new skills", matchScore: 82, avatar: null },
-  { id: 5, name: "Elena Rodriguez", role: "Designer", industry: "E-commerce", goal: "Partnership", matchScore: 79, avatar: null },
-  { id: 6, name: "James Okonkwo", role: "Marketing / Growth", industry: "Health Tech", goal: "Hire talent", matchScore: 76, avatar: null },
-];
+export interface MatchedAttendee {
+  id: string | number;
+  name: string;
+  role: string;
+  industry: string;
+  goal: string;
+  matchScore: number;
+  avatar?: string | null;
+}
 
 interface CustomQuestion {
   id: string;
@@ -156,7 +157,8 @@ export default function NetworkingPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
+  const [matches, setMatches] = useState<MatchedAttendee[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<string | number | null>(null);
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [newQuestionText, setNewQuestionText] = useState("");
@@ -213,13 +215,35 @@ export default function NetworkingPage() {
     setAnswers((prev) => ({ ...prev, [questionId]: option }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < filteredQuestions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
     } else {
       setCurrentStep("matching");
-      // Simulate matching delay
-      setTimeout(() => setCurrentStep("results"), 2500);
+      try {
+        if (_id) {
+          const res = await attendeesService.getAttendees(_id as string, 1, 50);
+          if (res.data && res.data.length > 0) {
+            const computedMatches: MatchedAttendee[] = res.data.map((att, idx) => ({
+              id: att.id,
+              name: att.name || "Attendee",
+              role: "Registered Attendee",
+              industry: answers["industry"] || "General",
+              goal: answers["business_goal"] || "Networking & Collaboration",
+              matchScore: Math.max(65, 95 - (idx * 4)),
+              avatar: null,
+            }));
+            setMatches(computedMatches);
+          } else {
+            setMatches([]);
+          }
+        } else {
+          setMatches([]);
+        }
+      } catch {
+        setMatches([]);
+      }
+      setTimeout(() => setCurrentStep("results"), 1500);
     }
   };
 
@@ -660,67 +684,81 @@ export default function NetworkingPage() {
       )}
 
       {/* Matches List */}
-      <div className="space-y-4">
-        {MOCK_MATCHES.map((match) => (
-          <div
-            key={match.id}
-            onClick={() => setSelectedMatch(selectedMatch === match.id ? null : match.id)}
-            className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-lg group ${
-              selectedMatch === match.id ? "border-[#EB5017] shadow-lg shadow-[#EB5017]/5" : "border-gray-100"
-            }`}
-          >
-            <div className="p-6 flex items-center gap-5">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <Avatar name={match.name} isBigger={true} />
-                {/* Match score badge */}
-                <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#EB5017] rounded-full flex items-center justify-center shadow-lg shadow-[#EB5017]/30">
-                  <span className="text-[9px] font-black text-white">{match.matchScore}%</span>
-                </div>
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h4 className="font-black text-base text-[#1B1818] tracking-tight">{match.name}</h4>
-                <p className="text-xs text-gray-400 font-bold mt-0.5">{match.role}</p>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="text-[9px] font-black text-[#EB5017] bg-[#EB5017]/5 px-2 py-0.5 rounded-full border border-[#EB5017]/10">
-                    {match.industry}
-                  </span>
-                  <span className="text-[9px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
-                    {match.goal}
-                  </span>
-                </div>
-              </div>
-
-              {/* Match bar */}
-              <div className="hidden md:flex flex-col items-end gap-1 shrink-0 w-28">
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Match</span>
-                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#EB5017] to-[#FF7043] rounded-full transition-all duration-700"
-                    style={{ width: `${match.matchScore}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Expanded actions */}
-            {selectedMatch === match.id && (
-              <div className="px-6 pb-5 pt-4 flex items-center gap-3 border-t border-gray-50">
-                <button className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-lg shadow-[#EB5017]/20">
-                  <HiChat className="text-sm" />
-                  Send Message
-                </button>
-                <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-[#1B1818] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all">
-                  <HiMail className="text-sm" />
-                  Send Email
-                </button>
-              </div>
-            )}
+      {matches.length === 0 ? (
+        <div className="bg-white border border-gray-100 rounded-3xl p-12 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+            <HiUserGroup className="text-3xl" />
           </div>
-        ))}
-      </div>
+          <div className="space-y-1">
+            <h3 className="font-bold text-gray-700 text-lg">No attendee matches yet</h3>
+            <p className="text-sm text-gray-400 max-w-md mx-auto">
+              Once more attendees register and complete check-in for this event, your smart matches will appear here.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {matches.map((match) => (
+            <div
+              key={match.id}
+              onClick={() => setSelectedMatch(selectedMatch === match.id ? null : match.id)}
+              className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-lg group ${
+                selectedMatch === match.id ? "border-[#EB5017] shadow-lg shadow-[#EB5017]/5" : "border-gray-100"
+              }`}
+            >
+              <div className="p-6 flex items-center gap-5">
+                {/* Avatar */}
+                <div className="relative shrink-0">
+                  <Avatar name={match.name} isBigger={true} />
+                  {/* Match score badge */}
+                  <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#EB5017] rounded-full flex items-center justify-center shadow-lg shadow-[#EB5017]/30">
+                    <span className="text-[9px] font-black text-white">{match.matchScore}%</span>
+                  </div>
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-black text-base text-[#1B1818] tracking-tight">{match.name}</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-0.5">{match.role}</p>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className="text-[9px] font-black text-[#EB5017] bg-[#EB5017]/5 px-2 py-0.5 rounded-full border border-[#EB5017]/10">
+                      {match.industry}
+                    </span>
+                    <span className="text-[9px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">
+                      {match.goal}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Match bar */}
+                <div className="hidden md:flex flex-col items-end gap-1 shrink-0 w-28">
+                  <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Match</span>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#EB5017] to-[#FF7043] rounded-full transition-all duration-700"
+                      style={{ width: `${match.matchScore}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded actions */}
+              {selectedMatch === match.id && (
+                <div className="px-6 pb-5 pt-4 flex items-center gap-3 border-t border-gray-50">
+                  <button className="inline-flex items-center gap-2 bg-[#EB5017] text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all active:scale-95 shadow-lg shadow-[#EB5017]/20">
+                    <HiChat className="text-sm" />
+                    Send Message
+                  </button>
+                  <button className="inline-flex items-center gap-2 bg-white border border-gray-200 text-[#1B1818] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all">
+                    <HiMail className="text-sm" />
+                    Send Email
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

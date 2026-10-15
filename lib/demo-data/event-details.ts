@@ -1,5 +1,2 @@
-export const eventDashboard = [
-  {
-    
-  },
-];
+export const eventDashboard: any[] = [];
+

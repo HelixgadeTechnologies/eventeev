@@ -94,8 +94,8 @@ export default function QuizDetailPage() {
         <div className="flex-grow space-y-12">
           {/* Hero Section */}
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="relative w-full md:w-[160px] lg:w-[200px] h-[160px] lg:h-[200px] flex-shrink-0 rounded-[24px] overflow-hidden shadow-xl shadow-gray-200">
-              <Image src={quiz.thumbnail} alt={quiz.title} fill className="object-cover" />
+            <div className="relative w-full md:w-[160px] lg:w-[200px] h-[160px] lg:h-[200px] flex-shrink-0 rounded-[24px] overflow-hidden shadow-xl shadow-gray-200 bg-gray-100">
+              <Image src={quiz.thumbnail || "/thumbnails/space_trivia.png"} alt={quiz.title} fill className="object-cover" />
             </div>
 
             <div className="flex-grow space-y-4 py-1">
@@ -201,7 +201,7 @@ export default function QuizDetailPage() {
                   options={q.options}
                   correctOptionIndex={q.correctAnswer?.[0]}
                   timeLimit={`${q.timeLimit}s`}
-                  thumbnail={q.mediaUrl}
+                  thumbnail={q.mediaUrl || quiz.thumbnail || null}
                   showAnswer={showAnswers}
                 />
               ))}

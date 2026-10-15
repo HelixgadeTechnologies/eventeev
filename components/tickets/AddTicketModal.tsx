@@ -36,7 +36,7 @@ export default function AddTickets({ isOpen, onClose, onSuccess, initialData, de
         </div>
 
         {/* Bottom - Form Section (Glassy) */}
-        <div className="flex-1 bg-gray-50/30 p-6 md:p-8 overflow-y-auto max-h-[60vh]">
+        <div className="flex-1 bg-gray-50/30 p-6 md:p-8 overflow-y-auto max-h-[75vh] md:max-h-[80vh] pb-16">
           <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 gap-2 bg-white/50 p-1.5 rounded-full border border-gray-100 mb-8 backdrop-blur-sm">
               <TabsTrigger

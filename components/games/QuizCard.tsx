@@ -42,9 +42,9 @@ export default function QuizCard({
       className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow group cursor-pointer h-full flex flex-col font-sans"
     >
       {/* Thumbnail */}
-      <div className="relative h-[220px] w-full overflow-hidden">
+      <div className="relative h-[220px] w-full overflow-hidden bg-gray-100">
         <Image
-          src={thumbnail}
+          src={thumbnail && thumbnail.trim() !== "" ? thumbnail : "/thumbnails/space_trivia.png"}
           alt={title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"

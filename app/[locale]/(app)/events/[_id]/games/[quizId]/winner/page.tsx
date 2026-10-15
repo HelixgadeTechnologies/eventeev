@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
@@ -9,30 +9,33 @@ import confetti from "canvas-confetti";
 import { HiOutlineTrophy, HiOutlineHome, HiOutlineShare } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
 
-export default function WinnerPage() {
+interface Winner {
+  rank: number;
+  name: string;
+  points: string;
+  avatar: string;
+  color: string;
+}
+
+function WinnerContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
+  const pin = searchParams.get("pin") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [visibleStep, setVisibleStep] = useState(0); // 0: none, 1: 3rd, 2: 2nd, 3: 1st
-
-  const winners = [
-    { rank: 3, name: "StarGazer", points: "7,900", avatar: "/icons/avatar-placeholder.png", color: "#CD7F32" },
-    { rank: 2, name: "RocketMan", points: "8,420", avatar: "/icons/avatar-placeholder.png", color: "#E2E8F0" },
-    { rank: 1, name: "SpaceExplorer", points: "9,850", avatar: "/icons/avatar-placeholder.png", color: "#FFD700" },
-  ];
+  const [winners, setWinners] = useState<Winner[]>([]);
 
   const triggerConfetti = (rank: number) => {
     const scalar = rank === 1 ? 2 : 1;
     const defaults = { spread: 360, ticks: 100, gravity: 1, decay: 0.94, startVelocity: 30 * scalar, shapes: ['circle', 'square'] as any };
     
     if (rank === 1) {
-       // Big finish for 1st place
        confetti({ ...defaults, particleCount: 150, origin: { y: 0.6 } });
-       // Side bursts
        setTimeout(() => confetti({ ...defaults, particleCount: 80, origin: { x: 0, y: 0.6 } }), 200);
        setTimeout(() => confetti({ ...defaults, particleCount: 80, origin: { x: 1, y: 0.6 } }), 400);
     } else {
@@ -55,16 +58,41 @@ export default function WinnerPage() {
   }, [quizId]);
 
   useEffect(() => {
-    if (!loading && quiz) {
+    if (pin) {
+      quizzesService.getLeaderboard(pin).then((res) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const sorted = [...res].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+          const colors = ["#FFD700", "#E2E8F0", "#CD7F32"];
+          const topWinners: Winner[] = sorted.slice(0, 3).map((item, idx) => ({
+            rank: idx + 1,
+            name: item.nickname || item.name || `Player ${idx + 1}`,
+            points: (item.score ?? 0).toLocaleString(),
+            avatar: item.avatar || "/icons/avatar-placeholder.png",
+            color: colors[idx] || "#CD7F32",
+          }));
+          setWinners(topWinners);
+        } else {
+          setWinners([]);
+        }
+      }).catch(() => {
+        setWinners([]);
+      });
+    }
+  }, [pin]);
+
+  useEffect(() => {
+    if (!loading && quiz && winners.length > 0) {
       // Drama sequence: Reveal 3rd, then 2nd, then 1st
       const timers = [
-        setTimeout(() => { setVisibleStep(1); triggerConfetti(3); }, 2000),
-        setTimeout(() => { setVisibleStep(2); triggerConfetti(2); }, 5000),
-        setTimeout(() => { setVisibleStep(3); triggerConfetti(1); }, 8500),
+        setTimeout(() => { setVisibleStep(1); triggerConfetti(3); }, 1500),
+        setTimeout(() => { setVisibleStep(2); triggerConfetti(2); }, 3500),
+        setTimeout(() => { setVisibleStep(3); triggerConfetti(1); }, 6000),
       ];
       return () => timers.forEach(clearTimeout);
+    } else if (!loading && quiz && winners.length === 0) {
+      setVisibleStep(3);
     }
-  }, [loading, quiz]);
+  }, [loading, quiz, winners.length]);
 
   const handleFinish = () => {
     router.push(`/events/${eventId}/games`);
@@ -78,8 +106,11 @@ export default function WinnerPage() {
     );
   }
 
-  // Sort for display on podium: [2nd, 1st, 3rd]
-  const podiumOrder = [winners[1], winners[2], winners[0]];
+  // Sort for display on podium: [2nd, 1st, 3rd] if 3 winners exist
+  const first = winners.find(w => w.rank === 1);
+  const second = winners.find(w => w.rank === 2);
+  const third = winners.find(w => w.rank === 3);
+  const podiumOrder = [second, first, third].filter((w): w is Winner => !!w);
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
@@ -108,78 +139,98 @@ export default function WinnerPage() {
 
       {/* Winner Content */}
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-6">
-        <div className="text-center mb-16 animate-in fade-in slide-in-from-top-12 duration-1000">
+        <div className="text-center mb-12 animate-in fade-in slide-in-from-top-12 duration-1000">
           <div className="inline-flex items-center gap-3 bg-[#FFF2F0] text-[#EB5017] px-6 py-2 rounded-full font-black text-xs uppercase tracking-[0.3em] mb-6 border border-[#EB5017]/10 shadow-sm">
             <HiOutlineTrophy className="text-lg" />
             Quiz Completed
           </div>
-          <h1 className="text-[64px] md:text-[80px] font-black text-[#1B1818] tracking-tighter leading-none mb-4 font-feather uppercase italic">
-            {visibleStep === 3 ? "WE HAVE A WINNER!" : "THE RESULTS ARE IN..."}
+          <h1 className="text-[54px] md:text-[72px] font-black text-[#1B1818] tracking-tighter leading-none mb-4 font-feather uppercase italic">
+            {winners.length > 0
+              ? (visibleStep === 3 ? "WE HAVE A WINNER!" : "THE RESULTS ARE IN...")
+              : "SESSION FINISHED"}
           </h1>
           <p className="text-lg text-[#667185] font-medium max-w-lg mx-auto leading-relaxed h-8">
-            {visibleStep === 0 && "Calculating final scores..."}
-            {visibleStep === 1 && "In 3rd Place..."}
-            {visibleStep === 2 && "The Runner Up is..."}
-            {visibleStep === 3 && "All hail the Champion!"}
+            {winners.length > 0 ? (
+              <>
+                {visibleStep === 0 && "Calculating final scores..."}
+                {visibleStep === 1 && "In 3rd Place..."}
+                {visibleStep === 2 && "The Runner Up is..."}
+                {visibleStep === 3 && "All hail the Champion!"}
+              </>
+            ) : (
+              "The quiz session has concluded successfully."
+            )}
           </p>
         </div>
 
-        {/* Podium */}
-        <div className="flex items-end justify-center gap-4 md:gap-12 w-full max-w-5xl mb-20">
-          {podiumOrder.map((winner) => {
-            const isVisible = (winner.rank === 3 && visibleStep >= 1) || 
-                              (winner.rank === 2 && visibleStep >= 2) || 
-                              (winner.rank === 1 && visibleStep >= 3);
+        {/* Podium or Empty State */}
+        {podiumOrder.length > 0 ? (
+          <div className="flex items-end justify-center gap-4 md:gap-12 w-full max-w-5xl mb-16">
+            {podiumOrder.map((winner) => {
+              const isVisible = (winner.rank === 3 && visibleStep >= 1) || 
+                                (winner.rank === 2 && visibleStep >= 2) || 
+                                (winner.rank === 1 && visibleStep >= 3);
 
-            return (
-              <div 
-                key={winner.rank} 
-                className={`flex flex-col items-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95 blur-xl pointer-events-none'}`}
-              >
-                {/* Avatar Circle */}
-                <div className={`relative mb-6 ${winner.rank === 1 ? 'w-32 h-32 md:w-40 md:h-40' : 'w-24 h-24 md:w-28 md:h-28'}`}>
-                  <div className={`absolute inset-0 rounded-full border-[6px] shadow-2xl z-10`} style={{ borderColor: winner.color }}>
-                     <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
-                        <Image src={winner.avatar} alt={winner.name} fill className="object-cover" />
-                     </div>
-                  </div>
-                  {winner.rank === 1 && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFC20E" stroke="#FFC20E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  )}
-                  {/* Rank Badge */}
-                  <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-white shadow-lg`} style={{ backgroundColor: winner.color, color: winner.rank === 1 ? '#1B1818' : 'white' }}>
-                     {winner.rank}
-                  </div>
-                </div>
-
-                {/* Name and Points */}
-                <div className="text-center mb-6">
-                  <h3 className={`font-black text-[#1B1818] uppercase tracking-tight ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
-                    {winner.name}
-                  </h3>
-                  <span className="text-sm font-black text-[#667185] opacity-60 uppercase tracking-widest">
-                    {winner.points} PTS
-                  </span>
-                </div>
-
-                {/* Podium Block */}
+              return (
                 <div 
-                  className={`w-32 md:w-48 rounded-t-[32px] shadow-2xl transition-all duration-1000`}
-                  style={{ 
-                    height: winner.rank === 1 ? '240px' : winner.rank === 2 ? '180px' : '140px',
-                    backgroundColor: 'white',
-                    borderTop: `8px solid ${winner.color}`,
-                    background: 'linear-gradient(to bottom, white, rgba(255,255,255,0.8))'
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
+                  key={winner.rank} 
+                  className={`flex flex-col items-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-20 scale-95 blur-xl pointer-events-none'}`}
+                >
+                  {/* Avatar Circle */}
+                  <div className={`relative mb-6 ${winner.rank === 1 ? 'w-32 h-32 md:w-40 md:h-40' : 'w-24 h-24 md:w-28 md:h-28'}`}>
+                    <div className={`absolute inset-0 rounded-full border-[6px] shadow-2xl z-10`} style={{ borderColor: winner.color }}>
+                       <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
+                          <Image src={winner.avatar} alt={winner.name} fill className="object-cover" />
+                       </div>
+                    </div>
+                    {winner.rank === 1 && (
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#FFC20E" stroke="#FFC20E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                    )}
+                    {/* Rank Badge */}
+                    <div className={`absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-white shadow-lg`} style={{ backgroundColor: winner.color, color: winner.rank === 1 ? '#1B1818' : 'white' }}>
+                       {winner.rank}
+                    </div>
+                  </div>
+
+                  {/* Name and Points */}
+                  <div className="text-center mb-6">
+                    <h3 className={`font-black text-[#1B1818] uppercase tracking-tight ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
+                      {winner.name}
+                    </h3>
+                    <span className="text-sm font-black text-[#667185] opacity-60 uppercase tracking-widest">
+                      {winner.points} PTS
+                    </span>
+                  </div>
+
+                  {/* Podium Block */}
+                  <div 
+                    className={`w-32 md:w-48 rounded-t-[32px] shadow-2xl transition-all duration-1000`}
+                    style={{ 
+                      height: winner.rank === 1 ? '240px' : winner.rank === 2 ? '180px' : '140px',
+                      backgroundColor: 'white',
+                      borderTop: `8px solid ${winner.color}`,
+                      background: 'linear-gradient(to bottom, white, rgba(255,255,255,0.8))'
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-white border border-gray-100 rounded-3xl p-10 max-w-md w-full text-center space-y-3 mb-12 shadow-sm">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-orange-50 flex items-center justify-center text-[#EB5017]">
+              <HiOutlineTrophy className="text-3xl" />
+            </div>
+            <h3 className="font-bold text-gray-700 text-lg">Game Session Complete</h3>
+            <p className="text-xs text-gray-400">
+              No participant leaderboard scores recorded for this session.
+            </p>
+          </div>
+        )}
 
         {/* Action Button */}
         <div className={`transition-all duration-1000 ${visibleStep === 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
@@ -196,5 +247,13 @@ export default function WinnerPage() {
       {/* Confetti Canvas Placeholder */}
       <div className="fixed inset-0 pointer-events-none z-[100]" id="confetti-holder" />
     </div>
+  );
+}
+
+export default function WinnerPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <WinnerContent />
+    </Suspense>
   );
 }

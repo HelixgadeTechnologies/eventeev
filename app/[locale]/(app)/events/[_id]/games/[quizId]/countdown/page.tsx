@@ -1,15 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineVolumeUp, HiOutlineCog } from "react-icons/hi";
+import { quizzesService } from "@/lib/services/quizzes.service";
 
-export default function CountdownPage() {
+function CountdownContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const eventId = params._id;
+  const quizId = params.quizId;
+  const pin = searchParams.get("pin") || "";
+
   const [count, setCount] = useState(5);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [playersCount, setPlayersCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (pin) {
+      quizzesService.getLeaderboard(pin).then((res) => {
+        if (Array.isArray(res)) {
+          setPlayersCount(res.length);
+        }
+      }).catch(() => {});
+    }
+  }, [pin]);
 
   useEffect(() => {
     if (count > 0) {
@@ -22,12 +39,10 @@ export default function CountdownPage() {
       }, 1000);
       return () => clearTimeout(timer);
     } else {
-      // Navigate to the play page
-      const eventId = params._id;
-      const quizId = params.quizId;
-      router.push(`/events/${eventId}/games/${quizId}/intro?q=0`);
+      // Navigate to the intro page with pin passed
+      router.push(`/events/${eventId}/games/${quizId}/intro?q=0${pin ? `&pin=${pin}` : ''}`);
     }
-  }, [count, params._id, params.quizId, router]);
+  }, [count, eventId, quizId, pin, router]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#EB5017] flex flex-col font-sans overflow-hidden items-center justify-center text-white">
@@ -99,7 +114,7 @@ export default function CountdownPage() {
 
       {/* Players Ready Status */}
       <div className="mt-12 bg-white/10 backdrop-blur-2xl border border-white/20 px-12 py-6 rounded-[32px] shadow-2xl flex flex-col items-center gap-1.5 min-w-[240px]">
-        <span className="text-white text-4xl md:text-5xl font-black tracking-tight leading-none">128</span>
+        <span className="text-white text-4xl md:text-5xl font-black tracking-tight leading-none">{playersCount}</span>
         <div className="flex items-center gap-2 text-white/60 font-black text-[10px] uppercase tracking-[0.2em]">
            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
@@ -111,7 +126,7 @@ export default function CountdownPage() {
       {/* Footer Area */}
       <footer className="absolute bottom-0 left-0 right-0 p-8 flex items-center justify-between">
         <div className="text-white font-black text-[10px] uppercase tracking-widest opacity-60">
-           Room Code: <span className="text-white font-black">EV-7721</span>
+           Room Code: <span className="text-white font-black">{pin || "---"}</span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -124,5 +139,13 @@ export default function CountdownPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function CountdownPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#EB5017]" />}>
+      <CountdownContent />
+    </Suspense>
   );
 }

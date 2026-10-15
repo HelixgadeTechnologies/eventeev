@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { profileService } from "@/lib/services/profile.service";
 import { uploadService } from "@/lib/services/upload.service";
+import { eventsService } from "@/lib/services/events.service";
 import ActionConfirmationModal from "../ui/ActionConfirmationModal";
 import { 
   User, 
@@ -1408,24 +1409,39 @@ const ShowProfile = () => {
   // ----------------------------------------------------
   // SUB-PANE COMPONENT 7: Data Export
   // ----------------------------------------------------
-  const triggerDataDownload = (format: "json" | "csv") => {
+  const triggerDataDownload = async (format: "json" | "csv") => {
     try {
-      const mockEventData = [
-        { id: "e1", title: "Cyber Tech Meetup", date: "2026-05-25", organizer: `${formData.firstName} ${formData.lastName}` },
-        { id: "e2", title: "Design Sprint Showcase", date: "2026-06-12", organizer: `${formData.firstName} ${formData.lastName}` }
-      ];
+      let userEvents: any[] = [];
+      try {
+        const pubRes = await eventsService.getPublishedEvents();
+        if (Array.isArray(pubRes.data)) {
+          userEvents = pubRes.data
+            .filter((e: any) => {
+              const ownerId = typeof e.userId === 'object' ? (e.userId?.id || e.userId?._id) : e.userId;
+              return ownerId === user?.id || ownerId === user?._id;
+            })
+            .map((e: any) => ({
+              id: e.id || e._id,
+              title: e.title || "Untitled Event",
+              date: e.startDate || e.date || "",
+              organizer: `${formData.firstName} ${formData.lastName}`.trim() || "Organizer"
+            }));
+        }
+      } catch {
+        userEvents = [];
+      }
 
       let fileData = "";
       let filename = `eventeev_export_${user?.id || "user"}`;
       let mimeType = "";
 
       if (format === "json") {
-        fileData = JSON.stringify({ user: formData, events: mockEventData }, null, 2);
+        fileData = JSON.stringify({ user: formData, events: userEvents }, null, 2);
         filename += ".json";
         mimeType = "application/json";
       } else {
         fileData = "EventID,Title,StartDate,Organizer\n" + 
-          mockEventData.map(e => `"${e.id}","${e.title}","${e.date}","${e.organizer}"`).join("\n");
+          userEvents.map(e => `"${e.id}","${e.title}","${e.date}","${e.organizer}"`).join("\n");
         filename += ".csv";
         mimeType = "text/csv";
       }

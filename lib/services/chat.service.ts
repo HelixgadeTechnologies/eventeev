@@ -154,16 +154,33 @@ class ChatService {
   }
 
   async getMessages(roomId: string, page = 1, limit = 50) {
+    if (!roomId) return { messages: [], pagination: null };
+
+    // MongoDB ObjectIds are strictly 24 hexadecimal characters.
+    // If roomId is a client-side synthetic DM (e.g. "dm_...", "organizer", or non-hex string),
+    // skip the backend request to avoid MongoDB CastError -> 500.
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(roomId);
+    if (!isValidObjectId) {
+      return { messages: [], pagination: null };
+    }
+
     try {
       const response = await axiosInstance.get(`/api/chat/messages/${roomId}?page=${page}&limit=${limit}`);
-      return response.data?.pagination
-        ? { messages: response.data.data, pagination: response.data.pagination }
-        : response.data;
+      const rawData = response.data;
+      if (Array.isArray(rawData)) {
+        return { messages: rawData, pagination: null };
+      }
+      if (rawData?.pagination) {
+        return { messages: rawData.data || [], pagination: rawData.pagination };
+      }
+      return { messages: rawData?.messages || rawData?.data || [], pagination: null };
     } catch (error: any) {
+      // Gracefully return empty messages on 404 or backend 500 so UI falls back cleanly to local/socket messages
       const status = error.response?.status;
-      if (status === 404) return { messages: [], pagination: null };
-      console.error('Failed to fetch messages:', error);
-      throw error;
+      if (status !== 404 && status !== 500) {
+        console.warn('[ChatService] getMessages notice:', error.message);
+      }
+      return { messages: [], pagination: null };
     }
   }
 
@@ -172,8 +189,13 @@ class ChatService {
       const response = await axiosInstance.post('/api/chat/room', data);
       return response.data;
     } catch (error: any) {
-      console.warn('Failed to create chat room on backend:', error.response?.data || error.message);
-      throw error;
+      try {
+        const response2 = await axiosInstance.post('/api/chat/rooms', data);
+        return response2.data;
+      } catch {
+        console.warn('Failed to create chat room on backend:', error.response?.data || error.message);
+        throw error;
+      }
     }
   }
 

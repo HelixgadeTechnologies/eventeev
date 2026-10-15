@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FiSearch } from "react-icons/fi";
 import { 
   HiOutlineBeaker, 
@@ -17,6 +17,7 @@ import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import QuizCard from "@/components/games/QuizCard";
 import CreateQuizModal from "@/components/games/CreateQuizModal";
+import { quizzesService } from "@/lib/services/quizzes.service";
 
 const categories = [
   { id: "all", name: "All", icon: RiInfinityLine, active: true },
@@ -28,68 +29,40 @@ const categories = [
   { id: "pop-culture", name: "Pop Culture", icon: HiOutlineFilm },
 ];
 
-const featuredQuizzes = [
-  {
-    id: "space-trivia",
-    title: "The Ultimate Space Trivia",
-    category: "Science",
-    questions: 10,
-    author: "SARAH J.",
-    thumbnail: "/thumbnails/space_trivia.png",
-  },
-  {
-    id: "modern-art",
-    title: "Modern Art Masterpieces",
-    category: "Art",
-    questions: 12,
-    author: "ALEX RIVERS",
-    thumbnail: "/thumbnails/modern_art.png",
-  },
-  {
-    id: "pop-hits",
-    title: "2000s Pop Hits Quiz",
-    category: "Music",
-    questions: 20,
-    author: "DJ MIKE",
-    thumbnail: "/thumbnails/pop_hits.png",
-  },
-  {
-    id: "mountain-ranges",
-    title: "Mountain Ranges World Tour",
-    category: "Geography",
-    questions: 10,
-    author: "EXPLORER SAM",
-    thumbnail: "/thumbnails/mountain_ranges.png",
-  },
-  {
-    id: "ancient-civilizations",
-    title: "Ancient Civilizations 101",
-    category: "History",
-    questions: 18,
-    author: "DR. HISTORY",
-    thumbnail: "/thumbnails/ancient_civilizations.png",
-  },
-  {
-    id: "video-game-lore",
-    title: "Video Game Lore Expert",
-    category: "Gaming",
-    questions: 25,
-    author: "GAMERTAG99",
-    thumbnail: "/thumbnails/video_game_lore.png",
-  },
-];
-
-// interface GamesPageProps {
-//   params?: Promise<{ _id: string }>;
-// }
-
 export default function GamesPage() {
   const params = useParams();
-  const eventId = params._id;
+  const eventId = params._id as string;
+  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!eventId) return;
+    const fetchEventQuizzes = async () => {
+      try {
+        setLoading(true);
+        const data = await quizzesService.getQuizzesByEvent(eventId);
+        setQuizzes(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching event quizzes:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEventQuizzes();
+  }, [eventId]);
+
+  const filteredQuizzes = useMemo(() => {
+    return quizzes.filter((q) => {
+      const matchesCategory = activeCategory === "all" || q.category?.toLowerCase() === activeCategory.toLowerCase();
+      const matchesSearch = !searchQuery || q.title?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [quizzes, activeCategory, searchQuery]);
 
   const handleCreateQuiz = () => {
     setIsCreateModalOpen(true);
@@ -148,6 +121,8 @@ export default function GamesPage() {
         <FiSearch className="text-[#98A2B3] text-xl" />
         <input 
           type="text" 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Find a quiz on science, history, or pop culture..."
           className="flex-grow px-4 outline-none text-[#1B1818] text-base placeholder:text-[#98A2B3] font-normal"
         />
@@ -178,34 +153,58 @@ export default function GamesPage() {
         })}
       </div>
 
-      {/* Featured Quizzes Header */}
+      {/* Event Quizzes Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl md:text-3xl font-black text-[#1B1818] tracking-tight font-sans">
-            Featured Quizzes
+            Event Quizzes
           </h2>
-          <span className="bg-[#FFF2F0] text-[#FF4D4F] px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
-            NEW
-          </span>
+          {quizzes.length > 0 && (
+            <span className="bg-[#FFF2F0] text-[#EB5017] px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+              {quizzes.length} Total
+            </span>
+          )}
         </div>
-        <button className="text-[#eb5017] font-bold text-sm hover:underline flex items-center gap-1 group">
-          View All <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
-        </button>
       </div>
 
-      {/* Quizzes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {featuredQuizzes.map((quiz, index) => (
-          <QuizCard key={index} {...quiz} />
-        ))}
-      </div>
-
-      {/* Load More */}
-      <div className="flex justify-center pt-8">
-        <button className="border-2 border-[#eb5017] text-[#eb5017] px-12 py-4 rounded-2xl font-black tracking-tight hover:bg-[#eb5017] hover:text-white transition-all transform active:scale-95">
-          Load More Quizzes
-        </button>
-      </div>
+      {/* Quizzes Grid or Empty State */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#eb5017]"></div>
+        </div>
+      ) : filteredQuizzes.length === 0 ? (
+        <div className="bg-white rounded-[32px] border border-dashed border-gray-200 p-12 text-center flex flex-col items-center justify-center space-y-4">
+          <div className="w-16 h-16 bg-[#FFF2F0] text-[#EB5017] rounded-full flex items-center justify-center text-2xl font-black">
+            🎮
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold text-[#1B1818]">No Quizzes Created Yet</h3>
+            <p className="text-gray-400 text-sm max-w-md">
+              Create interactive trivia, games, and quizzes to engage your event participants.
+            </p>
+          </div>
+          <button 
+            onClick={handleCreateQuiz}
+            className="bg-[#eb5017] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#d64815] transition-all transform active:scale-95 shadow-md shadow-[#eb5017]/20"
+          >
+            Create Your First Quiz
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredQuizzes.map((quiz, index) => (
+            <QuizCard 
+              key={quiz._id || quiz.id || index}
+              id={quiz._id || quiz.id}
+              title={quiz.title}
+              category={quiz.category || "General"}
+              questions={quiz.questions?.length || 0}
+              author={quiz.author || "Organizer"}
+              thumbnail={quiz.coverImage || quiz.thumbnail || "/thumbnails/space_trivia.png"}
+            />
+          ))}
+        </div>
+      )}
 
       <CreateQuizModal 
         isOpen={isCreateModalOpen}
