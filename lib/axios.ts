@@ -58,8 +58,21 @@ axiosInstance.interceptors.response.use(
       const url = config?.url || '';
       const isAuthRequest = url.includes('/auth/') || url.includes('/user/me');
 
-      if (typeof window !== 'undefined' && !isAuthRequest && window.location.pathname !== '/') {
-        window.location.href = '/';
+      if (typeof window !== 'undefined' && !isAuthRequest) {
+        const path = window.location.pathname;
+        const isPublicPath =
+          path === '/' ||
+          path.includes('/login') ||
+          path.includes('/register') ||
+          path.includes('/forgot-password') ||
+          path.includes('/pricing') ||
+          path.includes('/explore') ||
+          path.includes('/public');
+
+        // Only redirect if browsing private dashboard/admin surfaces
+        if (!isPublicPath && (path.includes('/dashboard') || path.includes('/profile') || path.includes('/settings') || path.includes('/checklist') || path.includes('/monetization'))) {
+          window.location.href = '/';
+        }
       }
     }
     return Promise.reject(error);

@@ -23,6 +23,9 @@ export class AuthService {
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
       
+      if (token && typeof window !== 'undefined') {
+        localStorage.setItem('x-auth-token', token);
+      }
       return { user: mappedUser, error: null }
     } catch (error: any) {
       return { user: null, error: error.response?.data?.message || 'Registration failed' }
@@ -37,7 +40,9 @@ export class AuthService {
       const response = await axios.post('/api/auth/login', data);
       const { user, token } = response.data;
       const mappedUser = user ? { ...user, id: user.id || user._id } : null;
-      
+      if (token && typeof window !== 'undefined') {
+        localStorage.setItem('x-auth-token', token);
+      }
       return { user: mappedUser, session: { access_token: token, user: mappedUser }, error: null }
     } catch (error: any) {
       return { user: null, session: null, error: error.response?.data?.message || 'Login failed' }
@@ -49,6 +54,9 @@ export class AuthService {
    */
   async signOut() {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('x-auth-token');
+      }
       await axios.post('/api/auth/logout');
     } catch (e) {
       // ignore

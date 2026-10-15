@@ -204,7 +204,7 @@ const ShowProfile = () => {
     if (!user?.id) return;
     setIsSaving(true);
     try {
-      // 1. Update API-supported fields
+      // 1. Update API fields
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -215,6 +215,13 @@ const ShowProfile = () => {
         orgName: formData.orgName,
         orgWebsite: formData.orgWebsite,
         orgIndustry: formData.orgIndustry,
+        jobTitle: formData.jobTitle,
+        location: formData.location,
+        phone: formData.phone,
+        bio: formData.bio,
+        cityState: formData.cityState,
+        postalCode: formData.postalCode,
+        taxId: formData.taxId,
       };
 
       const profileResult = await profileService.updateUserProfile(user.id, payload);

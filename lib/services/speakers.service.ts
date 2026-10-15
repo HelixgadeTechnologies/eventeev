@@ -117,7 +117,6 @@ export class SpeakersService {
       const response = await axiosInstance.get(`/api/speaker/event/${eventId}/stats`);
       return { data: response.data, error: null };
     } catch (error: any) {
-      console.error('Failed to fetch speaker stats:', error);
       return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } };
     }
   }

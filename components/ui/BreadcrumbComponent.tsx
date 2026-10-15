@@ -20,14 +20,35 @@ export default function Breadcrumb({
   fallbackSubtitle = "Control your profile setup and integrations",
 }: Props) {
   const pathname = usePathname();
-  // const params = useParams();
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
   const { user } = useAuth();
 
-  // const _id = Array.isArray(params._id) ? params._id[0] : params._id;
+  // Normalize path by stripping locale and trailing slashes
+  const cleanPath =
+    (pathname.replace(/^\/[a-zA-Z]{2,3}(?=\/|$)/, "") || "/").replace(
+      /\/+$/,
+      ""
+    ) || "/";
 
-  // const currentEvent = publishedEvents.find((event) => event._id === _id);
+  const isDashboard =
+    cleanPath === "/dashboard" ||
+    /^\/events\/[^/]+\/dashboard$/.test(cleanPath);
+
+  // Hide breadcrumb on games pages as per user request to move content up
+  if (cleanPath.includes("/games")) return null;
+
   const matched = matchBreadcrumb(pathname);
+
+  // If not on the dashboard, never render the dashboard text fallback
+  if (!isDashboard) {
+    if (!matched) return null;
+    if (
+      matched.title === "Dashboard" ||
+      matched.subtitle === "Control your profile setup and integrations"
+    ) {
+      return null;
+    }
+  }
 
   const handleOpen = () => {
     setOpenAddTicketModal(true);
@@ -36,9 +57,6 @@ export default function Breadcrumb({
   const handleClose = () => {
     setOpenAddTicketModal(false);
   };
-
-  // Build the dynamic route pattern
-  // const dynamicRoute = currentEvent ? `/events/${currentEvent._id}/dashboard` : null;
 
   const hasButtons: Record<string, React.ReactNode> = {
     dashboard: (
@@ -72,8 +90,8 @@ export default function Breadcrumb({
         content="Create New Quiz"
         icon={<IoAdd className="text-lg" />}
         onClick={() => {
-          const pathSegments = pathname.split("/");
-          const eventId = pathSegments[2];
+          const pathSegments = cleanPath.split("/").filter(Boolean);
+          const eventId = pathSegments[1];
           window.location.href = `/events/${eventId}/games/create`;
         }}
       />
@@ -81,8 +99,8 @@ export default function Breadcrumb({
   };
 
   const getPageType = () => {
-    const pathSegments = pathname.split("/");
-    return pathSegments[pathSegments.length - 1];
+    const pathSegments = cleanPath.split("/").filter(Boolean);
+    return pathSegments[pathSegments.length - 1] || "";
   };
 
   const pageType = getPageType();
@@ -98,21 +116,22 @@ export default function Breadcrumb({
 
   const buttonToShow = shouldShowButton();
 
-  // Hide breadcrumb on games pages as per user request to move content up
-  if (pathname.includes("/games")) return null;
-
   const displayTitle = (matched?.title || fallbackTitle).replace(
     "{firstName}",
     user?.firstName || "User"
   );
 
+  const displaySubtitle = matched !== null ? matched.subtitle : fallbackSubtitle;
+
   return (
     <section className="flex justify-between items-center">
       <div>
         <h2 className="font-semibold text-base md:text-[22px]">{displayTitle}</h2>
-        <p className="text-[10px] md:text-xs text-gray-500">
-          {matched !== null ? matched.subtitle : fallbackSubtitle}
-        </p>
+        {displaySubtitle && (
+          <p className="text-[10px] md:text-xs text-gray-500">
+            {displaySubtitle}
+          </p>
+        )}
       </div>
 
       {buttonToShow && <div className="min-w-[228px]">{buttonToShow}</div>}

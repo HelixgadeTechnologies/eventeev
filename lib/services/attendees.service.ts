@@ -33,6 +33,36 @@ export class AttendeesService {
   }
 
   /**
+   * Get a single attendee by ID with direct endpoint and event fallback
+   */
+  async getAttendeeById(eventId: string, attendeeId: string) {
+    // 1. Try direct attendee lookup
+    try {
+      const response = await axiosInstance.get(`/api/attendee/${attendeeId}`);
+      const raw = response.data?.data || response.data;
+      if (raw && (raw.id === attendeeId || raw._id === attendeeId)) {
+        return {
+          data: { ...raw, id: raw.id || raw._id } as ApiAttendee,
+          error: null,
+        };
+      }
+    } catch {
+      // Direct endpoint may not be implemented on some backend versions; fall back
+    }
+
+    // 2. Fallback: Search in event attendees list
+    const { data: attendees, error } = await this.getAttendees(eventId, 1, 500);
+    if (error) {
+      return { data: null, error };
+    }
+    const found = attendees.find((a) => a.id === attendeeId);
+    if (!found) {
+      return { data: null, error: { message: 'Attendee not found in this event' } };
+    }
+    return { data: found, error: null };
+  }
+
+  /**
    * Public registration for an event (Unauthenticated)
    */
   async publicRegister(payload: { eventId: string; name: string; email: string; ticketId?: string }) {
@@ -58,16 +88,24 @@ export class AttendeesService {
     }
   }
 
+  private inFlightCheckIns = new Set<string>();
+
   /**
    * Check-in an attendee
    */
   async checkInAttendee(attendeeId: string) {
+    if (this.inFlightCheckIns.has(attendeeId)) {
+      return { data: null, error: { message: 'Check-in already in progress' } };
+    }
+    this.inFlightCheckIns.add(attendeeId);
     try {
       const response = await axiosInstance.patch(`/api/attendee/${attendeeId}/check-in`);
       return { data: response.data, error: null };
     } catch (error: any) {
       console.error('Failed to check-in attendee:', error);
       return { data: null, error: error.response?.data || { message: 'Failed to check-in attendee' } };
+    } finally {
+      this.inFlightCheckIns.delete(attendeeId);
     }
   }
 

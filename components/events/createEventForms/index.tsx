@@ -5,17 +5,16 @@ import EventDetailsForm from './eventDetailsForm';
 import EventThumbnailForm from './eventThumbnailForm';
 import EventSocialsForm from './eventSocialsForm';
 import EventFormPreview from './eventFormPreview';
-import { useAppSelector } from "@/store/hooks";
-import { RootState } from "@/store/store";
+import { CreateEventProvider, useAppSelector, RootState } from "@/context/CreateEventContext";
 
 const formSteps = [
   { id: 1, title: "Basic Details", subtitle: "Event Name, Description, Dates..." },
   { id: 2, title: "Category & Media", subtitle: "Banner, Location, Category" },
   { id: 3, title: "Social Links", subtitle: "Website, Instagram, X..." },
   { id: 4, title: "Review & Publish", subtitle: "Final check and launch" },
-]
+];
 
-const CreateEventForm = () => {
+const CreateEventFormContent = () => {
   const { step } = useAppSelector((state: RootState) => state.createEvent);
 
   return (
@@ -84,7 +83,15 @@ const CreateEventForm = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateEventForm
+const CreateEventForm = () => {
+  return (
+    <CreateEventProvider>
+      <CreateEventFormContent />
+    </CreateEventProvider>
+  );
+};
+
+export default CreateEventForm;

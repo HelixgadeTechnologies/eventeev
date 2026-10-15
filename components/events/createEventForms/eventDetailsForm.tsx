@@ -3,12 +3,13 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { RootState } from "@/store/store";
 import {
+  useAppSelector,
+  useAppDispatch,
+  RootState,
   setNextStep,
   updateForm,
-} from "@/store/features/create-event/createEventSlice";
+} from "@/context/CreateEventContext";
 import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
