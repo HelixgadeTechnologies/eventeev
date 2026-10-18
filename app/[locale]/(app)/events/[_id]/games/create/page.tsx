@@ -319,32 +319,86 @@ export default function CreateQuizPage() {
   };
 
   const handleSaveQuiz = async () => {
+    const isMongoObjectId = (id: string): boolean => /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (!_id || !isMongoObjectId(_id)) {
+      setAlertModal({
+        isOpen: true,
+        title: "Invalid Event",
+        description: "Cannot save quiz because the event ID is missing or invalid. Please return to your event and try again.",
+        variant: "error"
+      });
+      return;
+    }
+
+    if (!quizTitle.trim()) {
+      setAlertModal({
+        isOpen: true,
+        title: "Missing Title",
+        description: "Please enter a title for your quiz before saving.",
+        variant: "error"
+      });
+      return;
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      if (!q.text.trim()) {
+        setAlertModal({
+          isOpen: true,
+          title: "Incomplete Question",
+          description: `Question ${i + 1} has no question text. Please provide a question before saving.`,
+          variant: "error"
+        });
+        return;
+      }
+      const hasCorrect = q.options.some(o => o.isCorrect);
+      if (!hasCorrect) {
+        setAlertModal({
+          isOpen: true,
+          title: "Missing Correct Answer",
+          description: `Question ${i + 1} does not have a correct answer selected. Please select at least one correct option.`,
+          variant: "error"
+        });
+        return;
+      }
+    }
+
     setIsSaving(true);
-    const payload = {
-      id: quizId,
+    const payload: Record<string, any> = {
       eventId: _id,
-      title: quizTitle,
-      description: quizDescription,
-      category: quizCategory,
-      thumbnail: quizCoverImage,
+      title: quizTitle.trim(),
+      description: quizDescription.trim(),
+      category: quizCategory || "trivia",
+      thumbnail: quizCoverImage || "/thumbnails/space_trivia.png",
       questions: questions.map(q => ({
-        text: q.text,
-        mediaUrl: q.media,
+        text: q.text.trim(),
+        mediaUrl: q.media || undefined,
         type: q.type,
-        options: q.options.map(o => o.text),
+        options: q.options.map(o => o.text.trim()),
         correctAnswer: q.options.reduce((acc, o, i) => o.isCorrect ? [...acc, i] : acc, [] as number[]),
         timeLimit: parseInt(q.timeLimit) || 20,
-        points: 0,
+        points: 1000,
         isMultiSelect: q.isMultiSelect
       }))
     };
 
+    if (quizId && isMongoObjectId(quizId)) {
+      payload.id = quizId;
+    }
+
     try {
       await quizzesService.createQuiz(payload);
       setAlertModal({ isOpen: true, title: "Success", description: "Quiz saved successfully!", variant: "success" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save Quiz Error:", error);
-      setAlertModal({ isOpen: true, title: "Error", description: "Failed to save quiz. Please check all fields.", variant: "error" });
+      const serverMessage = error?.response?.data?.message || (typeof error?.response?.data === 'string' ? error.response.data : null);
+      setAlertModal({ 
+        isOpen: true, 
+        title: "Error", 
+        description: serverMessage || "Failed to save quiz. Please check all fields.", 
+        variant: "error" 
+      });
     } finally {
       setIsSaving(false);
     }

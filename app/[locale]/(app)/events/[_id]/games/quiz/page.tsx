@@ -103,22 +103,29 @@ export default function GamesPage() {
   };
 
   const handleModalNext = (data: { title: string; description: string; category: string; coverImage: string }) => {
-    const pathSegments = pathname.split("/");
-    const eventId = pathSegments[2];
-    const quizId = crypto.randomUUID();
+    const targetEventId = eventId || (() => {
+      const segments = pathname.split("/").filter(Boolean);
+      const eventsIndex = segments.indexOf("events");
+      return eventsIndex !== -1 && segments[eventsIndex + 1] ? segments[eventsIndex + 1] : "";
+    })();
     
     const queryParams = new URLSearchParams({
-      id: quizId,
       title: data.title,
       description: data.description,
       category: data.category,
       coverImage: data.coverImage
     }).toString();
 
-    router.push(`/events/${eventId}/games/create?${queryParams}`);
+    router.push(`/events/${targetEventId}/games/create?${queryParams}`);
   };
 
   const handleUseTemplate = (template: any) => {
+    const targetEventId = eventId || (() => {
+      const segments = pathname.split("/").filter(Boolean);
+      const eventsIndex = segments.indexOf("events");
+      return eventsIndex !== -1 && segments[eventsIndex + 1] ? segments[eventsIndex + 1] : "";
+    })();
+
     const queryParams = new URLSearchParams({
       templateId: template._id,
       title: template.title || "",
@@ -127,7 +134,7 @@ export default function GamesPage() {
       coverImage: template.thumbnail || template.coverImage || ""
     }).toString();
 
-    router.push(`/events/${eventId}/games/create?${queryParams}`);
+    router.push(`/events/${targetEventId}/games/create?${queryParams}`);
   };
 
   const handleCloneTemplate = async (templateId: string) => {
