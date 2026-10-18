@@ -18,7 +18,6 @@ import { IoAdd } from "react-icons/io5";
 import { usePathname, useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { FaAngleLeft } from "react-icons/fa6";
 import { toast } from "sonner";
 import QuizCard from "@/components/games/QuizCard";
 import CreateQuizModal from "@/components/games/CreateQuizModal";
@@ -155,15 +154,6 @@ export default function GamesPage() {
 
   return (
     <div className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-10 font-sans">
-      <div className="w-full flex items-center justify-start">
-        <Link 
-            href="../games" 
-            className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
-        >
-            <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
-            Back to Selection
-        </Link>
-      </div>
 
       {/* Header with Create Button */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

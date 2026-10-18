@@ -75,6 +75,7 @@ export default function CreateQuizPage() {
     description: "",
     variant: "primary" as "primary" | "danger" | "success" | "error"
   });
+  const [createdQuizId, setCreatedQuizId] = useState<string>("");
   const templateId = searchParams.get("templateId");
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
@@ -388,8 +389,17 @@ export default function CreateQuizPage() {
     }
 
     try {
-      await quizzesService.createQuiz(payload);
-      setAlertModal({ isOpen: true, title: "Success", description: "Quiz saved successfully!", variant: "success" });
+      const savedQuiz = await quizzesService.createQuiz(payload);
+      const newQuizId = savedQuiz?._id || savedQuiz?.id || "";
+      if (newQuizId) {
+        setCreatedQuizId(newQuizId);
+      }
+      setAlertModal({ 
+        isOpen: true, 
+        title: "Quiz Saved Successfully!", 
+        description: "Your quiz is ready! You can go directly to the host page or view all event quizzes.", 
+        variant: "success" 
+      });
     } catch (error: any) {
       console.error("Save Quiz Error:", error);
       const serverMessage = error?.response?.data?.message || (typeof error?.response?.data === 'string' ? error.response.data : null);
@@ -790,14 +800,19 @@ export default function CreateQuizPage() {
         onConfirm={() => {
           setAlertModal(prev => ({ ...prev, isOpen: false }));
           if (alertModal.variant === "success") {
-            router.push(`/events/${_id}/games/quiz`);
+            if (createdQuizId) {
+              router.push(`/events/${_id}/games/${createdQuizId}`);
+            } else {
+              router.push(`/events/${_id}/games/quiz`);
+            }
           }
         }}
         title={alertModal.title}
         description={alertModal.description}
         variant={alertModal.variant}
-        confirmLabel="OK"
-        hideCancelButton
+        confirmLabel={alertModal.variant === "success" ? "Go to Host Page" : "OK"}
+        cancelLabel="All Quizzes"
+        hideCancelButton={alertModal.variant !== "success"}
       />
     </div>
   );
