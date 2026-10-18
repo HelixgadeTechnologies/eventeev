@@ -20,7 +20,15 @@ export interface Room {
   id: string;
   _id?: string;
   name: string;
-  type: 'general' | 'announcement' | 'private';
+  type: 'general' | 'announcement' | 'private' | 'public';
+  isGroup?: boolean;
+  participantIds?: string[];
+  participants?: Array<{
+    id?: string;
+    name?: string;
+    avatar?: string;
+    role?: string;
+  }>;
   leadParticipant?: {
     name: string;
     avatar?: string;
@@ -184,7 +192,16 @@ class ChatService {
     }
   }
 
-  async createRoom(data: { event?: string; eventId?: string; name: string; type: string; leadParticipant?: any }) {
+  async createRoom(data: {
+    event?: string;
+    eventId?: string;
+    name: string;
+    type?: string;
+    isGroup?: boolean;
+    participantIds?: string[];
+    participants?: any[];
+    leadParticipant?: any;
+  }) {
     try {
       const response = await axiosInstance.post('/api/chat/room', data);
       return response.data;
@@ -206,39 +223,55 @@ class ChatService {
   ) {
     try {
       const existingRooms = await this.getRooms(eventId);
-      const dmRoom = existingRooms.find((r: any) => 
-        (r.type === 'private' || r.type === 'dm') && (
+      const dmRoom = existingRooms.find((r: any) => {
+        const isDm = r.type === 'private' || r.type === 'dm' || r.isGroup === false;
+        if (!isDm) return false;
+        if (Array.isArray(r.participantIds) && r.participantIds.includes(attendee.id)) {
+          return true;
+        }
+        return (
           r.name === attendee.name ||
           r.name === `DM: ${attendee.name}` ||
           r.leadParticipant === attendee.id ||
           (typeof r.leadParticipant === 'object' && (r.leadParticipant?.id === attendee.id || r.leadParticipant?.name === attendee.name))
-        )
-      );
+        );
+      });
 
       if (dmRoom) {
         return { data: dmRoom, error: null };
       }
 
-      // 1. Try creating room via API with both eventId & event
+      const pIds = [currentUserId, attendee.id].filter(Boolean) as string[];
+
+      // 1. Try creating room via API with isGroup: false and participantIds
       try {
         const newRoom = await this.createRoom({
           eventId,
           event: eventId,
           name: attendee.name,
           type: 'private',
+          isGroup: false,
+          participantIds: pIds,
+          leadParticipant: attendee.id,
+          participants: [
+            ...(currentUserId ? [{ id: currentUserId, role: 'admin' }] : []),
+            { id: attendee.id, name: attendee.name, role: 'attendee' }
+          ]
         });
         const roomData = newRoom?.data || newRoom;
         if (roomData && (roomData.id || roomData._id)) {
           return { data: roomData, error: null };
         }
       } catch (err: any) {
-        // 2. Try with object leadParticipant in case the schema expects embedded participant
+        // 2. Try with object leadParticipant fallback
         try {
           const newRoomWithLead = await this.createRoom({
             eventId,
             event: eventId,
             name: attendee.name,
             type: 'private',
+            isGroup: false,
+            participantIds: pIds,
             leadParticipant: {
               name: attendee.name,
               id: attendee.id,
@@ -261,6 +294,8 @@ class ChatService {
         id: fallbackRoomId,
         name: attendee.name,
         type: 'private',
+        isGroup: false,
+        participantIds: pIds,
         leadParticipant: {
           name: attendee.name,
           id: attendee.id,
@@ -277,6 +312,8 @@ class ChatService {
         id: fallbackRoomId,
         name: attendee.name,
         type: 'private',
+        isGroup: false,
+        participantIds: currentUserId ? [currentUserId, attendee.id] : [attendee.id],
         leadParticipant: {
           name: attendee.name,
           id: attendee.id,

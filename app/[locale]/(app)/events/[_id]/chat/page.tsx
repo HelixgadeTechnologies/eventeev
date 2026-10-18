@@ -406,6 +406,31 @@ export default function ChatPage() {
       (content.match(/\.(jpeg|jpg|gif|png|webp)/i) || content.includes('cloudinary'));
   };
 
+  const isDirectRoom = (room?: Room | null) => {
+    if (!room) return false;
+    return room.isGroup === false || room.type === 'private';
+  };
+
+  const getRoomDisplayName = (room?: Room | null, user?: any) => {
+    if (!room) return "";
+    if (!isDirectRoom(room)) return room.name;
+
+    const isUserTheAttendee = 
+      room.name === user?.name || 
+      room.id === user?.id || 
+      (typeof room.leadParticipant === 'object' && room.leadParticipant?.id === user?.id) ||
+      (typeof room.leadParticipant === 'string' && room.leadParticipant === user?.id);
+
+    if (isUserTheAttendee) {
+      return "Event Organizer";
+    }
+
+    return room.name || "Direct Message";
+  };
+
+  const groupChannels = rooms.filter(r => !isDirectRoom(r));
+  const directMessages = rooms.filter(r => isDirectRoom(r));
+
   return (
     <div className="flex bg-white h-[calc(100vh-140px)] border border-gray-100 rounded-[24px] overflow-hidden font-sans">
       {/* Main Chat Area */}
@@ -416,14 +441,12 @@ export default function ChatPage() {
             <>
               <div>
                 <h1 className="text-xl font-black text-[#1B1818] tracking-tight">
-                  {(activeRoom.type === 'private' && (
-                    activeRoom.name === currentUser?.name || 
-                    activeRoom.id === currentUser?.id || 
-                    (typeof activeRoom.leadParticipant === 'object' && activeRoom.leadParticipant?.id === currentUser?.id)
-                  )) ? "Event Organizer" : activeRoom.name}
+                  {getRoomDisplayName(activeRoom, currentUser)}
                 </h1>
                 <p className="text-xs font-bold text-gray-400 mt-0.5">
-                  {activeRoom.type === 'general' ? 'Public Lobby' : activeRoom.type === 'private' ? 'Direct Message' : 'Private Session'}
+                  {isDirectRoom(activeRoom) 
+                    ? 'Direct Message (Private — strictly between you two)' 
+                    : activeRoom.type === 'general' ? 'Public Lobby' : 'Group Channel'}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-gray-400">
@@ -587,7 +610,7 @@ export default function ChatPage() {
               <input 
                 type="text" 
                 disabled={!activeRoom}
-                placeholder={!activeRoom ? "Please select a room first..." : activeRoom.name === "General Lobby" ? "Type a message to the lobby..." : `Message ${activeRoom.name}...`}
+                placeholder={!activeRoom ? "Please select a room first..." : isDirectRoom(activeRoom) ? `Direct message to ${getRoomDisplayName(activeRoom, currentUser)}...` : activeRoom.name === "General Lobby" ? "Type a message to the lobby..." : `Message ${activeRoom.name}...`}
                 className="flex-grow bg-transparent outline-none text-sm font-semibold text-[#1B1818] placeholder:text-gray-300 px-2"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -683,58 +706,108 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Rooms Section */}
-        <div className="p-6 border-b border-gray-50 flex-1 overflow-y-auto custom-scrollbar">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em]">Chat Rooms</h2>
-          </div>
-          
-          <div className="space-y-3">
-            {rooms.length === 0 ? (
-               <div className="py-12 px-4 text-center group cursor-default">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-200 mx-auto mb-4 group-hover:bg-[#FFF8F2] group-hover:text-[#EB5017] transition-all duration-500">
-                    <FiCoffee size={24} />
-                  </div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">No chat rooms found for this event yet.</p>
-               </div>
-            ) : (
-              rooms.map((room) => {
-                const roomId = room.id || (room as any)._id;
-                const isSelected = (activeRoom?.id || (activeRoom as any)?._id) === roomId;
-                const unread = unreadCounts[roomId] || 0;
+        {/* Rooms & Direct Messages Section */}
+        <div className="p-6 border-b border-gray-50 flex-1 overflow-y-auto custom-scrollbar space-y-6">
+          {/* Group Channels */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em] flex items-center gap-1.5">
+                <span>Channels & Lobbies</span>
+                <span className="text-[10px] text-gray-400 font-bold">({groupChannels.length})</span>
+              </h2>
+            </div>
+            
+            <div className="space-y-2">
+              {groupChannels.length === 0 ? (
+                <p className="text-[10px] text-gray-400 font-medium">No public channels yet.</p>
+              ) : (
+                groupChannels.map((room) => {
+                  const roomId = room.id || (room as any)._id;
+                  const isSelected = (activeRoom?.id || (activeRoom as any)?._id) === roomId;
+                  const unread = unreadCounts[roomId] || 0;
 
-                return (
-                  <div 
-                    key={roomId} 
-                    onClick={() => setActiveRoom(room)}
-                    className={`flex items-center gap-3 group cursor-pointer p-3 rounded-2xl transition-all ${isSelected ? 'bg-[#FFF8F2] border border-[#FFD9B3]' : 'hover:bg-gray-50 border border-transparent'}`}
-                  >
-                    <div className="relative">
-                      <div className={`w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#EB5017] bg-[#EB5017]/10' : 'border-white bg-gray-50 shadow-sm'}`}>
-                        <span className={`font-black text-xs ${isSelected ? 'text-[#EB5017]' : 'text-gray-400'}`}>
-                          {room.name.charAt(0)}
-                        </span>
+                  return (
+                    <div 
+                      key={roomId} 
+                      onClick={() => setActiveRoom(room)}
+                      className={`flex items-center gap-3 group cursor-pointer p-2.5 rounded-2xl transition-all ${isSelected ? 'bg-[#FFF8F2] border border-[#FFD9B3]' : 'hover:bg-gray-50 border border-transparent'}`}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={`w-9 h-9 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#EB5017] bg-[#EB5017]/10' : 'border-white bg-gray-50 shadow-sm'}`}>
+                          <span className={`font-black text-xs ${isSelected ? 'text-[#EB5017]' : 'text-gray-400'}`}>
+                            #
+                          </span>
+                        </div>
                       </div>
+                      <div className="flex-grow overflow-hidden">
+                        <p className={`text-[13px] font-black truncate transition-colors ${isSelected ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>
+                          {room.name}
+                        </p>
+                        <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Public Lobby' : 'Group Channel'}</p>
+                      </div>
+                      {unread > 0 && !isSelected && (
+                        <span className="bg-[#EB5017] text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce">
+                          {unread}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex-grow overflow-hidden">
-                      <p className={`text-[13px] font-black truncate transition-colors ${isSelected ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>
-                        {(room.type === 'private' && (
-                          room.name === currentUser?.name || 
-                          room.id === currentUser?.id || 
-                          (typeof room.leadParticipant === 'object' && room.leadParticipant?.id === currentUser?.id)
-                        )) ? "Event Organizer" : room.name}
-                      </p>
-                      <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : room.type === 'private' ? 'Direct Message' : 'Workshop'}</p>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Direct Messages */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-[11px] font-black text-[#1B1818] uppercase tracking-[0.1em] flex items-center gap-1.5">
+                <span>Direct Messages</span>
+                <span className="text-[10px] text-gray-400 font-bold">({directMessages.length})</span>
+              </h2>
+            </div>
+            
+            <div className="space-y-2">
+              {directMessages.length === 0 ? (
+                <div className="py-4 text-center">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">No direct messages yet.</p>
+                  <p className="text-[9px] text-gray-300 mt-1">Click a member above to start a private chat.</p>
+                </div>
+              ) : (
+                directMessages.map((room) => {
+                  const roomId = room.id || (room as any)._id;
+                  const isSelected = (activeRoom?.id || (activeRoom as any)?._id) === roomId;
+                  const unread = unreadCounts[roomId] || 0;
+                  const displayName = getRoomDisplayName(room, currentUser);
+
+                  return (
+                    <div 
+                      key={roomId} 
+                      onClick={() => setActiveRoom(room)}
+                      className={`flex items-center gap-3 group cursor-pointer p-2.5 rounded-2xl transition-all ${isSelected ? 'bg-[#FFF8F2] border border-[#FFD9B3]' : 'hover:bg-gray-50 border border-transparent'}`}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={`w-9 h-9 rounded-full overflow-hidden flex items-center justify-center border-2 transition-all ${isSelected ? 'border-[#EB5017] bg-[#EB5017]/10' : 'border-white bg-gray-50 shadow-sm'}`}>
+                          <span className={`font-black text-xs ${isSelected ? 'text-[#EB5017]' : 'text-gray-400'}`}>
+                            {displayName.charAt(0)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-grow overflow-hidden">
+                        <p className={`text-[13px] font-black truncate transition-colors ${isSelected ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>
+                          {displayName}
+                        </p>
+                        <p className="text-[10px] font-bold text-gray-400 truncate">Private (1-on-1)</p>
+                      </div>
+                      {unread > 0 && !isSelected && (
+                        <span className="bg-[#EB5017] text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce">
+                          {unread}
+                        </span>
+                      )}
                     </div>
-                    {unread > 0 && !isSelected && (
-                      <span className="bg-[#EB5017] text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce">
-                        {unread}
-                      </span>
-                    )}
-                  </div>
-                );
-              })
-            )}
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
       </div>
