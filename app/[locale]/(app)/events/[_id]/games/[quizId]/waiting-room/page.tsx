@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand } from "react-icons/hi";
+import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand, HiOutlineClipboardCopy, HiOutlineLink } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
 import { toast } from "sonner";
 
@@ -16,6 +16,8 @@ export default function WaitingRoomPage() {
   const eventId = params._id;
   const quizId = params.quizId;
   const pin = searchParams.get("pin") || "";
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +66,20 @@ export default function WaitingRoomPage() {
     router.push(`/events/${eventId}/games/${quizId}/countdown${pin ? `?pin=${pin}` : ''}`);
   };
 
+  const handleCopyPin = () => {
+    if (!pin) return;
+    navigator.clipboard.writeText(pin);
+    toast.success(`Game PIN ${pin} copied to clipboard!`);
+  };
+
+  const handleCopyJoinLink = () => {
+    if (!pin) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const joinUrl = `${origin}/events/${eventId}/games/join?pin=${pin}`;
+    navigator.clipboard.writeText(joinUrl);
+    toast.success("Attendee join link copied to clipboard!");
+  };
+
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
@@ -107,24 +123,59 @@ export default function WaitingRoomPage() {
           </h1>
           <div className="inline-flex flex-col items-center">
             <span className="text-[10px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Game PIN</span>
-            <div className="text-5xl md:text-7xl font-black text-[#1B1818] tracking-widest leading-none">
+            <div className="text-5xl md:text-7xl font-black text-[#1B1818] tracking-widest leading-none select-all font-mono">
               {formatPin(pin)}
             </div>
           </div>
+          {pin && (
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-3">
+              <button
+                onClick={handleCopyPin}
+                className="bg-white border border-gray-200 text-gray-700 hover:text-[#EB5017] hover:border-[#EB5017] px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer"
+              >
+                <HiOutlineClipboardCopy className="text-sm text-[#EB5017]" />
+                Copy PIN
+              </button>
+              <button
+                onClick={handleCopyJoinLink}
+                className="bg-[#FFF2F0] text-[#EB5017] hover:bg-[#ffe5e0] px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              >
+                <HiOutlineLink className="text-sm" />
+                Copy Attendee Link
+              </button>
+            </div>
+          )}
+          <p className="text-[11px] font-semibold text-gray-400 mt-2">
+            Attendees connect with this 6-digit PIN to join the lobby
+          </p>
         </div>
 
-        {/* Start Game Action */}
+        {/* Start Game Action / Player Status */}
         <div className="mb-6 w-full max-w-sm shrink-0">
-          <button 
-            onClick={handleStartGame}
-            className="w-full bg-[#EB5017] text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20"
-          >
-            <HiOutlinePlay className="text-xl" />
-            Start Game
-          </button>
-          <p className="text-center text-[#667185] text-[10px] mt-2 font-bold opacity-60">
-            Click start when everyone has joined
-          </p>
+          {isPlayerMode ? (
+            <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-gray-100 shadow-sm text-center space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-xs font-black rounded-full">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Connected as {playerNickname || "Player"}
+              </div>
+              <p className="text-xs font-bold text-gray-500">
+                You are in the game! Watch the host screen for questions to start.
+              </p>
+            </div>
+          ) : (
+            <>
+              <button 
+                onClick={handleStartGame}
+                className="w-full bg-[#EB5017] text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-xl shadow-[#EB5017]/20 cursor-pointer"
+              >
+                <HiOutlinePlay className="text-xl" />
+                Start Game
+              </button>
+              <p className="text-center text-[#667185] text-[10px] mt-2 font-bold opacity-60">
+                Click start when everyone has joined
+              </p>
+            </>
+          )}
         </div>
 
         {/* Waiting Room Section - Grows to fill available space */}

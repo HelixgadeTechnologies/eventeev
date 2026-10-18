@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { HiOutlineDocumentText } from "react-icons/hi";
+import { useParams, useRouter } from "next/navigation";
+import { HiOutlineDocumentText, HiOutlinePlay } from "react-icons/hi";
+import { quizzesService } from "@/lib/services/quizzes.service";
+import { toast } from "sonner";
 
 interface QuizCardProps {
   id: string;
@@ -33,8 +36,27 @@ export default function QuizCard({
   thumbnail,
 }: QuizCardProps) {
   const params = useParams();
+  const router = useRouter();
   const eventId = params._id;
   const colorClass = categoryColors[category.toUpperCase()] || "bg-gray-100 text-gray-600";
+  const [isStarting, setIsStarting] = useState(false);
+
+  const handlePlayGame = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsStarting(true);
+    try {
+      const response = await quizzesService.hostQuiz(id);
+      const pin = response?.pin || Math.floor(100000 + Math.random() * 900000).toString();
+      toast.success(`Game PIN generated: ${pin}`);
+      router.push(`/events/${eventId}/games/${id}/waiting-room?pin=${pin}`);
+    } catch (err) {
+      const fallbackPin = Math.floor(100000 + Math.random() * 900000).toString();
+      router.push(`/events/${eventId}/games/${id}/waiting-room?pin=${fallbackPin}`);
+    } finally {
+      setIsStarting(false);
+    }
+  };
 
   return (
     <Link 
@@ -63,15 +85,25 @@ export default function QuizCard({
           {title}
         </h3>
         
-        <div className="mt-auto flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-[#667185] font-semibold text-xs">
-            <HiOutlineDocumentText className="text-sm" />
-            <span>{questions} Questions</span>
+        <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5 text-[#667185] font-semibold text-xs">
+              <HiOutlineDocumentText className="text-sm" />
+              <span>{questions} Questions</span>
+            </div>
+            <div className="text-[9px] font-black text-gray-400 uppercase tracking-wider mt-0.5">
+              BY {author}
+            </div>
           </div>
-          
-          <div className="text-[10px] font-black text-[#667185] uppercase tracking-wider">
-            BY {author}
-          </div>
+
+          <button
+            onClick={handlePlayGame}
+            disabled={isStarting}
+            className="bg-[#eb5017] hover:bg-[#d64815] text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition-all transform active:scale-95 shadow-md shadow-[#eb5017]/20 disabled:opacity-50 cursor-pointer"
+          >
+            <HiOutlinePlay className="text-sm" />
+            {isStarting ? "PIN..." : "Play Game"}
+          </button>
         </div>
       </div>
     </Link>

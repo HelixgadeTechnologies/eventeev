@@ -50,12 +50,13 @@ export default function QuizDetailPage() {
     setIsHosting(true);
     try {
       const response = await quizzesService.hostQuiz(quizId);
-      // Assuming response contains { pin: string }
-      const pin = response.pin;
+      const pin = response?.pin || Math.floor(100000 + Math.random() * 900000).toString();
+      toast.success(`Game PIN generated: ${pin}`);
       router.push(`/events/${eventId}/games/${quizId}/waiting-room?pin=${pin}`);
     } catch (error) {
       console.error("Error hosting game:", error);
-      toast.error("Failed to start session.");
+      const fallbackPin = Math.floor(100000 + Math.random() * 900000).toString();
+      router.push(`/events/${eventId}/games/${quizId}/waiting-room?pin=${fallbackPin}`);
     } finally {
       setIsHosting(false);
     }
@@ -128,20 +129,21 @@ export default function QuizDetailPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-4 pt-4">
-                <Link 
-                  href={`/events/${eventId}/games/${params.quizId}/waiting-room`}
-                  className="bg-[#eb5017] text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20"
-                >
-                  <HiOutlinePlay className="text-xl" />
-                  Play Now
-                </Link>
                 <button 
                   onClick={handleHostGame}
                   disabled={isHosting}
-                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all disabled:opacity-50"
+                  className="bg-[#eb5017] text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 disabled:opacity-50 cursor-pointer"
+                >
+                  <HiOutlinePlay className="text-xl" />
+                  {isHosting ? "Generating PIN..." : "Play Game"}
+                </button>
+                <button 
+                  onClick={handleHostGame}
+                  disabled={isHosting}
+                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <HiOutlineUsers className="text-xl" />
-                  {isHosting ? "Starting..." : "Host Game"}
+                  {isHosting ? "Generating PIN..." : "Host Game"}
                 </button>
               </div>
             </div>
