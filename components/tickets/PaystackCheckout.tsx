@@ -28,8 +28,16 @@ const PaystackCheckout: React.FC<PaystackCheckoutProps> = ({
   const [loading, setLoading] = useState(false);
   const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '';
 
+  const generateReference = () => {
+    const timestamp = Date.now();
+    const random = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID().replace(/-/g, '').slice(0, 8) 
+      : Math.random().toString(36).substring(2, 10);
+    return `EV_${timestamp}_${random}`;
+  };
+
   const config = {
-    reference: (new Date()).getTime().toString(),
+    reference: generateReference(),
     email,
     amount,
     currency,

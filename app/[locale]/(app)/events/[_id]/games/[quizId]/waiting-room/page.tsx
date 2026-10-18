@@ -15,7 +15,7 @@ export default function WaitingRoomPage() {
   const searchParams = useSearchParams();
   const eventId = params._id;
   const quizId = params.quizId;
-  const pin = searchParams.get("pin") || (quizId === "space-trivia" ? "452901" : "");
+  const pin = searchParams.get("pin") || "";
 
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export default function WaitingRoomPage() {
   };
 
   const handleStartGame = () => {
-    router.push(`/events/${eventId}/games/${quizId}/countdown`);
+    router.push(`/events/${eventId}/games/${quizId}/countdown${pin ? `?pin=${pin}` : ''}`);
   };
 
   const toggleFullScreen = () => {

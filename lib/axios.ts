@@ -56,10 +56,23 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401) {
       const url = config?.url || '';
-      const isAuthRequest = url.includes('/auth/');
+      const isAuthRequest = url.includes('/auth/') || url.includes('/user/me');
 
       if (typeof window !== 'undefined' && !isAuthRequest) {
-        window.location.href = '/';
+        const path = window.location.pathname;
+        const isPublicPath =
+          path === '/' ||
+          path.includes('/login') ||
+          path.includes('/register') ||
+          path.includes('/forgot-password') ||
+          path.includes('/pricing') ||
+          path.includes('/explore') ||
+          path.includes('/public');
+
+        // Only redirect if browsing private dashboard/admin surfaces
+        if (!isPublicPath && (path.includes('/dashboard') || path.includes('/profile') || path.includes('/settings') || path.includes('/checklist') || path.includes('/monetization'))) {
+          window.location.href = '/';
+        }
       }
     }
     return Promise.reject(error);

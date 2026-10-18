@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   format,
   addMonths,
@@ -12,9 +13,11 @@ import {
   addDays,
   isSameMonth,
   isSameDay,
+  isBefore,
+  startOfDay,
   parseISO,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +27,32 @@ interface DatePickerProps {
   label?: string;
   placeholder?: string;
   className?: string;
+  dropUp?: boolean;
+  minDate?: Date | string;
+  disablePast?: boolean;
 }
+
+const parseDateValue = (val?: string): Date | null => {
+  if (!val) return null;
+  try {
+    if (val.includes("T")) {
+      const d = parseISO(val);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    const parts = val.split("-");
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      const date = new Date(y, m, d);
+      return isNaN(date.getTime()) ? null : date;
+    }
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  } catch {
+    return null;
+  }
+};
 
 const DatePicker: React.FC<DatePickerProps> = ({
   value,
@@ -32,42 +60,180 @@ const DatePicker: React.FC<DatePickerProps> = ({
   label,
   placeholder = "Select date",
   className,
+  dropUp: explicitDropUp,
+  minDate,
+  disablePast = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(value ? parseISO(value) : new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(value ? parseISO(value) : null);
+  const [mounted, setMounted] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(parseDateValue(value));
+  const [currentMonth, setCurrentMonth] = useState<Date>(parseDateValue(value) || new Date());
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [isDropUp, setIsDropUp] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const today = new Date();
 
+  const effectiveMinDate = React.useMemo(() => {
+    if (minDate) {
+      const parsed = typeof minDate === "string" ? parseDateValue(minDate) : minDate;
+      if (parsed) return startOfDay(parsed);
+    }
+    if (disablePast) {
+      return startOfDay(new Date());
+    }
+    return null;
+  }, [minDate, disablePast]);
+
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const parsed = parseDateValue(value);
+    setSelectedDate(parsed);
+    if (parsed) {
+      setCurrentMonth(parsed);
+    }
+  }, [value]);
+
+  const updatePosition = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const popoverWidth = 295;
+    const popoverHeight = 350;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    let dropUp = false;
+    if (explicitDropUp !== undefined) {
+      dropUp = explicitDropUp;
+    } else {
+      dropUp = spaceBelow < popoverHeight && spaceAbove > spaceBelow;
+    }
+
+    let top = dropUp ? rect.top - popoverHeight - 8 : rect.bottom + 8;
+    if (top < 12) top = 12;
+    if (top + popoverHeight > window.innerHeight - 12) {
+      top = Math.max(12, window.innerHeight - popoverHeight - 12);
+    }
+
+    let left = rect.left;
+    if (left + popoverWidth > window.innerWidth - 16) {
+      left = Math.max(16, rect.right - popoverWidth);
+    }
+    if (left < 16) left = 16;
+
+    setPos({ top, left });
+    setIsDropUp(dropUp);
+  }, [explicitDropUp]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    updatePosition();
+
+    const handleScrollOrResize = () => {
+      updatePosition();
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        popoverRef.current &&
+        !popoverRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, updatePosition]);
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      updatePosition();
+    }
+    setIsOpen(!isOpen);
+  };
+
+  // Instant capture without requiring OK button, guarded against disabled past dates
+  const handleSelectDay = (day: Date) => {
+    if (effectiveMinDate && isBefore(startOfDay(day), effectiveMinDate)) {
+      return;
+    }
+    setSelectedDate(day);
+    onChange(format(day, "yyyy-MM-dd"));
+    setIsOpen(false);
+  };
+
+  const handleToday = () => {
+    if (effectiveMinDate && isBefore(startOfDay(today), effectiveMinDate)) {
+      return;
+    }
+    setSelectedDate(today);
+    setCurrentMonth(today);
+    onChange(format(today, "yyyy-MM-dd"));
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    setSelectedDate(null);
+    onChange("");
+    setIsOpen(false);
+  };
+
+  const isPrevMonthDisabled =
+    effectiveMinDate !== null &&
+    isBefore(endOfMonth(subMonths(currentMonth, 1)), effectiveMinDate);
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between px-1 py-2">
+      <div className="flex items-center justify-between px-1 py-1 mb-2">
         <button
           type="button"
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-gray-50 transition-all border border-gray-100"
+          disabled={isPrevMonthDisabled}
+          onClick={() => !isPrevMonthDisabled && setCurrentMonth(subMonths(currentMonth, 1))}
+          className={cn(
+            "w-7 h-7 flex items-center justify-center rounded-xl bg-gray-50 transition-all text-gray-500 border border-gray-100",
+            isPrevMonthDisabled
+              ? "opacity-25 cursor-not-allowed hover:bg-gray-50 hover:text-gray-500"
+              : "hover:bg-[#EB5017]/10 hover:text-[#EB5017] active:scale-95"
+          )}
+          title="Previous Month"
         >
-          <ChevronLeft className="w-3 h-3 text-gray-400" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
-        <span className="text-[10px] font-black text-[#1B1818]">
+        <span className="text-xs font-black text-[#1B1818] tracking-tight">
           {format(currentMonth, "MMMM yyyy")}
         </span>
         <button
           type="button"
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-gray-50 transition-all border border-gray-100"
+          className="w-7 h-7 flex items-center justify-center rounded-xl bg-gray-50 hover:bg-[#EB5017]/10 hover:text-[#EB5017] transition-all text-gray-500 border border-gray-100 active:scale-95"
+          title="Next Month"
         >
-          <ChevronRight className="w-3 h-3 text-gray-400" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     );
@@ -76,9 +242,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const renderDays = () => {
     const days = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
     return (
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-1.5 border-b border-gray-100 pb-1">
         {days.map((day) => (
-          <div key={day} className="text-center text-[8px] font-bold text-gray-400 uppercase tracking-[0.1em] py-1">
+          <div key={day} className="text-center text-[9px] font-black text-gray-400 uppercase tracking-wider py-0.5">
             {day}
           </div>
         ))}
@@ -102,90 +268,119 @@ const DatePicker: React.FC<DatePickerProps> = ({
         const isCurrentMonth = isSameMonth(day, monthStart);
         const isSelected = selectedDate && isSameDay(day, selectedDate);
         const isToday = isSameDay(day, today);
+        const isPast = effectiveMinDate ? isBefore(startOfDay(day), effectiveMinDate) : false;
 
         days.push(
-          <div
+          <button
+            type="button"
             key={day.toString()}
-            onClick={() => setSelectedDate(cloneDay)}
+            disabled={isPast}
+            onClick={() => !isPast && handleSelectDay(cloneDay)}
             className={cn(
-              "h-6 w-6 flex items-center justify-center text-[10px] font-black cursor-pointer rounded-lg transition-all m-auto relative",
-              !isCurrentMonth ? "text-gray-300" : "text-[#1B1818]",
-              isSelected
-                ? "bg-[#EB5017] text-white shadow-md shadow-[#EB5017]/20 scale-105 z-10"
-                : "hover:bg-gray-50 hover:text-[#EB5017]",
-              isToday && !isSelected && "border border-[#EB5017] text-[#EB5017]"
+              "h-8 w-8 flex items-center justify-center text-xs font-bold rounded-xl transition-all m-auto relative",
+              isPast
+                ? "opacity-25 text-gray-300 cursor-not-allowed hover:bg-transparent"
+                : !isCurrentMonth
+                ? "text-gray-300 hover:text-gray-500"
+                : "text-[#1B1818]",
+              !isPast && isSelected
+                ? "bg-[#EB5017] text-white font-black shadow-md shadow-[#EB5017]/30 scale-105 z-10"
+                : !isPast && "hover:bg-[#EB5017]/10 hover:text-[#EB5017]",
+              !isPast && isToday && !isSelected && "border border-[#EB5017] text-[#EB5017] font-black"
             )}
           >
             {format(day, "d")}
-          </div>
+          </button>
         );
         day = addDays(day, 1);
       }
       rows.push(
-        <div className="grid grid-cols-7" key={day.toString()}>
+        <div className="grid grid-cols-7 gap-y-1" key={day.toString()}>
           {days}
         </div>
       );
       days = [];
     }
-    return <div className="space-y-0.5">{rows}</div>;
+    return <div className="space-y-1">{rows}</div>;
   };
 
-  const handleDone = () => {
-    if (selectedDate) {
-      onChange(format(selectedDate, "yyyy-MM-dd"));
-    }
-    setIsOpen(false);
-  };
+  const isTodayDisabled = effectiveMinDate !== null && isBefore(startOfDay(today), effectiveMinDate);
 
-  const handleToday = () => {
-    setSelectedDate(today);
-    setCurrentMonth(today);
-  };
+  const popoverContent = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={popoverRef}
+          initial={{ opacity: 0, y: isDropUp ? 6 : -6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: isDropUp ? 6 : -6, scale: 0.98 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
+          style={{
+            position: "fixed",
+            top: `${pos.top}px`,
+            left: `${pos.left}px`,
+            width: "295px",
+            zIndex: 99999,
+          }}
+          className="bg-white rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.22)] border border-gray-100 p-4 select-none"
+        >
+          {renderHeader()}
+          {renderDays()}
+          {renderCells()}
+
+          {/* Quick Actions Footer */}
+          <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between px-1">
+            {!isTodayDisabled ? (
+              <button
+                type="button"
+                onClick={handleToday}
+                className="text-[10px] font-black text-[#EB5017] uppercase tracking-widest hover:underline"
+              >
+                Today
+              </button>
+            ) : <div />}
+            {selectedDate && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 flex items-center gap-1"
+              >
+                <X className="w-3 h-3" />
+                Clear
+              </button>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
-    <div className={cn("relative", className)} ref={containerRef}>
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-bold text-[#1B1818] flex items-center justify-between cursor-pointer focus:ring-1 focus:ring-[#EB5017]/10 focus:border-[#EB5017] hover:border-gray-300 transition-all shadow-sm"
-      >
-        <span className="truncate">{selectedDate ? format(selectedDate, "MMM d, yyyy") : placeholder}</span>
-        <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0 ml-2" />
-      </div>
+    <div className="relative w-full" ref={containerRef}>
+      {label && (
+        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block mb-1.5">
+          {label}
+        </span>
+      )}
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 5, scale: 0.95 }}
-            animate={{ opacity: 1, y: 3, scale: 1 }}
-            exit={{ opacity: 0, y: 5, scale: 0.95 }}
-            className="absolute z-50 mt-1 bg-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] border border-gray-100 p-3 w-[210px] left-0"
-          >
-            {renderHeader()}
-            <div className="px-1">
-                <div className="w-full h-[0.5px] bg-gray-100 mb-2" />
-                {renderDays()}
-                {renderCells()}
-                <div className="mt-4 flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={handleToday}
-                        className="text-[10px] font-black text-[#EB5017] uppercase tracking-widest hover:underline px-1"
-                    >
-                        Today
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleDone}
-                        className="bg-[#EB5017] text-white px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md shadow-[#EB5017]/10 hover:bg-[#d64815] transition-all active:scale-95"
-                    >
-                        Done
-                    </button>
-                </div>
-            </div>
-          </motion.div>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={handleToggle}
+        className={cn(
+          "w-full bg-white/70 border border-gray-100 rounded-2xl px-4 py-3 text-xs font-bold text-[#1B1818] flex items-center justify-between cursor-pointer hover:border-gray-300 transition-all shadow-sm focus:ring-1 focus:ring-[#EB5017]",
+          isOpen && "border-[#EB5017] ring-1 ring-[#EB5017]/20 bg-white",
+          className
         )}
-      </AnimatePresence>
+      >
+        <span className={cn("truncate", !selectedDate && "text-gray-400 font-medium")}>
+          {selectedDate ? format(selectedDate, "MMM d, yyyy") : placeholder}
+        </span>
+        <CalendarIcon className="w-4 h-4 text-gray-400 shrink-0 ml-2" />
+      </button>
+
+      {/* Portal Calendar */}
+      {mounted && createPortal(popoverContent, document.body)}
     </div>
   );
 };

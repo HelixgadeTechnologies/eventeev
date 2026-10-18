@@ -6,7 +6,7 @@ import { FiSearch, FiMoreVertical, FiPaperclip, FiSmile, FiMessageSquare, FiCoff
 import { IoSend as SendIcon } from "react-icons/io5";
 import { HiOutlineChatBubbleLeftRight, HiOutlineUsers } from "react-icons/hi2";
 import { Loader2 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import EmojiPicker from "@/components/chat/EmojiPicker";
 import { chatService, Room } from "@/lib/services/chat.service";
 import { authService } from "@/lib/services/auth.service";
@@ -16,6 +16,8 @@ import { toast } from "sonner";
 
 export default function ChatPage() {
   const { _id } = useParams();
+  const searchParams = useSearchParams();
+  const targetRoomId = searchParams?.get('roomId');
   const eventId = (Array.isArray(_id) ? _id[0] : _id) || "";
   
   const BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://eventeevapi.onrender.com');
@@ -33,6 +35,7 @@ export default function ChatPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [eventMembers, setEventMembers] = useState<any[]>([]);
+  const [startingDm, setStartingDm] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +51,23 @@ export default function ChatPage() {
         }
         setCurrentUser(user);
 
-        const token = localStorage.getItem('x-auth-token');
+        let token: string | null = null;
+        try {
+          token = localStorage.getItem('x-auth-token');
+        } catch {}
+
+        if (!token) {
+          try {
+            const tokenRes = await fetch('/api/auth/token');
+            const tokenData = await tokenRes.json();
+            if (tokenData?.token) {
+              token = tokenData.token;
+              try {
+                localStorage.setItem('x-auth-token', tokenData.token);
+              } catch {}
+            }
+          } catch (e) {}
+        }
         if (token) {
           chatService.initSocket(token);
         }
@@ -56,9 +75,10 @@ export default function ChatPage() {
         if (!eventId) return;
 
         // Fetch attendees for presence & activation check
+        let attendeesList: any[] = [];
         try {
           const res = await attendeesService.getAttendees(eventId as string, 1, 50);
-          const attendeesList = res.data || [];
+          attendeesList = res.data || [];
           setEventMembers(attendeesList);
           const totalAttendees = res.pagination?.total || attendeesList.length || 0;
           if (totalAttendees >= 2) {
@@ -69,9 +89,48 @@ export default function ChatPage() {
         }
 
         const fetchedRooms = await chatService.getRooms(eventId as string);
-        setRooms(fetchedRooms);
-        if (fetchedRooms.length > 0) {
-          setActiveRoom(fetchedRooms[0]);
+        const combinedRooms = [...fetchedRooms];
+
+        // If the logged-in user is an attendee, ensure their direct room with organizer is listed
+        const isAttendee = attendeesList.some(a => (a.id || a._id) === user.id);
+        if (isAttendee) {
+          const dmExists = combinedRooms.some(r => (r.id || (r as any)._id) === user.id);
+          if (!dmExists) {
+            combinedRooms.push({
+              id: user.id,
+              name: "Event Organizer",
+              type: 'private',
+              leadParticipant: {
+                name: "Event Organizer",
+                id: "organizer",
+              }
+            });
+          }
+        }
+
+        setRooms(combinedRooms);
+        if (targetRoomId) {
+          const matched = combinedRooms.find((r: any) => (r.id || r._id) === targetRoomId);
+          if (matched) {
+            setActiveRoom(matched);
+          } else {
+            // Find attendee matching targetRoomId if this was an attendee DM
+            const matchedAttendee = attendeesList.find((a: any) => (a.id || a._id) === targetRoomId);
+            const attendeeName = matchedAttendee?.name || 'Attendee';
+            const dmRoom: Room = {
+              id: targetRoomId,
+              name: attendeeName,
+              type: 'private',
+              leadParticipant: {
+                name: attendeeName,
+                id: targetRoomId,
+              }
+            };
+            setRooms(prev => [dmRoom, ...prev]);
+            setActiveRoom(dmRoom);
+          }
+        } else if (combinedRooms.length > 0) {
+          setActiveRoom(combinedRooms[0]);
         }
       } catch (error) {
         console.error("Error initializing chat:", error);
@@ -99,13 +158,43 @@ export default function ChatPage() {
     setUnreadCounts(prev => ({ ...prev, [currentRoomId]: 0 }));
 
     const fetchHistory = async () => {
+      // 1. Immediately display locally cached messages for instant rendering
+      let cached: any[] = [];
+      try {
+        const local = localStorage.getItem(`chat_history_${eventId}_${currentRoomId}`);
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            cached = parsed;
+            setMessages(parsed);
+            scrollToBottom();
+          }
+        }
+      } catch (e) {}
+
+      // 2. Fetch history from backend
       try {
         const history = await chatService.getMessages(currentRoomId);
-        const msgs = Array.isArray(history) ? history : (history?.messages || history?.data || []);
-        setMessages(Array.isArray(msgs) ? msgs : []);
-        scrollToBottom();
+        const msgs = Array.isArray(history) ? history : (history?.messages || (history as any)?.data || []);
+        const backendMessages = Array.isArray(msgs) ? msgs : [];
+
+        if (backendMessages.length > 0) {
+          setMessages(prev => {
+            const mergedMap = new Map();
+            [...cached, ...backendMessages].forEach(m => {
+              const key = m._id || m.id || `${m.content}_${m.createdAt}`;
+              mergedMap.set(key, m);
+            });
+            const merged = Array.from(mergedMap.values());
+            try {
+              localStorage.setItem(`chat_history_${eventId}_${currentRoomId}`, JSON.stringify(merged.slice(-100)));
+            } catch (e) {}
+            return merged;
+          });
+          scrollToBottom();
+        }
       } catch (error) {
-        toast.error("Failed to load message history");
+        // Handled silently
       }
     };
 
@@ -113,7 +202,21 @@ export default function ChatPage() {
 
     const handleNewMessage = (msg: any) => {
       if (msg.room === currentRoomId) {
-        setMessages(prev => [...prev, msg]);
+        setMessages(prev => {
+          const isDuplicate = prev.some(m => 
+            (m._id && msg._id && m._id === msg._id) ||
+            (m.content === msg.content && 
+              ((m.sender?._id || m.sender?.id || m.sender) === (msg.sender?._id || msg.sender?.id || msg.sender)) &&
+              Math.abs(new Date(m.createdAt || 0).getTime() - new Date(msg.createdAt || 0).getTime()) < 5000
+            )
+          );
+          if (isDuplicate) return prev;
+          const updated = [...prev, msg];
+          try {
+            localStorage.setItem(`chat_history_${eventId}_${currentRoomId}`, JSON.stringify(updated.slice(-100)));
+          } catch (e) {}
+          return updated;
+        });
         scrollToBottom();
       } else {
         setUnreadCounts(prev => ({
@@ -149,16 +252,43 @@ export default function ChatPage() {
     if (e) e.preventDefault();
     if (!inputText.trim() || !activeRoom || !currentUser) return;
 
+    const currentRoomId = activeRoom.id || (activeRoom as any)._id;
+    const text = inputText.trim();
+
+    // Optimistically render immediately so the sender sees their message without waiting
+    const optimisticMessage = {
+      _id: `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      room: currentRoomId,
+      sender: {
+        _id: currentUser.id || currentUser._id,
+        id: currentUser.id || currentUser._id,
+        name: currentUser.name || "User",
+        avatar: currentUser.avatar
+      },
+      content: text,
+      type: 'user_message',
+      createdAt: new Date().toISOString()
+    };
+
+    setMessages(prev => {
+      const updated = [...prev, optimisticMessage];
+      try {
+        localStorage.setItem(`chat_history_${eventId}_${currentRoomId}`, JSON.stringify(updated.slice(-100)));
+      } catch (e) {}
+      return updated;
+    });
+    setInputText("");
+    setShowEmojiPicker(false);
+    scrollToBottom();
+
     const messageData = {
-      room: activeRoom.id || (activeRoom as any)._id,
+      room: currentRoomId,
       sender: currentUser.id || currentUser._id,
-      content: inputText,
+      content: text,
       type: 'user_message'
     };
 
     chatService.sendMessage(messageData);
-    setInputText("");
-    setShowEmojiPicker(false);
   };
 
   const handleEmojiSelect = (emoji: string) => {
@@ -184,8 +314,32 @@ export default function ChatPage() {
       }
 
       const imageUrl = data.url || data.secure_url || data.image || data;
+      const currentRoomId = activeRoom.id || (activeRoom as any)._id;
+      const optimisticMessage = {
+        _id: `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        room: currentRoomId,
+        sender: {
+          _id: currentUser.id || currentUser._id,
+          id: currentUser.id || currentUser._id,
+          name: currentUser.name || "User",
+          avatar: currentUser.avatar
+        },
+        content: typeof imageUrl === 'string' ? imageUrl : JSON.stringify(imageUrl),
+        type: 'image',
+        createdAt: new Date().toISOString()
+      };
+
+      setMessages(prev => {
+        const updated = [...prev, optimisticMessage];
+        try {
+          localStorage.setItem(`chat_history_${eventId}_${currentRoomId}`, JSON.stringify(updated.slice(-100)));
+        } catch (e) {}
+        return updated;
+      });
+      scrollToBottom();
+
       const messageData = {
-        room: activeRoom.id || (activeRoom as any)._id,
+        room: currentRoomId,
         sender: currentUser.id || currentUser._id,
         content: typeof imageUrl === 'string' ? imageUrl : JSON.stringify(imageUrl),
         type: 'image'
@@ -199,6 +353,38 @@ export default function ChatPage() {
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleOpenDirectChat = async (member: any) => {
+    if (!eventId) return;
+    const memberId = member.id || member._id || member.attendeeId;
+    setStartingDm(memberId || member.email);
+    try {
+      const attendeeData = {
+        id: memberId,
+        name: member.name || member.email || 'Attendee',
+      };
+      const { data: room, error } = await chatService.getOrCreateDirectRoom(
+        eventId as string,
+        attendeeData,
+        currentUser?.id || currentUser?._id
+      );
+      if (error || !room) {
+        toast.error("Could not open direct chat with this member");
+        return;
+      }
+      const roomId = room.id || (room as any)._id;
+      setRooms(prev => {
+        const exists = prev.some(r => (r.id || (r as any)._id) === roomId);
+        return exists ? prev : [room, ...prev];
+      });
+      setActiveRoom(room);
+    } catch (error) {
+      console.error("Failed to start direct chat:", error);
+      toast.error("Could not open direct chat with this member");
+    } finally {
+      setStartingDm(null);
     }
   };
 
@@ -229,8 +415,16 @@ export default function ChatPage() {
           {activeRoom ? (
             <>
               <div>
-                <h1 className="text-xl font-black text-[#1B1818] tracking-tight">{activeRoom.name}</h1>
-                <p className="text-xs font-bold text-gray-400 mt-0.5">{activeRoom.type === 'general' ? 'Public Lobby' : 'Private Session'}</p>
+                <h1 className="text-xl font-black text-[#1B1818] tracking-tight">
+                  {(activeRoom.type === 'private' && (
+                    activeRoom.name === currentUser?.name || 
+                    activeRoom.id === currentUser?.id || 
+                    (typeof activeRoom.leadParticipant === 'object' && activeRoom.leadParticipant?.id === currentUser?.id)
+                  )) ? "Event Organizer" : activeRoom.name}
+                </h1>
+                <p className="text-xs font-bold text-gray-400 mt-0.5">
+                  {activeRoom.type === 'general' ? 'Public Lobby' : activeRoom.type === 'private' ? 'Direct Message' : 'Private Session'}
+                </p>
               </div>
               <div className="flex items-center gap-4 text-gray-400">
                 <button className="hover:text-[#EB5017] transition-colors"><FiSearch size={20} /></button>
@@ -299,6 +493,7 @@ export default function ChatPage() {
                           alt={sender?.name || "User"} 
                           width={40} 
                           height={40} 
+                          unoptimized
                           className="object-cover" 
                         />
                      </div>
@@ -334,7 +529,7 @@ export default function ChatPage() {
           )}
           
           {/* Room Activation Overlay */}
-          {activeRoom && !isActivated && !hasEnoughAttendees && (
+          {activeRoom && activeRoom.type !== 'private' && !isActivated && !hasEnoughAttendees && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-10 flex items-center justify-center p-8">
               <div className="text-center max-w-sm bg-white p-8 rounded-[32px] shadow-2xl shadow-[#EB5017]/10 border border-gray-50 transform hover:scale-[1.02] transition-transform">
                 <div className="w-16 h-16 bg-[#FFF8F2] rounded-2xl flex items-center justify-center text-[#EB5017] mx-auto mb-6">
@@ -358,7 +553,7 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${(!activeRoom || (!isActivated && !hasEnoughAttendees)) ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+        <div className={`px-8 pb-8 pt-4 transition-opacity duration-300 ${(!activeRoom || (activeRoom.type !== 'private' && !isActivated && !hasEnoughAttendees)) ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
           <div className="bg-white border border-gray-100 rounded-[20px] p-2 flex items-center gap-2 shadow-lg shadow-gray-100/50 relative">
             <button 
               disabled={!activeRoom}
@@ -429,6 +624,7 @@ export default function ChatPage() {
                     alt={currentUser?.name || "You"} 
                     width={40} 
                     height={40} 
+                    unoptimized
                     className="object-cover" 
                   />
                 </div>
@@ -441,26 +637,49 @@ export default function ChatPage() {
             </div>
 
             {/* Other Attendees */}
-            {eventMembers.map((member: any) => (
-              <div key={member.id || member._id || Math.random()} className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-100 bg-gray-50">
-                    <Image 
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || member.email || 'Member')}&background=random`} 
-                      alt={member.name || "Member"} 
-                      width={36} 
-                      height={36} 
-                      className="object-cover" 
-                    />
+            {eventMembers.map((member: any) => {
+              const memberId = member.id || member._id || member.attendeeId;
+              const isStartingThis = startingDm === (memberId || member.email);
+              return (
+                <div 
+                  key={memberId || member.email || Math.random()} 
+                  onClick={() => handleOpenDirectChat(member)}
+                  className="flex items-center justify-between group p-2 -mx-2 rounded-2xl hover:bg-gray-50 cursor-pointer transition-all"
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="relative shrink-0">
+                      <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-100 bg-gray-50">
+                        <Image 
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || member.email || 'Member')}&background=random`} 
+                          alt={member.name || "Member"} 
+                          width={36} 
+                          height={36} 
+                          unoptimized
+                          className="object-cover" 
+                        />
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-gray-300" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-xs font-bold text-[#1B1818] truncate group-hover:text-[#EB5017] transition-colors">{member.name || member.email}</p>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{member.checkedIn ? 'Verified' : 'Attendee'}</p>
+                    </div>
                   </div>
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-gray-300" />
+                  <button
+                    type="button"
+                    title="Direct message"
+                    disabled={isStartingThis}
+                    className="shrink-0 p-1.5 text-gray-400 group-hover:text-[#EB5017] group-hover:bg-[#FFF8F2] rounded-lg transition-all"
+                  >
+                    {isStartingThis ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-[#EB5017]" />
+                    ) : (
+                      <FiMessageSquare size={14} />
+                    )}
+                  </button>
                 </div>
-                <div className="flex-grow overflow-hidden">
-                  <p className="text-xs font-bold text-[#1B1818] truncate">{member.name || member.email}</p>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{member.checkedIn ? 'Verified' : 'Attendee'}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -498,8 +717,14 @@ export default function ChatPage() {
                       </div>
                     </div>
                     <div className="flex-grow overflow-hidden">
-                      <p className={`text-[13px] font-black truncate transition-colors ${isSelected ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>{room.name}</p>
-                      <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : 'Workshop'}</p>
+                      <p className={`text-[13px] font-black truncate transition-colors ${isSelected ? 'text-[#EB5017]' : 'text-[#1B1818] group-hover:text-[#EB5017]'}`}>
+                        {(room.type === 'private' && (
+                          room.name === currentUser?.name || 
+                          room.id === currentUser?.id || 
+                          (typeof room.leadParticipant === 'object' && room.leadParticipant?.id === currentUser?.id)
+                        )) ? "Event Organizer" : room.name}
+                      </p>
+                      <p className="text-[10px] font-bold text-gray-400 truncate">{room.type === 'general' ? 'Lobby' : room.type === 'private' ? 'Direct Message' : 'Workshop'}</p>
                     </div>
                     {unread > 0 && !isSelected && (
                       <span className="bg-[#EB5017] text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce">

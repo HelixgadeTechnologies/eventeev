@@ -32,37 +32,39 @@ async function handleProxyRequest(req: NextRequest, params: { path: string[] }) 
   const targetUrl = `${API_BASE_URL}/${path}${searchParams}`;
 
   const headers = new Headers();
-  headers.set('Content-Type', req.headers.get('content-type') || 'application/json');
+  const incomingContentType = req.headers.get('content-type');
+  if (incomingContentType) {
+    headers.set('Content-Type', incomingContentType);
+  }
   
   if (token) {
     headers.set('x-auth-token', token);
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  let body = null;
-  if (req.method !== 'GET' && req.method !== 'HEAD') {
-    const arrayBuffer = await req.arrayBuffer();
-    if (arrayBuffer.byteLength > 0) {
-      body = arrayBuffer;
-    }
+  const fetchInit: RequestInit & { duplex?: 'half' } = {
+    method: req.method,
+    headers,
+  };
+
+  if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+    fetchInit.body = req.body;
+    fetchInit.duplex = 'half';
   }
 
   try {
-    const response = await fetch(targetUrl, {
-      method: req.method,
-      headers,
-      body,
+    const response = await fetch(targetUrl, fetchInit as RequestInit);
+
+    const responseHeaders = new Headers();
+    const contentType = response.headers.get('content-type');
+    if (contentType) responseHeaders.set('content-type', contentType);
+    const cacheControl = response.headers.get('cache-control');
+    if (cacheControl) responseHeaders.set('cache-control', cacheControl);
+
+    return new Response(response.body, {
+      status: response.status,
+      headers: responseHeaders,
     });
-
-    const data = await response.text();
-    let parsedData = data;
-    try {
-      parsedData = JSON.parse(data);
-    } catch (e) {
-      // not json
-    }
-
-    return NextResponse.json(parsedData, { status: response.status });
   } catch (error) {
     console.error('Proxy error:', error);
     return NextResponse.json({ message: 'Proxy Error' }, { status: 500 });

@@ -2,11 +2,12 @@
 import React from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { RootState } from "@/store/store";
 import {
+  useAppSelector,
+  useAppDispatch,
+  RootState,
   setPrevStep,
-} from "@/store/features/create-event/createEventSlice";
+} from "@/context/CreateEventContext";
 import { createEventData } from "@/types/create-event";
 import document from "@/public/document.svg";
 import { Label } from "@/components/ui/label";

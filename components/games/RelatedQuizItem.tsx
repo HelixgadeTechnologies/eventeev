@@ -27,9 +27,9 @@ export default function RelatedQuizItem({
       href={`/events/${eventId}/games/${id}`}
       className="flex gap-4 items-center group cursor-pointer"
     >
-      <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden shadow-sm">
+      <div className="relative w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden shadow-sm bg-gray-100">
         <Image
-          src={thumbnail}
+          src={thumbnail && thumbnail.trim() !== "" ? thumbnail : "/thumbnails/space_trivia.png"}
           alt={title}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-300"

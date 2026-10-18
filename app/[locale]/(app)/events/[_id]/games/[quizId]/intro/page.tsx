@@ -14,8 +14,15 @@ function QuestionIntroContent() {
   const quizId = params?.quizId as string;
   const qIndex = parseInt(searchParams.get("q") || "0");
 
+  const pin = searchParams.get("pin") || "";
+
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(3);
+
+  const formatPin = (p: string) => {
+    if (!p) return "--- ---";
+    return p.length > 3 ? `${p.slice(0, 3)} ${p.slice(3)}` : p;
+  };
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -31,7 +38,7 @@ function QuestionIntroContent() {
 
   useEffect(() => {
     if (timeLeft === 0) {
-      router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}`);
+      router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
       return;
     }
 
@@ -40,7 +47,7 @@ function QuestionIntroContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, eventId, quizId, qIndex, router]);
+  }, [timeLeft, eventId, quizId, qIndex, pin, router]);
 
   if (!quiz) {
     return (
@@ -60,7 +67,7 @@ function QuestionIntroContent() {
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-end">
             <span className="text-[10px] font-black text-[#667185] uppercase tracking-widest opacity-60">Game PIN</span>
-            <span className="text-lg font-black text-[#1B1818]">452 901</span>
+            <span className="text-lg font-black text-[#1B1818]">{formatPin(pin)}</span>
           </div>
           <div className="w-12 h-12 bg-white rounded-full border border-gray-100 flex items-center justify-center p-1 shadow-sm">
              <div className="w-full h-full bg-[#F2F4F7] rounded-full overflow-hidden">

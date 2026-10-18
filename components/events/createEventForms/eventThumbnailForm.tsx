@@ -9,13 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useForm, Controller } from "react-hook-form";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { RootState } from "@/store/store";
 import {
+  useAppSelector,
+  useAppDispatch,
+  RootState,
   setNextStep,
   setPrevStep,
   updateForm,
-} from "@/store/features/create-event/createEventSlice";
+} from "@/context/CreateEventContext";
 import { createEventData } from "@/types/create-event";
 import { Label } from "@/components/ui/label";
 

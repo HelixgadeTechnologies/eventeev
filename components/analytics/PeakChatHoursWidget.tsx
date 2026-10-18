@@ -3,29 +3,38 @@
 import React from "react";
 import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from "recharts";
 
-const data = [
-  { time: "08:00", value: 40, active: false },
-  { time: "10:00", value: 65, active: false },
-  { time: "12:00", value: 85, active: true },
-  { time: "14:00", value: 100, active: true },
-  { time: "16:00", value: 75, active: true },
-  { time: "18:00", value: 50, active: false },
-  { time: "20:00", value: 30, active: false },
+interface PeakChatHoursWidgetProps {
+  data?: Array<{ time: string; value: number; active?: boolean }>;
+}
+
+const defaultData = [
+  { time: "08:00", value: 0, active: false },
+  { time: "10:00", value: 0, active: false },
+  { time: "12:00", value: 0, active: false },
+  { time: "14:00", value: 0, active: false },
+  { time: "16:00", value: 0, active: false },
+  { time: "18:00", value: 0, active: false },
+  { time: "20:00", value: 0, active: false },
 ];
 
-const PeakChatHoursWidget = () => {
+const PeakChatHoursWidget: React.FC<PeakChatHoursWidgetProps> = ({ data = defaultData }) => {
+  const hasActivity = data.some(d => d.value > 0);
+
   return (
-    <div className="bg-white border border-gray-100 rounded-[24px] p-4 shadow-sm h-full flex flex-col">
-      <h2 className="text-[13px] font-black text-[#B28A6A] uppercase tracking-widest mb-3">PEAK CHAT HOURS</h2>
+    <div className="bg-white border border-gray-100 rounded-[24px] p-4 shadow-sm h-full flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[13px] font-black text-[#B28A6A] uppercase tracking-widest">PEAK CHAT HOURS</h2>
+        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{hasActivity ? "Live" : "No Activity"}</span>
+      </div>
       
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="flex-1 w-full min-h-[140px] overflow-hidden">
          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
               <XAxis 
                 dataKey="time" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 11, fill: '#8D6950', fontWeight: 800 }} // Brownish color for text
+                tick={{ fontSize: 11, fill: '#8D6950', fontWeight: 800 }}
                 ticks={['08:00', '12:00', '16:00', '20:00']}
                 dy={5}
               />

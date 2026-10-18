@@ -49,10 +49,9 @@ export class EventsService {
       const respData = error.response?.data;
       const respMsg = (typeof respData === 'string' ? respData : respData?.message) || '';
       
-      // If the backend returns 404 or a "no events found" message, treat it as a successful empty response
       const isNotFoundError = error.response?.status === 404 || 
-                            respMsg.toLowerCase().includes('no') ||
-                            error.message?.toLowerCase().includes('map');
+                            respMsg.toLowerCase().includes('no events') ||
+                            respMsg.toLowerCase().includes('not found');
 
       if (isNotFoundError) {
         return { data: [], error: null }
@@ -69,17 +68,17 @@ export class EventsService {
   async getDraftedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/drafts')
-      const rawData = Array.isArray(response.data) ? response.data : [];
+      const rawResponseData = response.data?.data || response.data || [];
+      const rawData = Array.isArray(rawResponseData) ? rawResponseData : [];
       const data = rawData.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       const respData = error.response?.data;
       const respMsg = (typeof respData === 'string' ? respData : respData?.message) || '';
 
-      // Handle "No drafts" case gracefully
       const isNotFoundError = error.response?.status === 404 || 
-                            respMsg.toLowerCase().includes('no') ||
-                            error.message?.toLowerCase().includes('map');
+                            respMsg.toLowerCase().includes('no draft') ||
+                            respMsg.toLowerCase().includes('not found');
 
       if (isNotFoundError) {
         return { data: [], error: null }
@@ -96,17 +95,17 @@ export class EventsService {
   async getCompletedEvents() {
     try {
       const response = await axiosInstance.get('/api/event/completed')
-      const rawData = Array.isArray(response.data) ? response.data : [];
+      const rawResponseData = response.data?.data || response.data || [];
+      const rawData = Array.isArray(rawResponseData) ? rawResponseData : [];
       const data = rawData.map((event: any) => this.mapEvent(event))
       return { data, error: null }
     } catch (error: any) {
       const respData = error.response?.data;
       const respMsg = (typeof respData === 'string' ? respData : respData?.message) || '';
 
-      // Handle "No completed events" case gracefully
       const isNotFoundError = error.response?.status === 404 || 
-                            respMsg.toLowerCase().includes('no') ||
-                            error.message?.toLowerCase().includes('map');
+                            respMsg.toLowerCase().includes('no completed') ||
+                            respMsg.toLowerCase().includes('not found');
 
       if (isNotFoundError) {
         return { data: [], error: null }

@@ -4,53 +4,15 @@ import { HiOutlineLink, HiOutlineExternalLink, HiOutlineDocumentText, HiOutlineV
 import { useState } from "react";
 import ResourceUploadModal from "@/components/links/ResourceUploadModal";
 
-const MOCK_LINKS = [
-  {
-    id: 1,
-    title: "Event Presentation Slides",
-    url: "https://docs.google.com/presentation/d/example",
-    type: "document",
-    description: "Main keynote presentation for the event",
-    addedBy: "Richard Edem",
-    date: "Feb 12, 2026",
-  },
-  {
-    id: 2,
-    title: "Live Stream Recording",
-    url: "https://youtube.com/watch?v=example",
-    type: "video",
-    description: "Full recording of the main stage stream",
-    addedBy: "Richard Edem",
-    date: "Feb 11, 2026",
-  },
-  {
-    id: 3,
-    title: "Sponsor Information Kit",
-    url: "https://drive.google.com/file/d/example",
-    type: "document",
-    description: "Sponsorship tiers and benefits overview",
-    addedBy: "Sarah K.",
-    date: "Feb 10, 2026",
-  },
-  {
-    id: 4,
-    title: "Event Hashtag Guidelines",
-    url: "https://example.com/social-guidelines",
-    type: "link",
-    description: "Social media posting guidelines and hashtags",
-    addedBy: "Marketing Team",
-    date: "Feb 9, 2026",
-  },
-  {
-    id: 5,
-    title: "Venue Floor Plan",
-    url: "https://example.com/floor-plan",
-    type: "document",
-    description: "Interactive map of the venue layout",
-    addedBy: "Operations",
-    date: "Feb 8, 2026",
-  },
-];
+export interface ResourceLink {
+  id: number | string;
+  title: string;
+  url: string;
+  type: string;
+  description: string;
+  addedBy: string;
+  date: string;
+}
 
 const typeIcons: Record<string, React.ReactNode> = {
   document: <HiOutlineDocumentText className="text-lg text-blue-500" />,
@@ -65,12 +27,12 @@ const typeBadgeColors: Record<string, string> = {
 };
 
 export default function LinksPage() {
-  const [links, setLinks] = useState(MOCK_LINKS);
+  const [links, setLinks] = useState<ResourceLink[]>([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const handleUploadComplete = (data: { file: File, title: string, description: string }) => {
-    const newLink = {
-      id: links.length + 1,
+    const newLink: ResourceLink = {
+      id: Date.now(),
       title: data.title,
       url: "#",
       type: "document",
@@ -100,47 +62,67 @@ export default function LinksPage() {
       </div>
 
       {/* Links List */}
-      <div className="space-y-3">
-        {links.map((link) => (
-          <div
-            key={link.id}
-            className="bg-white border border-gray-100 rounded-3xl p-6 flex items-center gap-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
-          >
-            {/* Icon */}
-            <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-white group-hover:border-[#EB5017]/20 transition-all duration-500 shadow-sm">
-              {typeIcons[link.type] || <HiOutlineLink className="text-xl text-gray-400" />}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
-                <h4 className="font-black text-base text-[#1B1818] tracking-tight truncate">{link.title}</h4>
-                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${typeBadgeColors[link.type]}`}>
-                  {link.type}
-                </span>
-              </div>
-              <p className="text-xs text-gray-400 font-medium truncate max-w-xl">{link.description}</p>
-              <div className="flex items-center gap-2 mt-2">
-                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
-                    Added by <span className="text-[#EB5017]">{link.addedBy}</span>
-                 </p>
-                 <span className="w-1 h-1 rounded-full bg-gray-200" />
-                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{link.date}</p>
-              </div>
-            </div>
-
-            {/* Action */}
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 hover:bg-[#EB5017] hover:text-white hover:border-[#EB5017] hover:shadow-lg hover:shadow-[#EB5017]/20 transition-all text-gray-400 duration-300"
-            >
-              <HiOutlineExternalLink className="text-xl" />
-            </a>
+      {links.length === 0 ? (
+        <div className="bg-white border border-gray-100 rounded-3xl p-12 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+            <HiOutlineLink className="text-3xl" />
           </div>
-        ))}
-      </div>
+          <div className="space-y-1">
+            <h3 className="font-bold text-gray-700 text-lg">No resources shared yet</h3>
+            <p className="text-sm text-gray-400 max-w-md mx-auto">
+              Click &quot;Add Resource&quot; to upload documents, add presentation links, or share media for this event.
+            </p>
+          </div>
+          <button
+            onClick={() => setIsUploadModalOpen(true)}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#EB5017] hover:underline pt-2"
+          >
+            <HiOutlinePlus /> Upload your first resource
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {links.map((link) => (
+            <div
+              key={link.id}
+              className="bg-white border border-gray-100 rounded-3xl p-6 flex items-center gap-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
+            >
+              {/* Icon */}
+              <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-white group-hover:border-[#EB5017]/20 transition-all duration-500 shadow-sm">
+                {typeIcons[link.type] || <HiOutlineLink className="text-xl text-gray-400" />}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <h4 className="font-black text-base text-[#1B1818] tracking-tight truncate">{link.title}</h4>
+                  <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${typeBadgeColors[link.type]}`}>
+                    {link.type}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 font-medium truncate max-w-xl">{link.description}</p>
+                <div className="flex items-center gap-2 mt-2">
+                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">
+                      Added by <span className="text-[#EB5017]">{link.addedBy}</span>
+                   </p>
+                   <span className="w-1 h-1 rounded-full bg-gray-200" />
+                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{link.date}</p>
+                </div>
+              </div>
+
+              {/* Action */}
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 hover:bg-[#EB5017] hover:text-white hover:border-[#EB5017] hover:shadow-lg hover:shadow-[#EB5017]/20 transition-all text-gray-400 duration-300"
+              >
+                <HiOutlineExternalLink className="text-xl" />
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
 
       <ResourceUploadModal 
         isOpen={isUploadModalOpen}

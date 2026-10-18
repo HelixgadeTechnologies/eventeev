@@ -14,15 +14,7 @@ import { FaAngleRight, FaPlus, FaRegCalendarAlt, FaChevronRight } from "react-ic
 import { LuPlus, LuCalendar, LuTicket, LuSparkles } from "react-icons/lu";
 import { formatDate } from "@/lib/utils/configure-date";
 
-// Mock trend data to render a beautiful chart when portfolio is fresh
-const mockTrendData = [
-  { name: "Week 1", registrations: 12 },
-  { name: "Week 2", registrations: 45 },
-  { name: "Week 3", registrations: 89 },
-  { name: "Week 4", registrations: 156 },
-  { name: "Week 5", registrations: 230 },
-  { name: "Week 6", registrations: 345 },
-];
+
 
 export default function PlatformDashboard() {
   const router = useRouter();
@@ -118,10 +110,17 @@ export default function PlatformDashboard() {
     return list.slice(0, 4);
   }, [publishedEvents, completedEvents, draftedEvents]);
 
-  // Dynamically calculate actual trend data or mix with mock data for visuals
+  // Dynamically calculate actual trend data
   const chartData = useMemo(() => {
     if (portfolioStats.expectedRsvps === 0) {
-      return mockTrendData;
+      return [
+        { name: "Week 1", registrations: 0 },
+        { name: "Week 2", registrations: 0 },
+        { name: "Week 3", registrations: 0 },
+        { name: "Week 4", registrations: 0 },
+        { name: "Week 5", registrations: 0 },
+        { name: "Week 6", registrations: 0 },
+      ];
     }
     // Return cumulative trend based on actual RSVPs
     const count = portfolioStats.expectedRsvps;

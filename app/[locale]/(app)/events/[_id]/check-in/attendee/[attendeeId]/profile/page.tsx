@@ -6,9 +6,11 @@ import Link from "next/link";
 import { FaAngleLeft } from "react-icons/fa6";
 import { eventsService } from "@/lib/services/events.service";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
-import { Loader2, Mail, Calendar, CheckCircle, Clock, User, Tag, ShieldCheck } from "lucide-react";
+import { Loader2, Mail, Calendar, CheckCircle, Clock, User, Tag, ShieldCheck, MessageSquare } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Avatar from "@/components/ui/Avatar";
+import AttendeeBadge from "@/components/attendees/AttendeeBadge";
+import { chatService } from "@/lib/services/chat.service";
 
 interface AttendeeProfilePageProps {
   params: Promise<{
@@ -26,6 +28,30 @@ export default function AttendeeProfilePage({ params }: AttendeeProfilePageProps
   const [attendee, setAttendee] = useState<ApiAttendee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isStartingChat, setIsStartingChat] = useState(false);
+
+  const handleStartChat = async () => {
+    if (!attendee || !_id) return;
+    setIsStartingChat(true);
+    try {
+      const { data: room } = await chatService.getOrCreateDirectRoom(
+        _id,
+        {
+          id: attendee.id,
+          name: attendee.name,
+        },
+        user?.id || user?._id
+      );
+      if (room) {
+        const roomId = room.id || (room as any)._id;
+        router.push(`/events/${_id}/chat?roomId=${roomId}`);
+      }
+    } catch (err) {
+      console.error("Failed to start chat with attendee:", err);
+    } finally {
+      setIsStartingChat(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,17 +78,10 @@ export default function AttendeeProfilePage({ params }: AttendeeProfilePageProps
         }
         setEvent(eventData);
 
-        // Fetch all attendees and find the specific one
-        const { data: attendeesData, error: attendeesError } = await attendeesService.getAttendees(_id);
-        if (attendeesError) {
-          setError(attendeesError.message || "Failed to load attendees");
-          setLoading(false);
-          return;
-        }
-
-        const foundAttendee = attendeesData.find((a) => a.id === attendeeId);
-        if (!foundAttendee) {
-          setError("Attendee not found in this event");
+        // Fetch the specific attendee directly
+        const { data: foundAttendee, error: attendeeError } = await attendeesService.getAttendeeById(_id, attendeeId);
+        if (attendeeError || !foundAttendee) {
+          setError(attendeeError?.message || "Attendee not found in this event");
           setLoading(false);
           return;
         }
@@ -125,96 +144,134 @@ export default function AttendeeProfilePage({ params }: AttendeeProfilePageProps
             <p className="text-sm text-gray-400 font-medium mt-1">Viewing details for <span className="text-[#1B1818] font-bold">{attendee.name}</span></p>
           </div>
         </div>
+        <button
+          onClick={handleStartChat}
+          disabled={isStartingChat}
+          className="inline-flex items-center gap-2 bg-[#EB5017] hover:bg-[#d64815] text-white px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-md shadow-[#EB5017]/20 transition-all active:scale-[0.98] disabled:opacity-50"
+        >
+          {isStartingChat ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <MessageSquare size={16} />
+          )}
+          Chat with Attendee
+        </button>
       </div>
 
-      {/* Profile Content */}
-      <div className="max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-        
-        {/* Left Column: Avatar & Quick Info */}
-        <div className="col-span-1 space-y-6">
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center text-center">
-            <div className="w-32 h-32 mb-6 shadow-xl rounded-full overflow-hidden border-4 border-white ring-4 ring-gray-50">
-              <Avatar name={attendee.name} />
+      {/* Profile & Badge Grid */}
+      <div className="w-full grid grid-cols-1 xl:grid-cols-12 gap-8 mt-8 items-start">
+        {/* Left Column: Avatar & Details (xl:col-span-8) */}
+        <div className="xl:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {/* Avatar & Quick Info */}
+          <div className="col-span-1 space-y-6">
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center text-center">
+              <div className="w-32 h-32 mb-6 shadow-xl rounded-full overflow-hidden border-4 border-white ring-4 ring-gray-50">
+                <Avatar name={attendee.name} />
+              </div>
+              <h2 className="text-2xl font-black text-[#1B1818] tracking-tight">{attendee.name}</h2>
+              <p className="text-sm text-gray-500 font-medium mt-2">{attendee.email}</p>
+              
+              <div className="mt-8 w-full space-y-3">
+                <div className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest ${attendee.isCheckedIn ? 'bg-[#0F973D]/10 text-[#0F973D]' : 'bg-orange-50 text-orange-600'}`}>
+                  {attendee.isCheckedIn ? (
+                    <><CheckCircle size={16} /> Checked In</>
+                  ) : (
+                    <><Clock size={16} /> Pending Check-in</>
+                  )}
+                </div>
+                <button
+                  onClick={handleStartChat}
+                  disabled={isStartingChat}
+                  className="w-full py-3 px-4 rounded-2xl border border-[#EB5017]/20 text-[#EB5017] hover:bg-[#EB5017]/5 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isStartingChat ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <MessageSquare size={14} />
+                  )}
+                  Send Direct Message
+                </button>
+              </div>
             </div>
-            <h2 className="text-2xl font-black text-[#1B1818] tracking-tight">{attendee.name}</h2>
-            <p className="text-sm text-gray-500 font-medium mt-2">{attendee.email}</p>
-            
-            <div className="mt-8 w-full space-y-3">
-              <div className={`w-full py-3 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest ${attendee.isCheckedIn ? 'bg-[#0F973D]/10 text-[#0F973D]' : 'bg-orange-50 text-orange-600'}`}>
-                {attendee.isCheckedIn ? (
-                  <><CheckCircle size={16} /> Checked In</>
-                ) : (
-                  <><Clock size={16} /> Pending Check-in</>
-                )}
+          </div>
+
+          {/* Detailed Info */}
+          <div className="col-span-1 md:col-span-2 space-y-6">
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h3 className="text-lg font-black text-[#1B1818] uppercase tracking-tight mb-6 flex items-center gap-2">
+                <User className="text-[#EB5017]" size={20} />
+                Personal Details
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Full Name</p>
+                  <p className="text-[#1B1818] font-bold">{attendee.name}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email Address</p>
+                  <p className="text-[#1B1818] font-bold">{attendee.email}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Registration Date</p>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={14} className="text-gray-400" />
+                    <p className="text-[#1B1818] font-bold">
+                      {(attendee.registrationDate || attendee.createdAt) ? new Date(attendee.registrationDate || attendee.createdAt!).toLocaleString() : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attendee ID</p>
+                  <p className="text-[#1B1818] font-mono text-xs bg-gray-50 px-3 py-1.5 rounded-lg inline-block">{attendee.id}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h3 className="text-lg font-black text-[#1B1818] uppercase tracking-tight mb-6 flex items-center gap-2">
+                <ShieldCheck className="text-[#EB5017]" size={20} />
+                Event Access
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ticket Type</p>
+                  <div className="flex items-center gap-2">
+                    <Tag size={14} className="text-gray-400" />
+                    <p className="text-[#1B1818] font-bold">{attendee.status === "VIP" ? "VIP Access" : "General Admission"}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event Name</p>
+                  <p className="text-[#1B1818] font-bold">{event.title}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Detailed Info */}
-        <div className="col-span-1 md:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h3 className="text-lg font-black text-[#1B1818] uppercase tracking-tight mb-6 flex items-center gap-2">
-              <User className="text-[#EB5017]" size={20} />
-              Personal Details
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Full Name</p>
-                <p className="text-[#1B1818] font-bold">{attendee.name}</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email Address</p>
-                <p className="text-[#1B1818] font-bold">{attendee.email}</p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Registration Date</p>
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-gray-400" />
-                  <p className="text-[#1B1818] font-bold">
-                    {(attendee.registrationDate || attendee.createdAt) ? new Date(attendee.registrationDate || attendee.createdAt!).toLocaleString() : 'N/A'}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attendee ID</p>
-                <p className="text-[#1B1818] font-mono text-xs bg-gray-50 px-3 py-1.5 rounded-lg inline-block">{attendee.id}</p>
-              </div>
+        {/* Right Column: Attendee Badge (xl:col-span-4) */}
+        <div className="xl:col-span-4 space-y-4 xl:sticky xl:top-6">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#EB5017]" />
+              <h3 className="text-xs font-black text-[#1B1818] uppercase tracking-wider">Attendee Badge</h3>
             </div>
+            <Link
+              href={`/events/${_id}/check-in/attendee/${attendeeId}`}
+              className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-colors"
+            >
+              Full Screen
+            </Link>
           </div>
 
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h3 className="text-lg font-black text-[#1B1818] uppercase tracking-tight mb-6 flex items-center gap-2">
-              <ShieldCheck className="text-[#EB5017]" size={20} />
-              Event Access
-            </h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ticket Type</p>
-                <div className="flex items-center gap-2">
-                  <Tag size={14} className="text-gray-400" />
-                  <p className="text-[#1B1818] font-bold">{attendee.status === "VIP" ? "VIP Access" : "General Admission"}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event Name</p>
-                <p className="text-[#1B1818] font-bold">{event.title}</p>
-              </div>
-            </div>
-            
-            <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-              <Link
-                href={`/events/${_id}/check-in/attendee/${attendeeId}`}
-                className="bg-[#EB5017] text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#d64815] transition-all shadow-sm hover:shadow-md active:scale-95 inline-flex items-center gap-2"
-              >
-                View Print Badge
-              </Link>
-            </div>
-          </div>
+          <AttendeeBadge
+            event={event}
+            attendee={attendee}
+            showPrintButton={true}
+          />
         </div>
-
       </div>
     </div>
   );

@@ -30,6 +30,21 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.qrserver.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "eventeevapi.onrender.com",
+        pathname: "/**",
+      },
     ],
   },
 };

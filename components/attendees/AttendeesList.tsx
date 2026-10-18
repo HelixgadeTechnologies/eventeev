@@ -22,6 +22,8 @@ import QRScannerModal from "./QRScannerModal";
 import { useParams, useRouter } from "next/navigation";
 import { attendeesService, ApiAttendee } from "@/lib/services/attendees.service";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { chatService } from "@/lib/services/chat.service";
+import { useAuth } from "@/context/AuthContext";
 
 const filters: FilterConfig[] = [
   {
@@ -38,6 +40,7 @@ const filters: FilterConfig[] = [
 const AttendeesList = () => {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const eventId = params?._id as string;
   
   const [attendees, setAttendees] = useState<AttendeesDataType[]>([]);
@@ -248,6 +251,25 @@ const AttendeesList = () => {
     setIsActionLoading(false);
   };
 
+  const handleDirectChat = async (attendee: AttendeesDataType) => {
+    try {
+      const { data: room } = await chatService.getOrCreateDirectRoom(
+        eventId,
+        {
+          id: attendee.id,
+          name: attendee.name,
+        },
+        user?.id || user?._id
+      );
+      if (room) {
+        const roomId = room.id || (room as any)._id;
+        router.push(`/events/${eventId}/chat?roomId=${roomId}`);
+      }
+    } catch (err) {
+      console.error("Failed to start chat with attendee:", err);
+    }
+  };
+
   const columns = useMemo<ColumnDef<AttendeesDataType>[]>(() => [
     {
       id: "select",
@@ -380,6 +402,12 @@ const AttendeesList = () => {
               </DropdownMenuItem>
               <DropdownMenuItem 
                 className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3"
+                onClick={() => handleDirectChat(row.original)}
+              >
+                Message Attendee
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="rounded-xl focus:bg-[#EB5017]/5 focus:text-[#EB5017] cursor-pointer text-xs font-bold uppercase tracking-tight py-2.5 px-3"
                 onClick={() => router.push(`/events/${eventId}/check-in/attendee/${row.original.id}`)}
               >
                 Print Badge
@@ -396,7 +424,7 @@ const AttendeesList = () => {
         );
       },
     },
-  ], [handleToggleCheckIn]);
+  ], [handleToggleCheckIn, eventId, router]);
 
   if (loading) {
     return (

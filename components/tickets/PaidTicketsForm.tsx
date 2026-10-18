@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import DatePicker from "../ui/DatePicker";
@@ -29,6 +30,23 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
   const [endDate, setEndDate] = useState(initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
   const [endTime, setEndTime] = useState(initialData?.stopTime || "");
+
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const nowTimeStr = format(new Date(), "HH:mm");
+
+  const isStartToday = !startDate || startDate === todayStr;
+  const startMinTime = isStartToday ? nowTimeStr : undefined;
+
+  const isEndSameAsStart = endDate && startDate && endDate === startDate;
+  const endMinTime = isEndSameAsStart
+    ? startTime || (startDate === todayStr ? nowTimeStr : undefined)
+    : (endDate === todayStr ? nowTimeStr : undefined);
+
+  useEffect(() => {
+    if (startDate === todayStr && startTime && startTime < nowTimeStr) {
+      setStartTime(nowTimeStr);
+    }
+  }, [startDate, startTime, todayStr, nowTimeStr]);
   
   // Status modal state
   const [statusModal, setStatusModal] = useState<{
@@ -233,9 +251,15 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
             </Label>
             <DatePicker 
               value={startDate}
-              onChange={setStartDate}
+              onChange={(val) => {
+                setStartDate(val);
+                if (endDate && val && val > endDate) {
+                  setEndDate(val);
+                }
+              }}
               placeholder="Select date"
               className="h-12"
+              disablePast={true}
             />
           </div>
           <div className="space-y-1.5 flex flex-col">
@@ -249,6 +273,7 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
               value={startTime}
               onChange={setStartTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl"
+              minTime={startMinTime}
             />
           </div>
         </div>
@@ -266,6 +291,8 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
               onChange={setEndDate}
               placeholder="Select date"
               className="h-12"
+              dropUp={true}
+              minDate={startDate || todayStr}
             />
           </div>
           <div className="space-y-1.5 flex flex-col">
@@ -279,6 +306,8 @@ const PaidTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
               value={endTime}
               onChange={setEndTime}
               className="h-12 border-gray-100 bg-white/50 rounded-2xl"
+              dropUp={true}
+              minTime={endMinTime}
             />
           </div>
         </div>

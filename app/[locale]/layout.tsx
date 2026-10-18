@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AuthProvider } from "@/context/AuthContext";
-import ReduxProvider from "@/store/reduxProvider";
 import GoogleAuthProvider from "@/components/providers/GoogleAuthProvider";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
@@ -96,14 +95,12 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ReduxProvider>
-            <AuthProvider>
-              <GoogleAuthProvider>
-                <SidebarProvider>{children}</SidebarProvider>
-                <Toaster position="top-center" richColors />
-              </GoogleAuthProvider>
-            </AuthProvider>
-          </ReduxProvider>
+          <AuthProvider>
+            <GoogleAuthProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+              <Toaster position="top-center" richColors />
+            </GoogleAuthProvider>
+          </AuthProvider>
         </NextIntlClientProvider>
         {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>

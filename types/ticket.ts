@@ -7,6 +7,8 @@ export interface TicketTier {
   quantity: number;
   startDate?: string;
   startTime?: string;
+  endDate?: string;
+  endTime?: string;
   stopDate?: string;
   stopTime?: string;
   description?: string;

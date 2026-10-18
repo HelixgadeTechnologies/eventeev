@@ -18,11 +18,29 @@ function GamePlayContent() {
   const quizId = params.quizId as string;
   const qIndex = parseInt(searchParams.get("q") || "0");
 
+  const pin = searchParams.get("pin") || "";
+
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(20);
   const [answersCount, setAnswersCount] = useState(0);
   const [showEndModal, setShowEndModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [totalPlayers, setTotalPlayers] = useState(0);
+
+  const formatPin = (p: string) => {
+    if (!p) return "--- ---";
+    return p.length > 3 ? `${p.slice(0, 3)} ${p.slice(3)}` : p;
+  };
+
+  useEffect(() => {
+    if (pin) {
+      quizzesService.getLeaderboard(pin).then((res) => {
+        if (Array.isArray(res)) {
+          setTotalPlayers(res.length);
+        }
+      }).catch(() => {});
+    }
+  }, [pin]);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -55,7 +73,7 @@ function GamePlayContent() {
   }, [timeLeft, showEndModal]);
 
   const handleNextQuestion = () => {
-    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}`);
+    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
   };
 
   const handleEndGame = () => {
@@ -75,7 +93,6 @@ function GamePlayContent() {
   }
 
   const currentQuestion = quiz.questions[qIndex] || quiz.questions[0];
-  const totalPlayers = 5;
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
@@ -186,7 +203,7 @@ function GamePlayContent() {
       <footer className="w-full bg-white border-t border-gray-100 px-6 py-3 md:px-12 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-6">
            <div className="bg-gray-100 px-3 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-widest text-[#667185]">
-              PIN: <span className="text-[#1B1818]">452 9012</span>
+              PIN: <span className="text-[#1B1818]">{formatPin(pin)}</span>
            </div>
            <span className="text-[#667185] font-black text-[9px] uppercase tracking-widest opacity-60">
              Question {qIndex + 1} of {quiz.questions.length}

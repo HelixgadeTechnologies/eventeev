@@ -9,8 +9,8 @@ export const breadcrumbMap = [
   },
   {
     pattern: "/events",
-    title: `Welcome ${username}`,
-    subtitle: "Control your profile setup and integrations",
+    title: "My Events",
+    subtitle: "Manage and monitor your event portfolio",
     exact: true,
   },
   {
@@ -30,8 +30,8 @@ export const breadcrumbMap = [
   },
   {
     pattern: "/events/:id/games",
-    title: `Welcome ${username}`,
-    subtitle: "Control your profile setup and integrations",
+    title: "Games & Quizzes",
+    subtitle: "Engage your attendees with interactive games and quizzes",
   },
   {
     pattern: "/events/:id/games/create",

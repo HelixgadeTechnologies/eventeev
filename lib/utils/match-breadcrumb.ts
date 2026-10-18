@@ -3,6 +3,9 @@
 import { breadcrumbMap } from "../demo-data/breadcrumbs";
 
 export function matchBreadcrumb(pathname: string) {
+  // Strip locale prefix (e.g. /en, /fr) if present
+  const cleanPath = pathname.replace(/^\/[a-zA-Z]{2,3}(?=\/|$)/, "") || "/";
+
   for (const item of breadcrumbMap) {
     const regex = new RegExp(
       "^" +
@@ -12,10 +15,8 @@ export function matchBreadcrumb(pathname: string) {
         (item.exact ? "$" : ".*")
     );
 
-    if (regex.test(pathname)) {
-    //   const title =
-    //     typeof item.title === "function" ? item.title(eventName ?? "Event") : item.title;
-    const title = item.title;
+    if (regex.test(cleanPath)) {
+      const title = item.title;
       return {
         title,
         subtitle: item.subtitle,

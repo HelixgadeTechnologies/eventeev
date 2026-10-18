@@ -12,13 +12,30 @@ function QuestionResultsContent() {
   const searchParams = useSearchParams();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
+  const pin = searchParams.get("pin") || "";
   const qIndex = parseInt(searchParams.get("q") || "0");
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showEndModal, setShowEndModal] = useState(false);
+  const [players, setPlayers] = useState<any[]>([]);
   const totalDuration = 4000;
+
+  const formatPin = (p: string) => {
+    if (!p) return "--- ---";
+    return p.length > 3 ? `${p.slice(0, 3)} ${p.slice(3)}` : p;
+  };
+
+  useEffect(() => {
+    if (pin) {
+      quizzesService.getLeaderboard(pin).then((res) => {
+        if (Array.isArray(res)) {
+          setPlayers(res);
+        }
+      }).catch(() => {});
+    }
+  }, [pin]);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -48,10 +65,10 @@ function QuestionResultsContent() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [router, eventId, quizId, qIndex]);
+  }, [router, eventId, quizId, qIndex, pin]);
 
   const handleNextQuestion = () => {
-    router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}`);
+    router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
   };
 
   const handleEndGame = () => {
@@ -94,7 +111,7 @@ function QuestionResultsContent() {
         <div className="flex items-center gap-10">
           <div className="flex flex-col items-center">
             <span className="text-[8px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Join PIN</span>
-            <span className="text-xl font-black text-[#1B1818] tracking-tight">452 901</span>
+            <span className="text-xl font-black text-[#1B1818] tracking-tight">{formatPin(pin)}</span>
           </div>
           <div className="flex flex-col items-center">
             <span className="text-[8px] font-black text-[#667185] uppercase tracking-[0.2em] opacity-40">Progress</span>
@@ -166,7 +183,7 @@ function QuestionResultsContent() {
            <div className="bg-white border border-gray-100 p-4 rounded-[24px] shadow-xl shadow-gray-200/40 flex flex-col min-w-[200px]">
               <span className="text-[9px] font-black text-[#667185] opacity-40 uppercase tracking-[0.2em]">Total Players</span>
               <div className="flex items-center gap-4 mt-0.5">
-                <span className="text-[32px] font-black text-[#1B1818] leading-none text-orange-600">5</span>
+                <span className="text-[32px] font-black text-[#1B1818] leading-none text-orange-600">{players.length}</span>
                 <span className="bg-[#E7F8ED] text-[#26890C] px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase">
                   LIVE
                 </span>
@@ -177,7 +194,7 @@ function QuestionResultsContent() {
            <div className="flex flex-col -gap-1">
               <span className="text-lg font-black text-[#1B1818]">View Leaderboard</span>
               <span className="text-[10px] font-black text-[#667185] uppercase tracking-widest opacity-60">
-                Top Performer: <span className="text-[#EB5017] border-b border-[#EB5017]/20 uppercase">SpaceExplorer</span>
+                Top Performer: <span className="text-[#EB5017] border-b border-[#EB5017]/20 uppercase">{players[0]?.nickname || players[0]?.name || "Standings updating"}</span>
               </span>
            </div>
         </div>

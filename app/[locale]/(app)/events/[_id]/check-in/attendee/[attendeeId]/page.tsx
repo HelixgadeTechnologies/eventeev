@@ -51,17 +51,10 @@ export default function AttendeeBadgePage({ params }: AttendeeBadgePageProps) {
         }
         setEvent(eventData);
 
-        // Fetch all attendees and find the specific one
-        const { data: attendeesData, error: attendeesError } = await attendeesService.getAttendees(_id);
-        if (attendeesError) {
-          setError(attendeesError.message || "Failed to load attendees");
-          setLoading(false);
-          return;
-        }
-
-        const foundAttendee = attendeesData.find((a) => a.id === attendeeId);
-        if (!foundAttendee) {
-          setError("Attendee not found in this event");
+        // Fetch the specific attendee directly
+        const { data: foundAttendee, error: attendeeError } = await attendeesService.getAttendeeById(_id, attendeeId);
+        if (attendeeError || !foundAttendee) {
+          setError(attendeeError?.message || "Attendee not found in this event");
           setLoading(false);
           return;
         }

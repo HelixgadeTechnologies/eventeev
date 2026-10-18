@@ -1,13 +1,14 @@
 import React from "react";
 // import InputComponent from "@/components/ui/InputComponent";
 import { useForm, Controller } from "react-hook-form";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { RootState } from "@/store/store";
 import {
+  useAppSelector,
+  useAppDispatch,
+  RootState,
   setNextStep,
   setPrevStep,
   updateForm,
-} from "@/store/features/create-event/createEventSlice";
+} from "@/context/CreateEventContext";
 import { createEventData } from "@/types/create-event";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";

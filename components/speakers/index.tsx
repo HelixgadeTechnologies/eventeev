@@ -41,6 +41,10 @@ const Speakers = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successModalInfo, setSuccessModalInfo] = useState({
+    title: "Speaker Updated",
+    description: "The speaker profile has been updated successfully.",
+  });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [speakerToDelete, setSpeakerToDelete] = useState<any | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -126,6 +130,10 @@ const Speakers = () => {
     } else {
       await fetchSpeakers();
       setIsEditModalOpen(false);
+      setSuccessModalInfo({
+        title: "Speaker Updated",
+        description: "The speaker profile has been updated successfully.",
+      });
       setShowSuccessModal(true);
     }
     setIsUpdating(false);
@@ -143,6 +151,11 @@ const Speakers = () => {
     } else {
       await fetchSpeakers();
       setIsAddModalOpen(false);
+      setSuccessModalInfo({
+        title: "Speaker Added",
+        description: "The new speaker profile has been created successfully.",
+      });
+      setShowSuccessModal(true);
     }
     setIsUpdating(false);
   };
@@ -174,7 +187,7 @@ const Speakers = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-      <SpeakersSummary />
+      <SpeakersSummary speakers={speakers} loading={loading} />
       
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="flex-1 w-full bg-white/50 backdrop-blur-md rounded-full shadow-sm border border-gray-100 p-1.5 flex items-center group focus-within:ring-2 focus-within:ring-[#EB5017]/10 focus-within:border-[#EB5017] transition-all">
@@ -225,15 +238,15 @@ const Speakers = () => {
               <CirclePlus size={18} /> Add New Speaker
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-[86rem] bg-white/95 backdrop-blur-xl border-white/20 shadow-2xl rounded-[32px] p-0 overflow-hidden font-sans border gap-0">
-            <DialogHeader className="p-8 pb-0 shrink-0">
-              <DialogTitle className="text-2xl font-black text-[#1B1818] tracking-tight">Add New Speaker</DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 font-medium">
+          <DialogContent className="sm:max-w-[820px] w-full bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl rounded-[28px] p-0 overflow-hidden font-sans gap-0 h-fit">
+            <DialogHeader className="px-7 pt-5 pb-3 border-b border-gray-100 shrink-0">
+              <DialogTitle className="text-xl font-bold text-[#1D2739] tracking-tight">Add New Speaker</DialogTitle>
+              <DialogDescription className="text-xs text-[#667185] font-normal">
                 Create a professional profile for your event speakers.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="p-8 pt-6 overflow-y-auto max-h-[80vh] custom-scrollbar">
+            <div className="p-6 overflow-hidden">
               <SpeakerForm 
                 onSubmit={handleAdd} 
                 onCancel={() => setIsAddModalOpen(false)} 
@@ -310,21 +323,21 @@ const Speakers = () => {
 
       {/* Success Modal */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-[400px] bg-white rounded-3xl border-none shadow-2xl p-8 text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mb-6">
-            <HiOutlineCheckCircle className="text-3xl text-green-500" />
+        <DialogContent className="sm:max-w-[400px] bg-white/95 backdrop-blur-xl rounded-[28px] border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-7 sm:p-8 text-center flex flex-col items-center h-fit overflow-hidden">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-5 text-emerald-600 shadow-sm animate-in zoom-in-95 duration-300">
+            <HiOutlineCheckCircle className="text-3xl text-emerald-600" />
           </div>
-          <DialogTitle className="text-2xl font-black text-[#1B1818] tracking-tight mb-2">
-            Speaker Updated
+          <DialogTitle className="text-2xl font-bold text-[#1D2739] tracking-tight mb-2">
+            {successModalInfo.title}
           </DialogTitle>
-          <DialogDescription className="text-sm font-medium text-gray-500 mb-8">
-            The speaker profile has been updated successfully.
+          <DialogDescription className="text-sm font-normal text-[#667185] leading-relaxed max-w-[280px] mx-auto mb-7">
+            {successModalInfo.description}
           </DialogDescription>
           <button
             onClick={() => setShowSuccessModal(false)}
-            className="w-full bg-[#1B1818] text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all transform active:scale-95 shadow-xl shadow-black/10"
+            className="w-full bg-[#EB5017] hover:bg-[#d64815] text-white py-3.5 px-6 rounded-xl font-semibold text-sm transition-all transform active:scale-[0.98] shadow-md shadow-[#EB5017]/25 hover:shadow-lg hover:shadow-[#EB5017]/30 flex items-center justify-center"
           >
-            Great, Thanks!
+            Great, thanks!
           </button>
         </DialogContent>
       </Dialog>
