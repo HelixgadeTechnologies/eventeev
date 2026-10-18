@@ -75,6 +75,8 @@ export default function CreateQuizPage() {
     description: "",
     variant: "primary" as "primary" | "danger" | "success" | "error"
   });
+  const templateId = searchParams.get("templateId");
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
     { 
       id: 1, 
@@ -107,6 +109,64 @@ export default function CreateQuizPage() {
     };
     fetchSettings();
   }, [_id]);
+
+  // Load and pre-populate quiz data if templateId is provided
+  useEffect(() => {
+    if (!templateId) return;
+
+    const loadTemplate = async () => {
+      try {
+        setIsLoadingTemplate(true);
+        const template = await quizzesService.getQuiz(templateId);
+        if (template) {
+          if (template.title) setQuizTitle(template.title);
+          if (template.description) setQuizDescription(template.description);
+          if (template.category) setQuizCategory(template.category);
+          if (template.thumbnail || template.coverImage) {
+            setQuizCoverImage(template.thumbnail || template.coverImage);
+          }
+          if (Array.isArray(template.questions) && template.questions.length > 0) {
+            const mappedQuestions: Question[] = template.questions.map((q: any, idx: number) => {
+              const isMulti = Boolean(q.isMultiSelect || (Array.isArray(q.correctAnswer) && q.correctAnswer.length > 1));
+              const rawCorrect = Array.isArray(q.correctAnswer) 
+                ? q.correctAnswer 
+                : (typeof q.correctAnswer === "number" ? [q.correctAnswer] : []);
+
+              const options: Option[] = (q.options || []).map((optText: string, optIdx: number) => ({
+                text: optText,
+                isCorrect: rawCorrect.includes(optIdx)
+              }));
+
+              if (options.length === 0) {
+                options.push({ text: "Option 1", isCorrect: true }, { text: "Option 2", isCorrect: false });
+              }
+
+              const timeLimitStr = q.timeLimit ? `${q.timeLimit} seconds` : "20 seconds";
+
+              return {
+                id: idx + 1,
+                type: q.type || "Quiz",
+                title: `${idx + 1}. ${q.type || "Quiz"}`,
+                text: q.text || "",
+                active: idx === 0,
+                timeLimit: timeLimitStr,
+                media: q.mediaUrl || null,
+                isMultiSelect: isMulti,
+                options
+              };
+            });
+            setQuestions(mappedQuestions);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load quiz template:", err);
+      } finally {
+        setIsLoadingTemplate(false);
+      }
+    };
+
+    loadTemplate();
+  }, [templateId]);
 
   const activeQuestion = questions.find(q => q.active) || questions[0];
 
@@ -330,6 +390,13 @@ export default function CreateQuizPage() {
           </div>
         </div>
       </header>
+
+      {isLoadingTemplate && (
+        <div className="bg-orange-50 border-b border-orange-100 px-6 py-2.5 flex items-center gap-2 text-xs font-bold text-orange-700 animate-pulse">
+          <div className="w-3.5 h-3.5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+          <span>Arranging template quiz questions and options...</span>
+        </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden h-[calc(100vh-180px)]">
         {/* Left Sidebar - Questions */}
