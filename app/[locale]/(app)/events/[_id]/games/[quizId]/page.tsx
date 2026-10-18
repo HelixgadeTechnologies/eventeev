@@ -10,7 +10,8 @@ import {
   HiOutlinePlay, 
   HiOutlineEye,
   HiOutlineSparkles,
-  HiOutlineQuestionMarkCircle
+  HiOutlineQuestionMarkCircle,
+  HiOutlinePencilAlt
 } from "react-icons/hi";
 import { LuClock3, LuChartBar } from "react-icons/lu";
 import { FiShare2, FiBookmark, FiAlertTriangle } from "react-icons/fi";
@@ -128,23 +129,29 @@ export default function QuizDetailPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 pt-4">
+              <div className="flex flex-wrap items-center gap-3 pt-4">
                 <button 
                   onClick={handleHostGame}
                   disabled={isHosting}
-                  className="bg-[#eb5017] text-white px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 disabled:opacity-50 cursor-pointer"
-                >
-                  <HiOutlinePlay className="text-xl" />
-                  {isHosting ? "Generating PIN..." : "Play Game"}
-                </button>
-                <button 
-                  onClick={handleHostGame}
-                  disabled={isHosting}
-                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-10 py-4 rounded-2xl font-black flex items-center gap-3 hover:border-[#eb5017] hover:text-[#eb5017] transition-all disabled:opacity-50 cursor-pointer"
+                  className="bg-[#eb5017] text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2.5 hover:bg-[#d64815] transition-all transform active:scale-95 shadow-lg shadow-[#eb5017]/20 disabled:opacity-50 cursor-pointer"
                 >
                   <HiOutlineUsers className="text-xl" />
-                  {isHosting ? "Generating PIN..." : "Host Game"}
+                  {isHosting ? "Generating PIN..." : "Host Live Game"}
                 </button>
+                <Link 
+                  href={`/events/${eventId}/games/${quizId}/play?preview=true`}
+                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-7 py-4 rounded-2xl font-black flex items-center gap-2 hover:border-[#eb5017] hover:text-[#eb5017] transition-all cursor-pointer"
+                >
+                  <HiOutlinePlay className="text-xl" />
+                  Solo Play
+                </Link>
+                <Link 
+                  href={`/events/${eventId}/games/create?id=${quizId}`}
+                  className="bg-white text-[#1B1818] border-2 border-gray-100 px-7 py-4 rounded-2xl font-black flex items-center gap-2 hover:border-[#eb5017] hover:text-[#eb5017] transition-all cursor-pointer shadow-xs"
+                >
+                  <HiOutlinePencilAlt className="text-xl text-[#eb5017]" />
+                  Edit Game
+                </Link>
               </div>
             </div>
           </div>

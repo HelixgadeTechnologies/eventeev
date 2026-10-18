@@ -111,23 +111,27 @@ export default function CreateQuizPage() {
     fetchSettings();
   }, [_id]);
 
-  // Load and pre-populate quiz data if templateId is provided
+  // Load and pre-populate quiz data if templateId or initialId is provided
   useEffect(() => {
-    if (!templateId) return;
+    const targetLoadId = templateId || initialId;
+    if (!targetLoadId) return;
 
-    const loadTemplate = async () => {
+    const loadQuizData = async () => {
       try {
         setIsLoadingTemplate(true);
-        const template = await quizzesService.getQuiz(templateId);
-        if (template) {
-          if (template.title) setQuizTitle(template.title);
-          if (template.description) setQuizDescription(template.description);
-          if (template.category) setQuizCategory(template.category);
-          if (template.thumbnail || template.coverImage) {
-            setQuizCoverImage(template.thumbnail || template.coverImage);
+        const loadedQuiz = await quizzesService.getQuiz(targetLoadId);
+        if (loadedQuiz) {
+          if (initialId) {
+            setQuizId(initialId);
           }
-          if (Array.isArray(template.questions) && template.questions.length > 0) {
-            const mappedQuestions: Question[] = template.questions.map((q: any, idx: number) => {
+          if (loadedQuiz.title) setQuizTitle(loadedQuiz.title);
+          if (loadedQuiz.description) setQuizDescription(loadedQuiz.description);
+          if (loadedQuiz.category) setQuizCategory(loadedQuiz.category);
+          if (loadedQuiz.thumbnail || loadedQuiz.coverImage) {
+            setQuizCoverImage(loadedQuiz.thumbnail || loadedQuiz.coverImage);
+          }
+          if (Array.isArray(loadedQuiz.questions) && loadedQuiz.questions.length > 0) {
+            const mappedQuestions: Question[] = loadedQuiz.questions.map((q: any, idx: number) => {
               const isMulti = Boolean(q.isMultiSelect || (Array.isArray(q.correctAnswer) && q.correctAnswer.length > 1));
               const rawCorrect = Array.isArray(q.correctAnswer) 
                 ? q.correctAnswer 
@@ -160,14 +164,14 @@ export default function CreateQuizPage() {
           }
         }
       } catch (err) {
-        console.error("Failed to load quiz template:", err);
+        console.error("Failed to load quiz data:", err);
       } finally {
         setIsLoadingTemplate(false);
       }
     };
 
-    loadTemplate();
-  }, [templateId]);
+    loadQuizData();
+  }, [templateId, initialId]);
 
   const activeQuestion = questions.find(q => q.active) || questions[0];
 
