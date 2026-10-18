@@ -27,9 +27,9 @@ const DonatedTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTi
   const [currency, setCurrency] = useState<string>(initialData?.currency || DEFAULT_CURRENCY);
   const [price, setPrice] = useState<number>(initialData?.price || 0);
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
-  const [endDate, setEndDate] = useState(initialData?.stopDate || "");
+  const [endDate, setEndDate] = useState(initialData?.endDate || initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
-  const [endTime, setEndTime] = useState(initialData?.stopTime || "");
+  const [endTime, setEndTime] = useState(initialData?.endTime || initialData?.stopTime || "");
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const nowTimeStr = format(new Date(), "HH:mm");

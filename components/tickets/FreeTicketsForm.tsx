@@ -18,9 +18,9 @@ const FreeTicketsForm = ({ initialData, onSuccess }: { initialData?: TicketTier,
 
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(initialData?.startDate || "");
-  const [endDate, setEndDate] = useState(initialData?.stopDate || "");
+  const [endDate, setEndDate] = useState(initialData?.endDate || initialData?.stopDate || "");
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
-  const [endTime, setEndTime] = useState(initialData?.stopTime || "");
+  const [endTime, setEndTime] = useState(initialData?.endTime || initialData?.stopTime || "");
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const nowTimeStr = format(new Date(), "HH:mm");

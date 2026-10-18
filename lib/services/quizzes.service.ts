@@ -13,6 +13,34 @@ export class QuizzesService {
     }
   }
 
+    async getTemplateQuizzes(params?: { category?: string; search?: string; featured?: boolean }) {
+    try {
+      const response = await axiosInstance.get("/api/game/quiz/templates", { params });
+      const raw = response.data?.data || response.data;
+      return Array.isArray(raw) ? raw : [];
+    } catch (error: any) {
+      console.warn("[QuizzesService] Could not fetch template quizzes:", error?.message || error);
+      return [];
+    }
+  }
+
+  async cloneQuiz(quizId: string, eventId: string) {
+    if (!quizId || !isMongoObjectId(quizId)) {
+      throw new Error("Invalid quiz ID");
+    }
+    if (!eventId || !isMongoObjectId(eventId)) {
+      throw new Error("Invalid event ID");
+    }
+
+    try {
+      const response = await axiosInstance.post(`/api/game/quiz/${quizId}/clone`, { eventId });
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.error(`[QuizzesService] Failed to clone quiz "${quizId}":`, error?.message || error);
+      throw error;
+    }
+  }
+
   async getQuiz(id: string) {
     if (!id || !isMongoObjectId(id)) {
       return null;
