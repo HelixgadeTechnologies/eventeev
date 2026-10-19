@@ -25,6 +25,7 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { eventsService } from "@/lib/services/events.service";
 import { quizzesService } from "@/lib/services/quizzes.service";
 import ActionConfirmationModal from "@/components/ui/ActionConfirmationModal";
+import { useAuth } from "@/context/AuthContext";
 
 interface Option {
   text: string;
@@ -50,6 +51,7 @@ export default function CreateQuizPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const _id = params?._id as string;
+  const { user } = useAuth();
   
   // Get initial data from query params
   const initialId = searchParams.get("id") || "";
@@ -370,12 +372,15 @@ export default function CreateQuizPage() {
     }
 
     setIsSaving(true);
+    const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name : undefined;
     const payload: Record<string, any> = {
       eventId: _id,
       title: quizTitle.trim(),
       description: quizDescription.trim(),
       category: quizCategory || "trivia",
       thumbnail: quizCoverImage || "/thumbnails/space_trivia.png",
+      author: userFullName || undefined,
+      authorAvatar: user?.avatar || undefined,
       questions: questions.map(q => ({
         text: q.text.trim(),
         mediaUrl: q.media || undefined,

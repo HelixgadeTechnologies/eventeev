@@ -18,6 +18,8 @@ import { FiShare2, FiBookmark, FiAlertTriangle } from "react-icons/fi";
 import QuestionPreviewCard from "@/components/games/QuestionPreviewCard";
 import RelatedQuizItem from "@/components/games/RelatedQuizItem";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { useAuth } from "@/context/AuthContext";
+import Avatar from "@/components/ui/Avatar";
 import { toast } from "sonner";
 
 
@@ -26,6 +28,7 @@ export default function QuizDetailPage() {
   const router = useRouter();
   const eventId = params._id as string;
   const quizId = params.quizId as string;
+  const { user } = useAuth();
 
   const [showAnswers, setShowAnswers] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
@@ -114,20 +117,39 @@ export default function QuizDetailPage() {
                 {quiz.description}
               </p>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
-                   <Image src="/icons/avatar-placeholder.png" alt={quiz.author} width={40} height={40} />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-[#1B1818]">By {quiz.author}</span>
-                  {quiz.isVerified && (
-                    <span className="text-[10px] font-black text-[#667185] uppercase tracking-wider flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      Verified Creator
-                    </span>
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name : null;
+                const authorName = 
+                  (quiz?.author && quiz.author !== 'Eventeev Staff' && quiz.author !== 'Organizer')
+                    ? quiz.author
+                    : (quiz?.createdBy?.firstName ? `${quiz.createdBy.firstName} ${quiz.createdBy.lastName || ''}`.trim() : null)
+                    || quiz?.createdBy?.name
+                    || userFullName
+                    || quiz?.author
+                    || "Event Organizer";
+
+                const authorAvatar = quiz?.authorAvatar || quiz?.createdBy?.avatar || user?.avatar || undefined;
+
+                return (
+                  <div className="flex items-center gap-3">
+                    <Avatar 
+                      name={authorName} 
+                      src={authorAvatar} 
+                      disableLink={true} 
+                      isBigger={false} 
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-[#1B1818]">By {authorName}</span>
+                      {quiz?.isVerified !== false && (
+                        <span className="text-[10px] font-black text-[#667185] uppercase tracking-wider flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                          Verified Creator
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="flex flex-wrap items-center gap-3 pt-4">
                 <button 
