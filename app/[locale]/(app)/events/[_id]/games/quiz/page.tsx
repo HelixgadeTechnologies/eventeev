@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import QuizCard from "@/components/games/QuizCard";
 import CreateQuizModal from "@/components/games/CreateQuizModal";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { useAuth } from "@/context/AuthContext";
 
 const categories = [
   { id: "all", name: "All", icon: RiInfinityLine, active: true },
@@ -47,6 +48,8 @@ const categoryColors: Record<string, string> = {
 export default function GamesPage() {
   const params = useParams();
   const eventId = params._id as string;
+  const { user } = useAuth();
+  const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.name : null;
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [templateQuizzes, setTemplateQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -302,17 +305,28 @@ export default function GamesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredQuizzes.map((quiz, index) => (
-              <QuizCard 
-                key={quiz._id || quiz.id || index}
-                id={quiz._id || quiz.id}
-                title={quiz.title}
-                category={quiz.category || "General"}
-                questions={quiz.questions?.length || 0}
-                author={quiz.author || "Organizer"}
-                thumbnail={quiz.coverImage || quiz.thumbnail || "/thumbnails/space_trivia.png"}
-              />
-            ))}
+            {filteredQuizzes.map((quiz, index) => {
+              const authorName = 
+                (quiz?.author && quiz.author !== 'Eventeev Staff' && quiz.author !== 'Organizer')
+                  ? quiz.author
+                  : (quiz?.createdBy?.firstName ? `${quiz.createdBy.firstName} ${quiz.createdBy.lastName || ''}`.trim() : null)
+                  || quiz?.createdBy?.name
+                  || userFullName
+                  || quiz?.author
+                  || "Organizer";
+
+              return (
+                <QuizCard 
+                  key={quiz._id || quiz.id || index}
+                  id={quiz._id || quiz.id}
+                  title={quiz.title}
+                  category={quiz.category || "General"}
+                  questions={quiz.questions?.length || 0}
+                  author={authorName}
+                  thumbnail={quiz.coverImage || quiz.thumbnail || "/thumbnails/space_trivia.png"}
+                />
+              );
+            })}
           </div>
         )
       ) : (
