@@ -34,9 +34,14 @@ export default function WaitingRoomPage() {
 
     const fetchParticipants = async () => {
       try {
-        const data = await quizzesService.getLeaderboard(pin);
-        // Leaderboard typically returns an array of { nickname, score, etc. }
+        const [data, session] = await Promise.all([
+          quizzesService.getLeaderboard(pin),
+          isPlayerMode ? quizzesService.getSession(pin) : Promise.resolve(null),
+        ]);
         setPlayers(data || []);
+        if (isPlayerMode && session && (session.status === "active" || Boolean(session.currentQuestion))) {
+          router.push(`/events/${eventId}/games/${quizId}/play?q=0&pin=${pin}&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`);
+        }
       } catch (error) {
         console.error("Error fetching participants:", error);
       } finally {
@@ -62,8 +67,15 @@ export default function WaitingRoomPage() {
     router.push(`/events/${eventId}/games/${quizId}`);
   };
 
-  const handleStartGame = () => {
-    router.push(`/events/${eventId}/games/${quizId}/countdown${pin ? `?pin=${pin}` : ''}`);
+  const handleStartGame = async () => {
+    if (pin) {
+      try {
+        await quizzesService.startSession(pin);
+      } catch (err: any) {
+        console.warn("Server start session notification:", err?.message || err);
+      }
+    }
+    router.push(`/events/${eventId}/games/${quizId}/countdown${pin ? `?pin=${pin}` : ""}`);
   };
 
   const handleCopyPin = () => {

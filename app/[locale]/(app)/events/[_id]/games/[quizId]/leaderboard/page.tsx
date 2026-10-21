@@ -64,13 +64,20 @@ function LeaderboardContent() {
     }
   }, [pin]);
 
-  const handleNextQuestion = useCallback(() => {
+  const handleNextQuestion = useCallback(async () => {
     if (!quiz) return;
+    if (pin) {
+      try {
+        await quizzesService.nextQuestion(pin);
+      } catch (err) {
+        console.warn("Server next question notification:", err);
+      }
+    }
     if (qIndex < quiz.questions.length - 1) {
-      router.push(`/events/${eventId}/games/${quizId}/intro?q=${qIndex + 1}${pin ? `&pin=${pin}` : ''}`);
+      router.push(`/events/${eventId}/games/${quizId}/intro?q=${qIndex + 1}${pin ? `&pin=${pin}` : ""}`);
     } else {
       // Game finished, go to winner screen
-      router.push(`/events/${eventId}/games/${quizId}/winner${pin ? `?pin=${pin}` : ''}`);
+      router.push(`/events/${eventId}/games/${quizId}/winner${pin ? `?pin=${pin}` : ""}`);
     }
   }, [router, eventId, quizId, qIndex, quiz, pin]);
 

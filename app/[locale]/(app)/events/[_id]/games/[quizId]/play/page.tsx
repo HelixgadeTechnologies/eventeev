@@ -72,8 +72,15 @@ function GamePlayContent() {
     }
   }, [timeLeft, showEndModal]);
 
-  const handleNextQuestion = () => {
-    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
+  const handleNextQuestion = async () => {
+    if (pin) {
+      try {
+        await quizzesService.revealAnswer(pin);
+      } catch (err) {
+        console.warn("Server reveal answer notification:", err);
+      }
+    }
+    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ""}`);
   };
 
   const handleEndGame = () => {
