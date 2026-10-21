@@ -24,6 +24,8 @@ function WinnerContent() {
   const eventId = params?._id;
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,11 @@ function WinnerContent() {
   }, [loading, quiz, winners.length]);
 
   const handleFinish = () => {
-    router.push(`/events/${eventId}/games`);
+    if (isPlayerMode) {
+      router.push(`/events/${eventId}/games/join`);
+    } else {
+      router.push(`/events/${eventId}/games`);
+    }
   };
 
   if (loading || !quiz) {
@@ -123,14 +129,19 @@ function WinnerContent() {
       {/* Header */}
       <header className="w-full p-8 flex items-center justify-between relative z-10">
         <Link 
-            href={`/events/${eventId}/games`} 
+            href={isPlayerMode ? `/events/${eventId}/games/join` : `/events/${eventId}/games`} 
             className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
         >
             <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
-            Back to Games
+            {isPlayerMode ? "Exit Game" : "Back to Games"}
         </Link>
         <Image src="/logo-black.svg" alt="Eventeev" width={140} height={45} priority className="mr-auto ml-8" />
         <div className="flex items-center gap-4">
+           {isPlayerMode && playerNickname && (
+             <div className="bg-orange-50 border border-orange-200/60 text-[#EB5017] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+               Player: {playerNickname}
+             </div>
+           )}
            <button className="p-3 bg-white border border-gray-100 rounded-2xl shadow-sm text-gray-400 hover:text-[#EB5017] transition-colors">
               <HiOutlineShare className="text-2xl" />
            </button>
@@ -155,7 +166,13 @@ function WinnerContent() {
                 {visibleStep === 0 && "Calculating final scores..."}
                 {visibleStep === 1 && "In 3rd Place..."}
                 {visibleStep === 2 && "The Runner Up is..."}
-                {visibleStep === 3 && "All hail the Champion!"}
+                {visibleStep === 3 && (
+                  isPlayerMode && playerNickname
+                    ? (winners.some(w => w.name.toLowerCase() === playerNickname.toLowerCase())
+                        ? `🎉 Congratulations ${playerNickname}! You made the podium!`
+                        : `👏 Great game, ${playerNickname}! Thanks for playing!`)
+                    : "All hail the Champion!"
+                )}
               </>
             ) : (
               "The quiz session has concluded successfully."
@@ -198,8 +215,13 @@ function WinnerContent() {
 
                   {/* Name and Points */}
                   <div className="text-center mb-6">
-                    <h3 className={`font-black text-[#1B1818] uppercase tracking-tight ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
-                      {winner.name}
+                    <h3 className={`font-black text-[#1B1818] uppercase tracking-tight flex items-center justify-center gap-2 ${winner.rank === 1 ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>
+                      <span>{winner.name}</span>
+                      {isPlayerMode && playerNickname && winner.name.toLowerCase() === playerNickname.toLowerCase() && (
+                        <span className="bg-[#EB5017] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-sm">
+                          You
+                        </span>
+                      )}
                     </h3>
                     <span className="text-sm font-black text-[#667185] opacity-60 uppercase tracking-widest">
                       {winner.points} PTS
@@ -239,7 +261,7 @@ function WinnerContent() {
             className="bg-[#1B1818] text-white px-12 py-5 rounded-[24px] font-black text-lg uppercase tracking-widest flex items-center gap-3 hover:bg-[#eb5017] transition-all transform active:scale-95 shadow-2xl shadow-black/20 group"
           >
             <HiOutlineHome className="text-2xl group-hover:-translate-y-1 transition-transform" />
-            Finish Session
+            {isPlayerMode ? "Leave Game" : "Finish Session"}
           </button>
         </div>
       </main>

@@ -58,7 +58,11 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
           } else {
             setEvent(eventData);
             setStats(statsRes.data);
-            setAttendees(attendeesRes.data.slice(0, 8));
+            const allAttendees = attendeesRes.data || [];
+            // For Recent Check-ins, prioritize checked-in attendees; if none checked in yet, show recent registrants
+            const checkedIn = allAttendees.filter((a: ApiAttendee) => a.isCheckedIn);
+            const displayAttendees = checkedIn.length > 0 ? checkedIn : allAttendees;
+            setAttendees(displayAttendees.slice(0, 12));
           }
         }
       } catch (err: any) {
@@ -216,25 +220,45 @@ export default function EventsDashboard({ params }: EventDetailsProps) {
                 </div>
               ) : (
                 <div className="flex gap-8 items-center overflow-x-auto w-full px-8 py-4 custom-scrollbar">
-                  {attendees.map((attendee) => (
-                    <div
-                      key={attendee.id}
-                      className="flex flex-col shrink-0 items-center justify-center space-y-3 group/item cursor-pointer"
-                    >
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-[#eb5017] rounded-full scale-0 group-hover/item:scale-110 transition-transform duration-300 opacity-20" />
-                        <Avatar name={attendee.name} isBigger={true} />
-                      </div>
-                      <div className="text-center">
-                        <p className="font-black text-[11px] text-[#1B1818] uppercase tracking-tight truncate w-24">
-                          {attendee.name}
-                        </p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter w-24 truncate">
-                          {attendee.email}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                  {attendees.map((attendee) => {
+                    const attendeeId = attendee.id || (attendee as any)._id;
+                    const displayName =
+                      attendee.name?.trim() ||
+                      ((attendee as any).firstName || (attendee as any).lastName
+                        ? `${(attendee as any).firstName || ""} ${(attendee as any).lastName || ""}`.trim()
+                        : "") ||
+                      (attendee.email ? attendee.email.split("@")[0] : "Attendee");
+
+                    return (
+                      <Link
+                        key={attendeeId || attendee.email}
+                        href={
+                          attendeeId
+                            ? `/events/${event._id}/check-in/attendee/${attendeeId}/profile`
+                            : `/events/${event._id}/check-in`
+                        }
+                        className="flex flex-col shrink-0 items-center justify-center space-y-3 group/item cursor-pointer"
+                      >
+                        <div className="relative shrink-0">
+                          <div className="absolute inset-0 bg-[#eb5017] rounded-full scale-0 group-hover/item:scale-110 transition-transform duration-300 opacity-20" />
+                          <Avatar
+                            name={displayName}
+                            fallback={attendee.email}
+                            isBigger={true}
+                            disableLink={true}
+                          />
+                        </div>
+                        <div className="text-center">
+                          <p className="font-black text-[11px] text-[#1B1818] uppercase tracking-tight truncate w-24">
+                            {displayName}
+                          </p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter w-24 truncate">
+                            {attendee.email || "Verified"}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -209,6 +209,61 @@ export class QuizzesService {
       return localQuizzes;
     }
   }
+
+  async getSession(pin: string) {
+    if (!pin) return null;
+    try {
+      const response = await axiosInstance.get(`/api/game/quiz/session/${pin}`);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.warn(`[QuizzesService] Could not fetch session for pin "${pin}":`, error?.message || error);
+      return null;
+    }
+  }
+
+  async startSession(pin: string) {
+    if (!pin) throw new Error("PIN is required");
+    try {
+      const response = await axiosInstance.post(`/api/game/quiz/session/${pin}/start`);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.error(`[QuizzesService] Failed to start quiz session ${pin}:`, error?.message || error);
+      throw error;
+    }
+  }
+
+  async nextQuestion(pin: string) {
+    if (!pin) throw new Error("PIN is required");
+    try {
+      const response = await axiosInstance.post(`/api/game/quiz/session/${pin}/next`);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.error(`[QuizzesService] Failed to advance quiz session ${pin}:`, error?.message || error);
+      throw error;
+    }
+  }
+
+  async revealAnswer(pin: string) {
+    if (!pin) throw new Error("PIN is required");
+    try {
+      const response = await axiosInstance.post(`/api/game/quiz/session/${pin}/reveal`);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.error(`[QuizzesService] Failed to reveal answer for session ${pin}:`, error?.message || error);
+      throw error;
+    }
+  }
+
+  async endSession(pin: string) {
+    if (!pin) throw new Error("PIN is required");
+    try {
+      const response = await axiosInstance.post(`/api/game/quiz/session/${pin}/end`);
+      return response.data?.data || response.data;
+    } catch (error: any) {
+      console.error(`[QuizzesService] Failed to end quiz session ${pin}:`, error?.message || error);
+      throw error;
+    }
+  }
 }
 
 export const quizzesService = new QuizzesService();

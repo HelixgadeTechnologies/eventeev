@@ -5,6 +5,9 @@ import { useCallback, useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { io, Socket } from "socket.io-client";
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
 
 interface LeaderboardItem {
   rank: number;
@@ -24,6 +27,8 @@ function LeaderboardContent() {
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
   const qIndex = parseInt(searchParams.get("q") || "0");
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [progress, setProgress] = useState(0);
@@ -64,15 +69,52 @@ function LeaderboardContent() {
     }
   }, [pin]);
 
-  const handleNextQuestion = useCallback(() => {
+  const handleNextQuestion = useCallback(async () => {
     if (!quiz) return;
+    if (!isPlayerMode && pin) {
+      try {
+        await quizzesService.nextQuestion(pin);
+      } catch (err) {
+        console.warn("Server next question notification:", err);
+      }
+    }
+    const playerParams = isPlayerMode
+      ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
+      : "";
     if (qIndex < quiz.questions.length - 1) {
-      router.push(`/events/${eventId}/games/${quizId}/intro?q=${qIndex + 1}${pin ? `&pin=${pin}` : ''}`);
+      router.push(`/events/${eventId}/games/${quizId}/intro?q=${qIndex + 1}${pin ? `&pin=${pin}` : ""}${playerParams}`);
     } else {
       // Game finished, go to winner screen
-      router.push(`/events/${eventId}/games/${quizId}/winner${pin ? `?pin=${pin}` : ''}`);
+      router.push(`/events/${eventId}/games/${quizId}/winner?${pin ? `pin=${pin}` : ""}${playerParams}`);
     }
-  }, [router, eventId, quizId, qIndex, quiz, pin]);
+  }, [router, eventId, quizId, qIndex, quiz, pin, isPlayerMode, playerNickname]);
+
+  useEffect(() => {
+    if (!pin) return;
+    let socket: Socket | null = null;
+    try {
+      socket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 5,
+      });
+      socket.emit("join_room", pin);
+      socket.emit("join", pin);
+
+      const onNext = () => {
+        handleNextQuestion();
+      };
+
+      socket.on("next_question", onNext);
+      socket.on("question_start", onNext);
+      socket.on("new_question", onNext);
+      socket.on("game_ended", onNext);
+      socket.on("quiz_ended", onNext);
+
+      return () => {
+        socket?.disconnect();
+      };
+    } catch (_) {}
+  }, [pin, handleNextQuestion]);
 
   useEffect(() => {
     // Start progress animation
@@ -160,51 +202,81 @@ function LeaderboardContent() {
 
               {/* Ranks 2-5 List */}
               <div className="flex flex-col gap-2.5">
-                {leaderboard.slice(1).map((player) => (
-                  <div 
-                    key={player.rank}
-                    className="flex items-center gap-4 bg-white border border-[#f4ede7] rounded-[20px] p-4 shadow-sm hover:shadow-lg hover:scale-[1.005] transition-all duration-300 animate-in fade-in slide-in-from-left-8"
-                    style={{ animationDelay: `${player.rank * 100}ms` }}
-                  >
-                    <div className="flex items-center gap-5 flex-1">
-                      <span className="text-xl font-black text-[#9c7349]/40 w-6">{player.rank}</span>
-                      <div className="size-11 rounded-full overflow-hidden border-2 border-[#f4ede7] relative shrink-0">
-                        <Image src={player.avatar} alt={player.name} fill className="object-cover" />
+                {leaderboard.slice(1).map((player) => {
+                  const isMe =
+                    isPlayerMode &&
+                    Boolean(playerNickname) &&
+                    player.name.toLowerCase() === playerNickname.toLowerCase();
+
+                  return (
+                    <div 
+                      key={player.rank}
+                      className={`flex items-center gap-4 bg-white border rounded-[20px] p-4 shadow-sm hover:shadow-lg hover:scale-[1.005] transition-all duration-300 animate-in fade-in slide-in-from-left-8 ${
+                        isMe ? "border-[#f48c25] ring-2 ring-[#f48c25]/30 bg-orange-50/40" : "border-[#f4ede7]"
+                      }`}
+                      style={{ animationDelay: `${player.rank * 100}ms` }}
+                    >
+                      <div className="flex items-center gap-5 flex-1">
+                        <span className="text-xl font-black text-[#9c7349]/40 w-6">{player.rank}</span>
+                        <div className="size-11 rounded-full overflow-hidden border-2 border-[#f4ede7] relative shrink-0">
+                          <Image src={player.avatar} alt={player.name} fill className="object-cover" />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-black font-feather uppercase">{player.name}</span>
+                            {isMe && (
+                              <span className="bg-[#f48c25] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full">
+                                You
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[#9c7349] text-xs font-bold opacity-60">{player.message}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-lg font-black font-feather uppercase">{player.name}</span>
-                        <span className="text-[#9c7349] text-xs font-bold opacity-60">{player.message}</span>
+                      
+                      <div className="flex flex-col items-end">
+                        <span className="text-xl font-black leading-none">{player.points} pts</span>
+                        <span className="text-[#26890C] font-black text-[10px] mt-0.5">{player.gained}</span>
                       </div>
                     </div>
-                    
-                    <div className="flex flex-col items-end">
-                      <span className="text-xl font-black leading-none">{player.points} pts</span>
-                      <span className="text-[#26890C] font-black text-[10px] mt-0.5">{player.gained}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}
         </div>
       </main>
 
-      {/* Bottom Nav / Host Control */}
-      <div className="fixed bottom-10 right-10 z-20 flex items-center animate-in slide-in-from-right-12 duration-1000">
-        <div className="hidden md:flex flex-col items-end mr-5">
-          <span className="text-[10px] font-black text-[#f48c25] tracking-[0.2em] uppercase mb-1">Host Control</span>
-          <span className="text-xs font-medium opacity-40">Ready for next question?</span>
+      {/* Bottom Nav / Host Control or Attendee Live Status */}
+      {isPlayerMode ? (
+        <div className="fixed bottom-10 right-10 z-20 flex items-center bg-white/95 backdrop-blur-md border border-[#f4ede7] px-6 py-3.5 rounded-2xl shadow-xl shadow-black/5 animate-in slide-in-from-right-12 duration-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-3" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-[#f48c25] tracking-widest uppercase">
+              {qIndex < (quiz?.questions?.length || 10) - 1 ? "Next Round" : "Final Standings"}
+            </span>
+            <span className="text-xs font-bold text-[#1c140d]">
+              {playerNickname ? `${playerNickname} • Stay tuned` : "Advancing shortly..."}
+            </span>
+          </div>
         </div>
-        <button 
-          onClick={handleNextQuestion}
-          className="flex items-center justify-center gap-3 bg-[#f48c25] text-white px-8 py-4 rounded-2xl shadow-2xl shadow-[#f48c25]/40 hover:scale-105 hover:bg-[#d67a1d] active:scale-95 transition-all duration-300 group"
-        >
-          <span className="text-base font-black tracking-wider uppercase">
-            {qIndex < (quiz?.questions?.length || 10) - 1 ? "NEXT QUESTION" : "FINISH GAME"}
-          </span>
-          <HiOutlineChevronRight className="size-5 group-hover:translate-x-1 transition-transform" />
-        </button>
-      </div>
+      ) : (
+        <div className="fixed bottom-10 right-10 z-20 flex items-center animate-in slide-in-from-right-12 duration-1000">
+          <div className="hidden md:flex flex-col items-end mr-5">
+            <span className="text-[10px] font-black text-[#f48c25] tracking-[0.2em] uppercase mb-1">Host Control</span>
+            <span className="text-xs font-medium opacity-40">Ready for next question?</span>
+          </div>
+          <button 
+            onClick={handleNextQuestion}
+            className="flex items-center justify-center gap-3 bg-[#f48c25] text-white px-8 py-4 rounded-2xl shadow-2xl shadow-[#f48c25]/40 hover:scale-105 hover:bg-[#d67a1d] active:scale-95 transition-all duration-300 group"
+          >
+            <span className="text-base font-black tracking-wider uppercase">
+              {qIndex < (quiz?.questions?.length || 10) - 1 ? "NEXT QUESTION" : "FINISH GAME"}
+            </span>
+            <HiOutlineChevronRight className="size-5 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      )}
 
       {/* Decorative Bottom Bar */}
       <div 
