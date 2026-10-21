@@ -4,37 +4,64 @@ import React, { useState, useEffect } from "react";
 import { HiOutlineChevronDown, HiOutlineTrophy, HiOutlineUserGroup, HiOutlineClock } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
 import { useParams } from "next/navigation";
+import Avatar from "@/components/ui/Avatar";
 
-export default function GameAnalyticsWidget() {
+interface GameAnalyticsWidgetProps {
+  quizzes?: any[];
+  eventId?: string;
+}
+
+export default function GameAnalyticsWidget({ 
+  quizzes: propQuizzes, 
+  eventId: propEventId 
+}: GameAnalyticsWidgetProps = {}) {
   const params = useParams();
-  const eventId = params._id as string;
-  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const eventId = propEventId || (params?._id as string);
+  const [internalQuizzes, setInternalQuizzes] = useState<any[]>([]);
   const [selectedQuizId, setSelectedQuizId] = useState<string>("");
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const quizzes = propQuizzes !== undefined ? propQuizzes : internalQuizzes;
+
   useEffect(() => {
+    if (propQuizzes !== undefined) {
+      if (propQuizzes.length > 0) {
+        const firstId = propQuizzes[0]._id || propQuizzes[0].id;
+        setSelectedQuizId(firstId);
+      } else {
+        setSelectedQuizId("");
+      }
+      return;
+    }
+
+    if (!eventId) return;
+
     const fetchQuizzes = async () => {
       try {
         const data = await quizzesService.getQuizzesByEvent(eventId);
-        setQuizzes(data || []);
+        setInternalQuizzes(data || []);
         if (data && data.length > 0) {
-          setSelectedQuizId(data[0].id);
+          const firstId = data[0]._id || data[0].id;
+          setSelectedQuizId(firstId);
         }
       } catch (error) {
         console.error("Error fetching quizzes:", error);
       }
     };
     fetchQuizzes();
-  }, [eventId]);
+  }, [eventId, propQuizzes]);
 
   useEffect(() => {
-    if (!selectedQuizId) return;
+    if (!selectedQuizId) {
+      setLeaderboard([]);
+      return;
+    }
 
     const fetchLeaderboard = async () => {
       setLoading(true);
       try {
-        const quiz = quizzes.find(q => q.id === selectedQuizId);
+        const quiz = quizzes.find(q => (q._id || q.id) === selectedQuizId);
         if (quiz?.pin) {
           const data = await quizzesService.getLeaderboard(quiz.pin);
           setLeaderboard(data || []);
@@ -61,9 +88,10 @@ export default function GameAnalyticsWidget() {
             onChange={(e) => setSelectedQuizId(e.target.value)}
             className="appearance-none bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 pr-10 text-sm font-bold text-[#1B1818] outline-none focus:border-[#EB5017] transition-all cursor-pointer min-w-[150px]"
           >
-            {quizzes.map((quiz) => (
-              <option key={quiz.id} value={quiz.id}>{quiz.title}</option>
-            ))}
+            {quizzes.map((quiz) => {
+              const qId = quiz._id || quiz.id;
+              return <option key={qId} value={qId}>{quiz.title}</option>;
+            })}
             {quizzes.length === 0 && <option value="">No quizzes found</option>}
           </select>
           <HiOutlineChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -91,17 +119,20 @@ export default function GameAnalyticsWidget() {
                       index === 0 ? "bg-[#FFF2F0] border-[#EB5017]/20" : "bg-white border-gray-100"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <span className={`text-lg font-black ${index === 0 ? "text-[#EB5017]" : "text-gray-400"}`}>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-base font-black ${index === 0 ? "text-[#EB5017]" : "text-gray-400"}`}>
                         #{index + 1}
                       </span>
-                      <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
-                        <div className="w-full h-full flex items-center justify-center bg-[#EB5017]/10 text-[#EB5017] font-black text-xs uppercase">
-                          {(player.nickname || player.name || "?")[0]}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="font-black text-[#1B1818] text-sm">{player.nickname || player.name}</p>
+                      <Avatar 
+                        name={player.nickname || player.name} 
+                        fallback="Player" 
+                        disableLink 
+                        className="w-10 h-10 shrink-0" 
+                      />
+                      <div className="min-w-0">
+                        <p className="font-black text-[#1B1818] text-sm truncate max-w-[120px]">
+                          {player.nickname || player.name}
+                        </p>
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                           {player.correctAnswers || 0} Correct
                         </p>
@@ -116,6 +147,7 @@ export default function GameAnalyticsWidget() {
               ) : (
                 <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                   <p className="text-sm font-bold text-gray-400">No session data yet</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Host this quiz to see live participant performance</p>
                 </div>
               )}
             </div>
