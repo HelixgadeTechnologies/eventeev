@@ -95,21 +95,65 @@ export class QuizzesService {
   async hostQuiz(id: string) {
     if (!id || !isMongoObjectId(id)) {
       const fallbackPin = Math.floor(100000 + Math.random() * 900000).toString();
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`quiz_session_${id}`, fallbackPin);
+          localStorage.setItem('last_active_quiz_pin', fallbackPin);
+          const history = JSON.parse(localStorage.getItem('eventeev_quiz_pins') || '{}');
+          history[id] = fallbackPin;
+          localStorage.setItem('eventeev_quiz_pins', JSON.stringify(history));
+        } catch (_) {}
+      }
       return { pin: fallbackPin, quizId: id };
     }
 
     try {
       const response = await axiosInstance.post(`/api/game/quiz/${id}/session`);
       const data = response.data?.data || response.data;
-      if (data && data.pin) {
-        return data;
+      const pin = data?.pin || Math.floor(100000 + Math.random() * 900000).toString();
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`quiz_session_${id}`, pin);
+          localStorage.setItem('last_active_quiz_pin', pin);
+          const history = JSON.parse(localStorage.getItem('eventeev_quiz_pins') || '{}');
+          history[id] = pin;
+          localStorage.setItem('eventeev_quiz_pins', JSON.stringify(history));
+        } catch (_) {}
       }
-      const fallbackPin = Math.floor(100000 + Math.random() * 900000).toString();
-      return { ...data, pin: fallbackPin, quizId: id };
+      return { ...data, pin, quizId: id };
     } catch (error: any) {
       console.warn(`[QuizzesService] Failed to start host session on server for "${id}", using fallback 6-digit PIN:`, error?.message || error);
       const fallbackPin = Math.floor(100000 + Math.random() * 900000).toString();
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`quiz_session_${id}`, fallbackPin);
+          localStorage.setItem('last_active_quiz_pin', fallbackPin);
+          const history = JSON.parse(localStorage.getItem('eventeev_quiz_pins') || '{}');
+          history[id] = fallbackPin;
+          localStorage.setItem('eventeev_quiz_pins', JSON.stringify(history));
+        } catch (_) {}
+      }
       return { pin: fallbackPin, quizId: id };
+    }
+  }
+
+  async getSessions() {
+    try {
+      const response = await axiosInstance.get('/api/game/quiz/sessions');
+      const raw = response.data?.data || response.data;
+      return Array.isArray(raw) ? raw : [];
+    } catch (error: any) {
+      return [];
+    }
+  }
+
+  async getHistory() {
+    try {
+      const response = await axiosInstance.get('/api/game/quiz/history');
+      const raw = response.data?.data || response.data;
+      return Array.isArray(raw) ? raw : [];
+    } catch (error: any) {
+      return [];
     }
   }
 
