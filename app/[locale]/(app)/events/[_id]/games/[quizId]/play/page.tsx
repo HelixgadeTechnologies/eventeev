@@ -163,6 +163,42 @@ function GamePlayContent() {
     }
   };
 
+  // When the admin projector renders a question, notify the backend so it can
+  // emit question_display to all attendees — keeping everyone in lockstep.
+  useEffect(() => {
+    if (!pin || isPlayerMode || !currentQuestion || !quiz) return;
+
+    let adminSocket: any = null;
+    try {
+      adminSocket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 3,
+      });
+      adminSocket.emit("join_room", pin);
+      adminSocket.emit("join_quiz_session", { pin });
+    } catch (_) {}
+
+    // Small delay: let React finish painting the question UI before unlocking attendees
+    const t = setTimeout(() => {
+      try {
+        adminSocket?.emit("admin_question_ready", {
+          pin,
+          questionIndex: qIndex,
+          totalQuestions: quiz?.questions?.length ?? 0,
+          currentQuestion: currentQuestion,
+          options: currentQuestion?.options ?? [],
+          timeLimitSeconds: currentQuestion?.timeLimit ?? 20,
+          startedAt: Date.now(),
+        });
+      } catch (_) {}
+    }, 300);
+
+    return () => {
+      clearTimeout(t);
+      adminSocket?.disconnect();
+    };
+  }, [pin, isPlayerMode, qIndex, currentQuestion, quiz]);
+
   const handleEndGame = () => {
     setShowEndModal(true);
   };
