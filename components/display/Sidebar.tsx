@@ -147,7 +147,7 @@ export default function Sidebar() {
 
         {/* footer */}
         <footer className="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100 w-full">
-          <Avatar name={fullName} />
+          <Avatar name={fullName} fallback={email} />
           <div className="flex-1 overflow-hidden">
             <p className="text-[13px] font-semibold text-[#101928] truncate">{fullName}</p>
             <p className="text-[11px] font-normal text-[#475367] truncate">{email}</p>

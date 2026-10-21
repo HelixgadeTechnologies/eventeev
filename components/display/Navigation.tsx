@@ -12,7 +12,10 @@ export default function Navigation() {
     return (
         <div className="flex justify-end items-center gap-1.5 md:gap-3 bg-white px-4 md:px-6 py-2 md:py-3">
           <NotificationsComponent />
-          <Avatar src="" name={user ? `${user.firstName} ${user.lastName}` : "Guest User"} />
+          <Avatar 
+            name={user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "Guest User"} 
+            fallback={user?.email} 
+          />
           <FiMenu onClick={openMobile} className="text-xl md:hidden" />
         </div>
     )

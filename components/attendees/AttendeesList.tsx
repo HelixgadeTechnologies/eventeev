@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { AttendeesDataType } from "@/lib/demo-data/attendees";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
@@ -308,14 +309,37 @@ const AttendeesList = () => {
         </button>
       ),
       cell: ({ row }) => {
-        const name = row.getValue("name") as string;
+        const attendee = row.original;
+        const name = (attendee?.name || (row.getValue("name") as string) || "").trim();
+        const email = (attendee?.email || "").trim();
+        const displayName = name || (email ? email.split("@")[0] : "Attendee");
+
         return (
           <div className="flex items-center gap-4">
-            <div className="relative group/avatar">
+            <Link
+              href={attendee?.id ? `/events/${eventId}/check-in/attendee/${attendee.id}/profile` : "#"}
+              className="relative group/avatar shrink-0 block"
+            >
               <div className="absolute inset-0 bg-[#EB5017] rounded-full scale-0 group-hover/avatar:scale-110 transition-transform duration-300 opacity-20" />
-              <Avatar name={name} href="#" />
+              <Avatar
+                name={displayName}
+                fallback={email}
+                disableLink={true}
+              />
+            </Link>
+            <div className="flex flex-col">
+              <Link
+                href={attendee?.id ? `/events/${eventId}/check-in/attendee/${attendee.id}/profile` : "#"}
+                className="font-black text-[#1B1818] uppercase tracking-tight text-xs hover:text-[#EB5017] transition-colors"
+              >
+                {displayName}
+              </Link>
+              {!name && email && (
+                <span className="text-[10px] text-gray-400 font-medium lowercase">
+                  {email}
+                </span>
+              )}
             </div>
-            <span className="font-black text-[#1B1818] uppercase tracking-tight text-xs">{name}</span>
           </div>
         );
       },
