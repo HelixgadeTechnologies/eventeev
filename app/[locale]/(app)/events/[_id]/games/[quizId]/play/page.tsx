@@ -111,6 +111,7 @@ function GamePlayContent() {
       });
       socket.emit("join_room", pin);
       socket.emit("join", pin);
+      socket.emit("join_quiz_session", { pin });
 
       const onReveal = () => {
         handleNextQuestion();
@@ -118,9 +119,15 @@ function GamePlayContent() {
 
       socket.on("reveal_answer", onReveal);
       socket.on("answer_revealed", onReveal);
+      socket.on("question_ended", onReveal);
+      socket.on("round_ended", onReveal);
+      socket.on("round_result", onReveal);
       socket.on("question_end", onReveal);
       socket.on("time_up", onReveal);
       socket.on("show_results", onReveal);
+      socket.on("answer_submitted", () => {
+        setAnswersCount((prev) => prev + 1);
+      });
 
       return () => {
         socket?.disconnect();
