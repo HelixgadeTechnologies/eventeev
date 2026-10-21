@@ -13,6 +13,8 @@ function CountdownContent() {
   const eventId = params._id;
   const quizId = params.quizId;
   const pin = searchParams.get("pin") || "";
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [count, setCount] = useState(5);
   const [isAnimating, setIsAnimating] = useState(true);
@@ -39,10 +41,13 @@ function CountdownContent() {
       }, 1000);
       return () => clearTimeout(timer);
     } else {
-      // Navigate to the intro page with pin passed
-      router.push(`/events/${eventId}/games/${quizId}/intro?q=0${pin ? `&pin=${pin}` : ''}`);
+      // Navigate to the intro page with pin and player parameters passed
+      const playerParams = isPlayerMode
+        ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
+        : "";
+      router.push(`/events/${eventId}/games/${quizId}/intro?q=0${pin ? `&pin=${pin}` : ""}${playerParams}`);
     }
-  }, [count, eventId, quizId, pin, router]);
+  }, [count, eventId, quizId, pin, isPlayerMode, playerNickname, router]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#EB5017] flex flex-col font-sans overflow-hidden items-center justify-center text-white">
@@ -60,8 +65,10 @@ function CountdownContent() {
           <Image src="/logo-white.svg" alt="Eventeev" width={140} height={45} priority />
         </div>
         <div className="bg-white/10 backdrop-blur-md text-white px-4 py-1.5 rounded-full flex items-center gap-2 font-black text-xs uppercase tracking-widest border border-white/20">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            Live Syncing
+            <span className={`w-2 h-2 rounded-full animate-pulse ${isPlayerMode ? "bg-emerald-400" : "bg-white"}`} />
+            {isPlayerMode
+              ? (playerNickname ? `${playerNickname} • Ready` : "Live Player Ready")
+              : "Live Syncing"}
         </div>
       </header>
 

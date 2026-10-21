@@ -7,7 +7,10 @@ import { HiOutlineArrowLeft, HiOutlinePlay, HiOutlineArrowsExpand, HiOutlineClip
 import { quizzesService } from "@/lib/services/quizzes.service";
 import { toast } from "sonner";
 
+import { io, Socket } from "socket.io-client";
+
 // Mock data removed in favor of real API calls
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
 
 export default function WaitingRoomPage() {
   const params = useParams();
@@ -32,6 +35,57 @@ export default function WaitingRoomPage() {
   useEffect(() => {
     if (!pin) return;
 
+    let hasNavigated = false;
+    const triggerGameStart = (targetQ = 0) => {
+      if (hasNavigated) return;
+      hasNavigated = true;
+      if (targetQ > 0) {
+        router.push(
+          `/events/${eventId}/games/${quizId}/play?q=${targetQ}&pin=${pin}&mode=player${
+            playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""
+          }`
+        );
+      } else {
+        router.push(
+          `/events/${eventId}/games/${quizId}/countdown?pin=${pin}&mode=player${
+            playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""
+          }`
+        );
+      }
+    };
+
+    // 1. Real-time WebSocket connection for instant event notification
+    let socket: Socket | null = null;
+    try {
+      socket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 5,
+      });
+
+      socket.emit("join_quiz_session", { pin, nickname: playerNickname });
+      socket.emit("join_room", pin);
+      socket.emit("join", pin);
+
+      socket.on("game_started", () => triggerGameStart(0));
+      socket.on("quiz_started", () => triggerGameStart(0));
+      socket.on("question_start", (data: any) => triggerGameStart(data?.questionIndex || 0));
+      socket.on("new_question", (data: any) => triggerGameStart(data?.questionIndex || 0));
+      socket.on("admin_start", () => triggerGameStart(0));
+      socket.on("state_change", (data: any) => {
+        if (
+          data?.status === "active" ||
+          data?.status === "started" ||
+          data?.status === "in_progress" ||
+          data?.status === "countdown"
+        ) {
+          triggerGameStart(data?.questionIndex || 0);
+        }
+      });
+    } catch (e) {
+      console.warn("Socket initialization in waiting room:", e);
+    }
+
+    // 2. Fallback polling guard (1.5s in player mode for fast response)
     const fetchParticipants = async () => {
       try {
         const [data, session] = await Promise.all([
@@ -39,8 +93,31 @@ export default function WaitingRoomPage() {
           isPlayerMode ? quizzesService.getSession(pin) : Promise.resolve(null),
         ]);
         setPlayers(data || []);
-        if (isPlayerMode && session && (session.status === "active" || Boolean(session.currentQuestion))) {
-          router.push(`/events/${eventId}/games/${quizId}/play?q=0&pin=${pin}&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`);
+
+        const isGameStarted = Boolean(
+          session && (
+            session.status === "active" ||
+            session.status === "in_progress" ||
+            session.status === "started" ||
+            session.status === "countdown" ||
+            session.status === "playing" ||
+            session.started === true ||
+            typeof session.currentQuestionIndex === "number" ||
+            (session.currentQuestion !== undefined &&
+              session.currentQuestion !== null &&
+              session.currentQuestion !== false)
+          )
+        );
+
+        if (isPlayerMode && isGameStarted) {
+          const currentQ =
+            typeof session.currentQuestionIndex === "number"
+              ? session.currentQuestionIndex
+              : typeof session.currentQuestion === "number"
+              ? session.currentQuestion
+              : 0;
+
+          triggerGameStart(currentQ);
         }
       } catch (error) {
         console.error("Error fetching participants:", error);
@@ -50,18 +127,21 @@ export default function WaitingRoomPage() {
     };
 
     fetchParticipants();
-    const interval = setInterval(fetchParticipants, 3000); // Poll every 3 seconds
+    const interval = setInterval(fetchParticipants, isPlayerMode ? 1500 : 3000);
 
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
     };
 
-    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
     return () => {
+      if (socket) {
+        socket.disconnect();
+      }
       clearInterval(interval);
-      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
-  }, [pin]);
+  }, [pin, isPlayerMode, eventId, quizId, playerNickname, router]);
 
   const handleBack = () => {
     router.push(`/events/${eventId}/games/${quizId}`);

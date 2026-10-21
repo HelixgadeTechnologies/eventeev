@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineChevronRight, HiOutlineCheckCircle } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { io, Socket } from "socket.io-client";
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
 
 function QuestionResultsContent() {
   const router = useRouter();
@@ -14,6 +17,8 @@ function QuestionResultsContent() {
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
   const qIndex = parseInt(searchParams.get("q") || "0");
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +56,13 @@ function QuestionResultsContent() {
     fetchQuiz();
   }, [quizId]);
 
+  const handleNextQuestion = useCallback(() => {
+    const playerParams = isPlayerMode
+      ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
+      : "";
+    router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
+  }, [router, eventId, quizId, qIndex, pin, isPlayerMode, playerNickname]);
+
   useEffect(() => {
     const startTime = Date.now();
     const interval = setInterval(() => {
@@ -65,11 +77,32 @@ function QuestionResultsContent() {
     }, 16);
 
     return () => clearInterval(interval);
-  }, [router, eventId, quizId, qIndex, pin]);
+  }, [handleNextQuestion]);
 
-  const handleNextQuestion = () => {
-    router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
-  };
+  useEffect(() => {
+    if (!pin) return;
+    let socket: Socket | null = null;
+    try {
+      socket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 5,
+      });
+      socket.emit("join_room", pin);
+      socket.emit("join", pin);
+
+      const onAdvance = () => {
+        handleNextQuestion();
+      };
+
+      socket.on("leaderboard", onAdvance);
+      socket.on("show_leaderboard", onAdvance);
+      socket.on("next_step", onAdvance);
+
+      return () => {
+        socket?.disconnect();
+      };
+    } catch (_) {}
+  }, [pin, handleNextQuestion]);
 
   const handleEndGame = () => {
     setShowEndModal(true);
@@ -118,9 +151,17 @@ function QuestionResultsContent() {
             <span className="text-xl font-black text-[#1B1818] tracking-tight">{qIndex + 1} / {quiz.questions.length}</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={handleEndGame} className="px-5 py-2 border-2 border-red-100 text-[#EB1D44] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-colors">
-              End Game
-            </button>
+            {!isPlayerMode ? (
+              <button onClick={handleEndGame} className="px-5 py-2 border-2 border-red-100 text-[#EB1D44] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-colors">
+                End Game
+              </button>
+            ) : (
+              playerNickname && (
+                <div className="bg-orange-50 border border-orange-200/60 text-[#EB5017] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+                  Player: {playerNickname}
+                </div>
+              )
+            )}
             <div className="w-10 h-10 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
                <div className="w-full h-full bg-gray-300 opacity-20" />
             </div>

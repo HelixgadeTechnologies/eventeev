@@ -15,6 +15,8 @@ function QuestionIntroContent() {
   const qIndex = parseInt(searchParams.get("q") || "0");
 
   const pin = searchParams.get("pin") || "";
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(3);
@@ -38,7 +40,10 @@ function QuestionIntroContent() {
 
   useEffect(() => {
     if (timeLeft === 0) {
-      router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}${pin ? `&pin=${pin}` : ''}`);
+      const playerParams = isPlayerMode
+        ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
+        : "";
+      router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
       return;
     }
 
@@ -47,7 +52,7 @@ function QuestionIntroContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, eventId, quizId, qIndex, pin, router]);
+  }, [timeLeft, eventId, quizId, qIndex, pin, isPlayerMode, playerNickname, router]);
 
   if (!quiz) {
     return (

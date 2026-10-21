@@ -1,24 +1,33 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { 
   HiOutlineUsers, 
-  HiOutlineChevronRight
+  HiOutlineChevronRight,
+  HiOutlineCheck,
+  HiOutlineClock
 } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { io, Socket } from "socket.io-client";
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
 
 function GamePlayContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params._id;
   const quizId = params.quizId as string;
   const qIndex = parseInt(searchParams.get("q") || "0");
 
   const pin = searchParams.get("pin") || "";
+  const isPlayerMode = searchParams.get("mode") === "player";
+  const playerNickname = searchParams.get("nickname") || "";
 
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(20);
@@ -26,6 +35,10 @@ function GamePlayContent() {
   const [showEndModal, setShowEndModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [totalPlayers, setTotalPlayers] = useState(0);
+
+  // Player state
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
 
   const formatPin = (p: string) => {
     if (!p) return "--- ---";
@@ -60,6 +73,22 @@ function GamePlayContent() {
     fetchQuiz();
   }, [quizId, qIndex]);
 
+  const currentQuestion = quiz?.questions?.[qIndex] || quiz?.questions?.[0];
+
+  const handleNextQuestion = useCallback(async () => {
+    if (pin && !isPlayerMode) {
+      try {
+        await quizzesService.revealAnswer(pin);
+      } catch (err) {
+        console.warn("Server reveal answer notification:", err);
+      }
+    }
+    const playerParams = isPlayerMode
+      ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
+      : "";
+    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
+  }, [pin, isPlayerMode, playerNickname, router, eventId, quizId, qIndex]);
+
   useEffect(() => {
     if (timeLeft > 0 && !showEndModal) {
       const timer = setInterval(() => {
@@ -70,17 +99,61 @@ function GamePlayContent() {
       // Auto-progress to results
       handleNextQuestion();
     }
-  }, [timeLeft, showEndModal]);
+  }, [timeLeft, showEndModal, handleNextQuestion]);
 
-  const handleNextQuestion = async () => {
+  useEffect(() => {
+    if (!pin) return;
+    let socket: Socket | null = null;
+    try {
+      socket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 5,
+      });
+      socket.emit("join_room", pin);
+      socket.emit("join", pin);
+
+      const onReveal = () => {
+        handleNextQuestion();
+      };
+
+      socket.on("reveal_answer", onReveal);
+      socket.on("answer_revealed", onReveal);
+      socket.on("question_end", onReveal);
+      socket.on("time_up", onReveal);
+      socket.on("show_results", onReveal);
+
+      return () => {
+        socket?.disconnect();
+      };
+    } catch (_) {}
+  }, [pin, handleNextQuestion]);
+
+  const handleSelectOption = async (index: number) => {
+    if (selectedOption !== null || isAnswerSubmitted || timeLeft === 0) return;
+    setSelectedOption(index);
+    setIsAnswerSubmitted(true);
+
+    if (typeof window !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(40);
+      } catch (_) {}
+    }
+
+    toast.success("Answer locked in!");
+
     if (pin) {
       try {
-        await quizzesService.revealAnswer(pin);
+        const timeLimit = currentQuestion?.timeLimit || 20;
+        await quizzesService.submitAnswer(pin, {
+          userId: user?.id || (user as any)?._id || playerNickname || "player",
+          questionIndex: qIndex,
+          answerIndex: index,
+          timeTaken: Math.max(1, timeLimit - timeLeft),
+        });
       } catch (err) {
-        console.warn("Server reveal answer notification:", err);
+        console.warn("Failed to submit answer to server:", err);
       }
     }
-    router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ""}`);
   };
 
   const handleEndGame = () => {
@@ -99,8 +172,120 @@ function GamePlayContent() {
     );
   }
 
-  const currentQuestion = quiz.questions[qIndex] || quiz.questions[0];
+  const colors = ["#EB1D44", "#1368CE", "#D89E00", "#26890C"];
+  const borderColors = ["#b01736", "#0e52a7", "#b58400", "#1e6e09"];
 
+  const shapes = [
+    <svg key="tri" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
+      <path d="M50 15L85 75H15L50 15Z" fill="none" stroke="white" strokeWidth="10" strokeLinejoin="round" />
+    </svg>,
+    <svg key="cir" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
+      <path d="M25 25L75 75M75 25L25 75" fill="none" stroke="white" strokeWidth="12" strokeLinecap="round" />
+    </svg>,
+    <svg key="x" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
+      <circle cx="50" cy="50" r="35" fill="none" stroke="white" strokeWidth="10" />
+    </svg>,
+    <svg key="sq" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
+      <rect x="20" y="20" width="60" height="60" fill="none" stroke="white" strokeWidth="10" />
+    </svg>
+  ];
+
+  // ----------------------------------------------------
+  // ATTENDEE / PLAYER CONTROLLER VIEW
+  // ----------------------------------------------------
+  if (isPlayerMode) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
+        {/* Player Header */}
+        <header className="flex items-center justify-between p-4 md:px-8 bg-white/80 backdrop-blur-sm border-b border-gray-100 shrink-0">
+          <div className="flex items-center gap-2">
+            <Image src="/logo-black.svg" alt="Eventeev" width={110} height={35} priority />
+            <span className="hidden sm:inline-block px-2.5 py-0.5 bg-orange-50 text-[#EB5017] rounded-full text-[10px] font-black uppercase tracking-wider">
+              Player
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-3 py-1 rounded-full text-xs font-black flex items-center gap-1.5 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="truncate max-w-[120px]">{playerNickname || "You"}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-3 py-1 rounded-full text-xs font-black text-gray-700 shadow-xs">
+              <HiOutlineClock className={`text-sm ${timeLeft <= 5 ? "text-red-500 animate-bounce" : "text-[#EB5017]"}`} />
+              <span className={timeLeft <= 5 ? "text-red-500 font-black" : ""}>{timeLeft}s</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Question Prompt */}
+        <div className="px-6 py-4 text-center shrink-0 bg-white/40 border-b border-gray-100/50">
+          <p className="text-[10px] font-black text-[#667185] uppercase tracking-widest mb-1">
+            Question {qIndex + 1} of {quiz.questions.length}
+          </p>
+          <h2 className="text-lg md:text-2xl font-black text-[#1B1818] max-w-2xl mx-auto leading-snug">
+            {currentQuestion.text}
+          </h2>
+        </div>
+
+        {/* Main Answer Area */}
+        <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-6 w-full max-w-4xl mx-auto min-h-0">
+          {!isAnswerSubmitted ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 md:gap-5 w-full h-full max-h-[520px]">
+              {currentQuestion.options.map((option: string, index: number) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectOption(index)}
+                  className="rounded-2xl md:rounded-3xl p-5 md:p-6 flex items-center gap-4 text-white font-black text-lg md:text-xl shadow-lg border-b-[6px] active:translate-y-1 active:border-b-[2px] transition-all cursor-pointer group hover:brightness-105"
+                  style={{ backgroundColor: colors[index % colors.length], borderColor: borderColors[index % borderColors.length] }}
+                >
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/15 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    {shapes[index % shapes.length]}
+                  </div>
+                  <span className="text-left line-clamp-3 uppercase tracking-tight flex-1">
+                    {option}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center p-8 bg-white/90 backdrop-blur-md rounded-3xl border border-gray-100 shadow-xl max-w-md w-full mx-4 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+              <div 
+                className="w-20 h-20 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-white shadow-lg border-b-[6px]"
+                style={{
+                  backgroundColor: colors[selectedOption! % colors.length],
+                  borderColor: borderColors[selectedOption! % borderColors.length]
+                }}
+              >
+                {shapes[selectedOption! % shapes.length]}
+              </div>
+
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-green-50 text-green-700 text-xs font-black rounded-full border border-green-200 shadow-xs">
+                  <HiOutlineCheck className="text-sm stroke-2" />
+                  Answer Locked In!
+                </div>
+                <h3 className="text-xl md:text-2xl font-black text-[#1B1818] uppercase tracking-tight">
+                  {currentQuestion.options[selectedOption!]}
+                </h3>
+                <p className="text-xs font-bold text-gray-400 max-w-xs mx-auto">
+                  Watch the main host screen! Results will appear once time runs out.
+                </p>
+              </div>
+
+              <div className="w-full pt-4 border-t border-gray-100 flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-wider">
+                <span>Game PIN: {formatPin(pin)}</span>
+                <span className="text-[#EB5017]">{timeLeft}s remaining</span>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
+
+  // ----------------------------------------------------
+  // HOST / ADMIN PROJECTOR VIEW
+  // ----------------------------------------------------
   return (
     <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
       {/* Eventeev Logo */}
@@ -173,32 +358,14 @@ function GamePlayContent() {
       {/* Answer Grid */}
       <div className="px-6 md:px-8 pb-6 grid grid-cols-2 gap-3 md:gap-4 w-full max-w-6xl mx-auto shrink-0">
         {currentQuestion.options.map((option: string, index: number) => {
-          const colors = ["#EB1D44", "#FFC20E", "#1368CE", "#26890C"];
-          const borderColors = ["#b01736", "#cc9b0b", "#0e4da1", "#1d6b0a"];
-
-          const shapes = [
-            <svg key="tri" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
-              <path d="M50 15L85 75H15L50 15Z" fill="none" stroke="white" strokeWidth="10" strokeLinejoin="round" />
-            </svg>,
-            <svg key="cir" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
-              <circle cx="50" cy="50" r="35" fill="none" stroke="white" strokeWidth="10" />
-            </svg>,
-            <svg key="x" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
-              <path d="M25 25L75 75M75 25L25 75" fill="none" stroke="white" strokeWidth="12" strokeLinecap="round" />
-            </svg>,
-            <svg key="sq" viewBox="0 0 100 100" className="w-8 h-8 md:w-10 md:h-10">
-              <rect x="20" y="20" width="60" height="60" fill="none" stroke="white" strokeWidth="10" />
-            </svg>
-          ];
-
           return (
             <div 
               key={index}
               className="h-16 md:h-20 rounded-xl flex items-center px-5 gap-4 shadow-lg border-b-[4px]"
-              style={{ backgroundColor: colors[index], borderColor: borderColors[index] }}
+              style={{ backgroundColor: colors[index % colors.length], borderColor: borderColors[index % borderColors.length] }}
             >
                <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
-                  {shapes[index]}
+                  {shapes[index % shapes.length]}
                </div>
                <span className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">{option}</span>
             </div>
