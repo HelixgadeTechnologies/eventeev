@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineChevronRight, HiOutlineCheckCircle } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
@@ -13,6 +15,7 @@ function QuestionResultsContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
@@ -20,12 +23,28 @@ function QuestionResultsContent() {
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showEndModal, setShowEndModal] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const totalDuration = 4000;
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   const formatPin = (p: string) => {
     if (!p) return "--- ---";
@@ -57,11 +76,11 @@ function QuestionResultsContent() {
   }, [quizId]);
 
   const handleNextQuestion = useCallback(() => {
-    const playerParams = isPlayerMode
+    const playerParams = effectivePlayerMode
       ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
       : "";
     router.push(`/events/${eventId}/games/${quizId}/leaderboard?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
-  }, [router, eventId, quizId, qIndex, pin, isPlayerMode, playerNickname]);
+  }, [router, eventId, quizId, qIndex, pin, effectivePlayerMode, playerNickname]);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -151,7 +170,7 @@ function QuestionResultsContent() {
             <span className="text-xl font-black text-[#1B1818] tracking-tight">{qIndex + 1} / {quiz.questions.length}</span>
           </div>
           <div className="flex items-center gap-3">
-            {!isPlayerMode ? (
+            {!effectivePlayerMode ? (
               <button onClick={handleEndGame} className="px-5 py-2 border-2 border-red-100 text-[#EB1D44] rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-colors">
                 End Game
               </button>

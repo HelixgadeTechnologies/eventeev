@@ -8,6 +8,8 @@ import { FaAngleLeft } from "react-icons/fa6";
 import confetti from "canvas-confetti";
 import { HiOutlineTrophy, HiOutlineHome, HiOutlineShare } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 
 interface Winner {
   rank: number;
@@ -21,16 +23,33 @@ function WinnerContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [visibleStep, setVisibleStep] = useState(0); // 0: none, 1: 3rd, 2: 2nd, 3: 1st
   const [winners, setWinners] = useState<Winner[]>([]);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   const triggerConfetti = (rank: number) => {
     const scalar = rank === 1 ? 2 : 1;
@@ -97,7 +116,7 @@ function WinnerContent() {
   }, [loading, quiz, winners.length]);
 
   const handleFinish = () => {
-    if (isPlayerMode) {
+    if (effectivePlayerMode) {
       router.push(`/events/${eventId}/games/join`);
     } else {
       router.push(`/events/${eventId}/games`);
@@ -129,15 +148,15 @@ function WinnerContent() {
       {/* Header */}
       <header className="w-full p-8 flex items-center justify-between relative z-10">
         <Link 
-            href={isPlayerMode ? `/events/${eventId}/games/join` : `/events/${eventId}/games`} 
+            href={effectivePlayerMode ? `/events/${eventId}/games/join` : `/events/${eventId}/games`} 
             className="inline-flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-[#EB5017] transition-all group"
         >
             <FaAngleLeft className="text-sm group-hover:-translate-x-1 transition-transform" />
-            {isPlayerMode ? "Exit Game" : "Back to Games"}
+            {effectivePlayerMode ? "Exit Game" : "Back to Games"}
         </Link>
         <Image src="/logo-black.svg" alt="Eventeev" width={140} height={45} priority className="mr-auto ml-8" />
         <div className="flex items-center gap-4">
-           {isPlayerMode && playerNickname && (
+           {effectivePlayerMode && playerNickname && (
              <div className="bg-orange-50 border border-orange-200/60 text-[#EB5017] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
                Player: {playerNickname}
              </div>

@@ -5,11 +5,14 @@ import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineLightBulb, HiOutlineGlobeAlt, HiOutlinePresentationChartBar, HiOutlineBeaker } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 
 function QuestionIntroContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
   const qIndex = parseInt(searchParams.get("q") || "0");
@@ -18,8 +21,24 @@ function QuestionIntroContent() {
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(3);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   const formatPin = (p: string) => {
     if (!p) return "--- ---";
@@ -40,7 +59,7 @@ function QuestionIntroContent() {
 
   useEffect(() => {
     if (timeLeft === 0) {
-      const playerParams = isPlayerMode
+      const playerParams = effectivePlayerMode
         ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
         : "";
       router.push(`/events/${eventId}/games/${quizId}/play?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
@@ -52,7 +71,7 @@ function QuestionIntroContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, eventId, quizId, qIndex, pin, isPlayerMode, playerNickname, router]);
+  }, [timeLeft, eventId, quizId, qIndex, pin, effectivePlayerMode, playerNickname, router]);
 
   if (!quiz) {
     return (

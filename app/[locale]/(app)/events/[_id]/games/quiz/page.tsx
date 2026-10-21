@@ -165,13 +165,6 @@ export default function GamesPage() {
           <p className="text-gray-500 text-sm mt-1 uppercase tracking-widest font-bold">Discover and deploy interactive games for your event</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={`/events/${eventId}/games/join`}
-            className="bg-white border border-gray-200 text-[#1B1818] px-5 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:border-[#eb5017] hover:text-[#eb5017] transition-all whitespace-nowrap shadow-xs cursor-pointer text-sm"
-          >
-            <HiOutlineDocumentText className="text-xl text-[#eb5017]" />
-            Join with PIN
-          </Link>
           <button 
             onClick={() => setActiveTab("templates")}
             className="bg-white border border-gray-200 text-[#1B1818] px-6 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:border-[#eb5017] hover:text-[#eb5017] transition-all whitespace-nowrap shadow-xs cursor-pointer text-sm"

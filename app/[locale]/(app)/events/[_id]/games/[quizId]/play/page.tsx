@@ -10,6 +10,7 @@ import {
   HiOutlineClock
 } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { io, Socket } from "socket.io-client";
@@ -29,6 +30,7 @@ function GamePlayContent() {
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
   const [timeLeft, setTimeLeft] = useState(20);
   const [answersCount, setAnswersCount] = useState(0);
@@ -39,6 +41,22 @@ function GamePlayContent() {
   // Player state
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  // If current user is the event organizer, they are ALWAYS host and NEVER a player
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   const formatPin = (p: string) => {
     if (!p) return "--- ---";
@@ -76,18 +94,18 @@ function GamePlayContent() {
   const currentQuestion = quiz?.questions?.[qIndex] || quiz?.questions?.[0];
 
   const handleNextQuestion = useCallback(async () => {
-    if (pin && !isPlayerMode) {
+    if (pin && !effectivePlayerMode) {
       try {
         await quizzesService.revealAnswer(pin);
       } catch (err) {
         console.warn("Server reveal answer notification:", err);
       }
     }
-    const playerParams = isPlayerMode
+    const playerParams = effectivePlayerMode
       ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
       : "";
     router.push(`/events/${eventId}/games/${quizId}/results?q=${qIndex}${pin ? `&pin=${pin}` : ""}${playerParams}`);
-  }, [pin, isPlayerMode, playerNickname, router, eventId, quizId, qIndex]);
+  }, [pin, effectivePlayerMode, playerNickname, router, eventId, quizId, qIndex]);
 
   useEffect(() => {
     if (timeLeft > 0 && !showEndModal) {
@@ -111,6 +129,7 @@ function GamePlayContent() {
       });
       socket.emit("join_room", pin);
       socket.emit("join", pin);
+      socket.emit("join_quiz_session", { pin });
 
       const onReveal = () => {
         handleNextQuestion();
@@ -118,9 +137,15 @@ function GamePlayContent() {
 
       socket.on("reveal_answer", onReveal);
       socket.on("answer_revealed", onReveal);
+      socket.on("question_ended", onReveal);
+      socket.on("round_ended", onReveal);
+      socket.on("round_result", onReveal);
       socket.on("question_end", onReveal);
       socket.on("time_up", onReveal);
       socket.on("show_results", onReveal);
+      socket.on("answer_submitted", () => {
+        setAnswersCount((prev) => prev + 1);
+      });
 
       return () => {
         socket?.disconnect();
@@ -155,6 +180,42 @@ function GamePlayContent() {
       }
     }
   };
+
+  // When the admin projector renders a question, notify the backend so it can
+  // emit question_display to all attendees — keeping everyone in lockstep.
+  useEffect(() => {
+    if (!pin || effectivePlayerMode || !currentQuestion || !quiz) return;
+
+    let adminSocket: any = null;
+    try {
+      adminSocket = io(SOCKET_URL, {
+        transports: ["websocket", "polling"],
+        reconnectionAttempts: 3,
+      });
+      adminSocket.emit("join_room", pin);
+      adminSocket.emit("join_quiz_session", { pin });
+    } catch (_) {}
+
+    // Small delay: let React finish painting the question UI before unlocking attendees
+    const t = setTimeout(() => {
+      try {
+        adminSocket?.emit("admin_question_ready", {
+          pin,
+          questionIndex: qIndex,
+          totalQuestions: quiz?.questions?.length ?? 0,
+          currentQuestion: currentQuestion,
+          options: currentQuestion?.options ?? [],
+          timeLimitSeconds: currentQuestion?.timeLimit ?? 20,
+          startedAt: Date.now(),
+        });
+      } catch (_) {}
+    }, 300);
+
+    return () => {
+      clearTimeout(t);
+      adminSocket?.disconnect();
+    };
+  }, [pin, effectivePlayerMode, qIndex, currentQuestion, quiz]);
 
   const handleEndGame = () => {
     setShowEndModal(true);
@@ -193,7 +254,7 @@ function GamePlayContent() {
   // ----------------------------------------------------
   // ATTENDEE / PLAYER CONTROLLER VIEW
   // ----------------------------------------------------
-  if (isPlayerMode) {
+  if (effectivePlayerMode) {
     return (
       <div className="fixed inset-0 z-[100] bg-[#FFFBF7] flex flex-col font-sans overflow-hidden">
         {/* Player Header */}
