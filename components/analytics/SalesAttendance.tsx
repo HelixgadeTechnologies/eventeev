@@ -23,70 +23,170 @@ const ProgressBar = ({ label, percentage, color }: { label: string; percentage: 
   </div>
 );
 
-const SalesAttendance = () => {
+interface SalesAttendanceProps {
+  tickets?: ApiTicket[];
+  stats?: any;
+  attendees?: any[];
+  currency?: string;
+  totalRevenue?: number;
+}
+
+const SalesAttendance: React.FC<SalesAttendanceProps> = ({
+  tickets: propTickets,
+  stats: propStats,
+  attendees: propAttendees,
+  currency = "USD",
+  totalRevenue: propTotalRevenue
+}) => {
   const params = useParams();
   const eventId = params?._id as string;
   
-  const [tickets, setTickets] = useState<ApiTicket[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [internalTickets, setInternalTickets] = useState<ApiTicket[]>([]);
+  const [internalStats, setInternalStats] = useState<any>(null);
+  const [loading, setLoading] = useState(!propTickets && !propStats);
+
+  const tickets = propTickets || internalTickets;
+  const stats = propStats || internalStats;
 
   useEffect(() => {
+    if (propTickets || propStats) {
+      setLoading(false);
+      return;
+    }
     if (eventId) {
       fetchAnalytics();
     }
-  }, [eventId]);
+  }, [eventId, propTickets, propStats]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
-    const [ticketsRes, statsRes, eventStatsRes] = await Promise.all([
-      ticketsService.getTickets(eventId),
-      attendeesService.getAttendeeStats(eventId),
-      eventsService.getEventStats(eventId).catch(() => ({ data: null }))
-    ]);
-    
-    if (ticketsRes.data) setTickets(ticketsRes.data);
-    const combinedStats = {
-      ...(statsRes.data || {}),
-      ...(eventStatsRes.data || {})
-    };
-    setStats(combinedStats);
-    setLoading(false);
+    try {
+      const [ticketsRes, statsRes, eventStatsRes] = await Promise.all([
+        ticketsService.getTickets(eventId),
+        attendeesService.getAttendeeStats(eventId),
+        eventsService.getEventStats(eventId).catch(() => ({ data: null }))
+      ]);
+      
+      if (ticketsRes.data) setInternalTickets(ticketsRes.data);
+      const combinedStats = {
+        ...(statsRes.data || {}),
+        ...(eventStatsRes.data || {})
+      };
+      setInternalStats(combinedStats);
+    } catch (e) {
+      console.warn("Failed fetching internal analytics:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const revenueData = React.useMemo(() => {
-    const totalRev = stats?.totalRevenue || 0;
+    const totalRev = typeof propTotalRevenue === 'number' ? propTotalRevenue : (stats?.totalRevenue || 0);
+    const attendeesList = propAttendees || [];
+
+    if (attendeesList.length > 0) {
+      // Sort attendees chronologically
+      const sorted = [...attendeesList].sort((a, b) => {
+        const tA = new Date(a.createdAt || a.registrationDate || 0).getTime();
+        const tB = new Date(b.createdAt || b.registrationDate || 0).getTime();
+        return tA - tB;
+      });
+
+      // Split into 4 progress milestones
+      const step = Math.max(1, Math.floor(sorted.length / 4));
+      const points = [
+        { name: "P1", count: Math.min(step, sorted.length) },
+        { name: "P2", count: Math.min(step * 2, sorted.length) },
+        { name: "P3", count: Math.min(step * 3, sorted.length) },
+        { name: "Final", count: sorted.length }
+      ];
+
+      return points.map((p, idx) => ({
+        name: idx === 3 ? "Current" : `Stage ${idx + 1}`,
+        revenue: totalRev > 0 
+          ? Math.round((p.count / sorted.length) * totalRev) 
+          : p.count,
+        registrations: p.count
+      }));
+    }
+
     if (totalRev === 0) {
       return [
-        { name: "Week 1", revenue: 0 },
-        { name: "Week 2", revenue: 0 },
-        { name: "Week 3", revenue: 0 },
-        { name: "Week 4", revenue: 0 },
+        { name: "Week 1", revenue: 0, registrations: 0 },
+        { name: "Week 2", revenue: 0, registrations: 0 },
+        { name: "Week 3", revenue: 0, registrations: 0 },
+        { name: "Week 4", revenue: 0, registrations: 0 },
       ];
     }
     return [
-      { name: "Week 1", revenue: Math.round(totalRev * 0.15) },
-      { name: "Week 2", revenue: Math.round(totalRev * 0.35) },
-      { name: "Week 3", revenue: Math.round(totalRev * 0.70) },
-      { name: "Week 4", revenue: totalRev },
+      { name: "Week 1", revenue: Math.round(totalRev * 0.15), registrations: 1 },
+      { name: "Week 2", revenue: Math.round(totalRev * 0.35), registrations: 2 },
+      { name: "Week 3", revenue: Math.round(totalRev * 0.70), registrations: 4 },
+      { name: "Week 4", revenue: totalRev, registrations: 5 },
     ];
-  }, [stats]);
+  }, [stats, propTotalRevenue, propAttendees]);
 
-  const ticketStats = React.useMemo(() => {
-    if (!tickets.length || !stats) return { paid: 0, free: 0, donation: 0 };
-    
-    const total = stats.totalAttendees || 1; // Avoid division by zero
-    // Ideally we'd have attendee counts per tier. For now, we'll use the quantity distributed.
-    const paid = tickets.filter(t => t.type === 'paid').reduce((acc, t) => acc + (t.quantity || 0), 0);
-    const free = tickets.filter(t => t.type === 'free').reduce((acc, t) => acc + (t.quantity || 0), 0);
-    const donation = tickets.filter(t => t.type === 'donation').reduce((acc, t) => acc + (t.quantity || 0), 0);
-    
-    return {
-      paid: Math.round((paid / total) * 100),
-      free: Math.round((free / total) * 100),
-      donation: Math.round((donation / total) * 100),
-    };
-  }, [tickets, stats]);
+  const ticketStatsList = React.useMemo(() => {
+    const ticketList = tickets || [];
+    const colors = ["#EB5017", "#F79009", "#1368CE", "#26890C", "#8B5CF6", "#EC4899"];
+    const totalAttendeesCount = propAttendees?.length || stats?.totalAttendees || 0;
+
+    if (!ticketList.length) {
+      return [
+        { label: "General Admission", percentage: totalAttendeesCount > 0 ? 100 : 0, color: "#EB5017" },
+        { label: "VIP Access", percentage: 0, color: "#F79009" },
+        { label: "Free Pass", percentage: 0, color: "#1368CE" }
+      ];
+    }
+
+    return ticketList.map((t, idx) => {
+      const tId = t.id || (t as any)._id;
+      const count = propAttendees 
+        ? propAttendees.filter((a: any) => a.ticketId === tId).length 
+        : 0;
+      
+      const pct = totalAttendeesCount > 0 && count > 0
+        ? Math.round((count / totalAttendeesCount) * 100)
+        : t.quantity > 0 && totalAttendeesCount > 0
+        ? Math.min(100, Math.round(((t.quantity / 2) / totalAttendeesCount) * 100))
+        : idx === 0 && totalAttendeesCount > 0
+        ? 100
+        : 0;
+
+      return {
+        label: t.name || `${t.type || 'Standard'} Tier`,
+        percentage: pct,
+        color: colors[idx % colors.length],
+        price: t.price,
+        type: t.type
+      };
+    });
+  }, [tickets, propAttendees, stats]);
+
+  const handleExportDetails = () => {
+    const attendeesList = propAttendees || [];
+    if (!attendeesList.length) {
+      alert("No attendee records available to export for this event yet.");
+      return;
+    }
+    const headers = ["ID", "Name", "Email", "CheckedIn", "RegistrationDate"];
+    const rows = attendeesList.map(a => [
+      a.id || a._id || "",
+      `"${(a.name || "").replace(/"/g, '""')}"`,
+      `"${(a.email || "").replace(/"/g, '""')}"`,
+      a.isCheckedIn ? "Yes" : "No",
+      a.createdAt || a.registrationDate || ""
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `event_${eventId || 'analytics'}_sales_attendance.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (loading) {
     return (
@@ -101,15 +201,22 @@ const SalesAttendance = () => {
       <div className="flex justify-between items-center mb-5">
         <div>
           <h2 className="text-base font-bold text-[#1B1818]">Sales & Attendance</h2>
-          <p className="text-xs text-gray-400 font-medium">Daily trend performance across all venues</p>
+          <p className="text-xs text-gray-400 font-medium">Daily trend performance and ticket breakdown</p>
         </div>
-        <button className="text-[#EB5017] text-xs font-bold hover:underline">Export Details</button>
+        <button 
+          onClick={handleExportDetails}
+          className="text-[#EB5017] text-xs font-bold hover:underline cursor-pointer"
+        >
+          Export Details
+        </button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-5">
         {/* Chart Area */}
         <div className="flex-1 min-h-[250px]">
-           <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-3">Revenue Growth Trend</p>
+           <p className="text-[10px] font-black text-[#B28A6A] uppercase tracking-widest mb-3">
+             {typeof propTotalRevenue === 'number' && propTotalRevenue > 0 ? "Revenue Growth Trend" : "Registration Acquisition Trend"}
+           </p>
            <ResponsiveContainer width="100%" height={260}>
              <AreaChart data={revenueData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
                <defs>
@@ -144,12 +251,24 @@ const SalesAttendance = () => {
         </div>
 
         {/* Ticket Types - Right Side */}
-        <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-5 flex flex-col gap-5 pt-3">
-           <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest mb-1">Ticket Distribution %</p>
+        <div className="w-full lg:w-1/2 lg:border-l lg:border-gray-50 lg:pl-5 flex flex-col gap-4 pt-3">
+           <div className="flex justify-between items-center mb-1">
+             <p className="text-[10px] font-black text-[#888888] uppercase tracking-widest">Ticket Distribution</p>
+             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+               {tickets.length} {tickets.length === 1 ? "Tier" : "Tiers"}
+             </span>
+           </div>
            
-           <ProgressBar label="Paid" percentage={ticketStats.paid} color="#EB5017" />
-           <ProgressBar label="Free" percentage={ticketStats.free} color="#E06C00" />
-           <ProgressBar label="Donation" percentage={ticketStats.donation} color="#E3A021" />
+           <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
+             {ticketStatsList.map((t, idx) => (
+               <ProgressBar 
+                 key={idx} 
+                 label={t.label} 
+                 percentage={t.percentage} 
+                 color={t.color} 
+               />
+             ))}
+           </div>
         </div>
       </div>
     </div>

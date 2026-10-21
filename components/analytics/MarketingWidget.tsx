@@ -15,15 +15,29 @@ const FunnelStep = ({ label, value, color, width }: { label: string; value: stri
   </div>
 );
 
-const MarketingWidget = () => {
+interface MarketingWidgetProps {
+  stats?: any;
+  eventData?: any;
+  attendees?: any[];
+}
+
+const MarketingWidget: React.FC<MarketingWidgetProps> = ({
+  stats: propStats,
+  eventData: propEventData,
+  attendees: propAttendees
+}) => {
   const [activeTab, setActiveTab] = useState("Conversion");
   const params = useParams();
   const eventId = params?._id as string;
 
-  const [stats, setStats] = useState<any>(null);
-  const [eventData, setEventData] = useState<any>(null);
+  const [internalStats, setInternalStats] = useState<any>(null);
+  const [internalEventData, setInternalEventData] = useState<any>(null);
+
+  const stats = propStats || internalStats;
+  const eventData = propEventData || internalEventData;
 
   useEffect(() => {
+    if (propStats && propEventData) return;
     if (!eventId) return;
 
     const loadData = async () => {
@@ -34,19 +48,19 @@ const MarketingWidget = () => {
           eventsService.getEventStats(eventId).catch(() => ({ data: null })),
         ]);
 
-        if (eventRes.data) setEventData(eventRes.data);
+        if (eventRes.data) setInternalEventData(eventRes.data);
         const combined = {
           ...(attendeeStatsRes.data || {}),
           ...(statsRes.data || {})
         };
-        setStats(combined);
+        setInternalStats(combined);
       } catch (err) {
         console.error("Failed to load marketing stats:", err);
       }
     };
 
     loadData();
-  }, [eventId]);
+  }, [eventId, propStats, propEventData]);
 
   const registered = stats?.totalAttendees || stats?.totalRegistrations || 0;
   const attended = stats?.verifiedAccess || 0;
