@@ -56,10 +56,17 @@ function QuestionResultsContent() {
       quizzesService.getLeaderboard(pin).then((res) => {
         if (Array.isArray(res)) {
           setPlayers(res);
+          if (typeof window !== 'undefined' && quizId && res.length > 0) {
+            try {
+              localStorage.setItem(`quiz_session_${quizId}`, pin);
+              localStorage.setItem(`eventeev_leaderboard_${quizId}`, JSON.stringify(res));
+              localStorage.setItem(`eventeev_leaderboard_${pin}`, JSON.stringify(res));
+            } catch (_) {}
+          }
         }
       }).catch(() => {});
     }
-  }, [pin]);
+  }, [pin, quizId]);
 
   useEffect(() => {
     const fetchQuiz = async () => {

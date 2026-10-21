@@ -82,6 +82,13 @@ function WinnerContent() {
     if (pin) {
       quizzesService.getLeaderboard(pin).then((res) => {
         if (Array.isArray(res) && res.length > 0) {
+          if (typeof window !== 'undefined' && quizId) {
+            try {
+              localStorage.setItem(`quiz_session_${quizId}`, pin);
+              localStorage.setItem(`eventeev_leaderboard_${quizId}`, JSON.stringify(res));
+              localStorage.setItem(`eventeev_leaderboard_${pin}`, JSON.stringify(res));
+            } catch (_) {}
+          }
           const sorted = [...res].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
           const colors = ["#FFD700", "#E2E8F0", "#CD7F32"];
           const topWinners: Winner[] = sorted.slice(0, 3).map((item, idx) => ({
@@ -99,7 +106,7 @@ function WinnerContent() {
         setWinners([]);
       });
     }
-  }, [pin]);
+  }, [pin, quizId]);
 
   useEffect(() => {
     if (!loading && quiz && winners.length > 0) {

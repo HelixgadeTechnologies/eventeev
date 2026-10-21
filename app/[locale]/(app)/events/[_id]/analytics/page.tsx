@@ -161,6 +161,8 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
         ticketsRes,
         roomsRes,
         quizzesRes,
+        templatesRes,
+        sessionsRes,
         rollingWinnersRes,
         pollsRes
       ] = await Promise.all([
@@ -171,6 +173,8 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
         ticketsService.getTickets(eventId).catch(() => ({ data: [] })),
         chatService.getRooms(eventId).catch(() => []),
         quizzesService.getQuizzesByEvent(eventId).catch(() => []),
+        quizzesService.getTemplateQuizzes().catch(() => []),
+        quizzesService.getSessions().catch(() => []),
         rollingGameService.getWinners(eventId).catch(() => []),
         pollsService.getPolls(eventId).catch(() => [])
       ]);
@@ -192,7 +196,28 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
       const roomsList = Array.isArray(roomsRes) ? roomsRes : [];
       setChatRooms(roomsList);
 
-      const quizList = Array.isArray(quizzesRes) ? quizzesRes : [];
+      const rawEventQuizzes = Array.isArray(quizzesRes) ? quizzesRes : [];
+      const rawTemplates = Array.isArray(templatesRes) ? templatesRes : [];
+      const rawSessions = Array.isArray(sessionsRes) ? sessionsRes : [];
+
+      // Combine event quizzes with featured/template quizzes (e.g. The Ultimate Space Trivia)
+      const mergedQuizzes = [...rawEventQuizzes, ...rawTemplates];
+      const quizList = mergedQuizzes.filter((q, idx, self) => {
+        const qId = q._id || q.id;
+        return qId && idx === self.findIndex(o => (o._id || o.id) === qId);
+      });
+
+      // Link any active or recent session PINs to the respective quizzes
+      quizList.forEach((q: any) => {
+        const qId = q._id || q.id;
+        const matchedSession = rawSessions.find((s: any) => 
+          s.quizId === qId || s.quiz === qId || s.quiz?._id === qId
+        );
+        if (matchedSession?.pin) {
+          q.pin = matchedSession.pin;
+        }
+      });
+
       setQuizzes(quizList);
 
       setPolls(Array.isArray(pollsRes) ? pollsRes : []);
@@ -200,6 +225,7 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
       // Derive Engagement Winners from Quiz Leaderboards or Rolling Game
       let derivedWinners: WinnerStat[] = [];
       if (quizList.length > 0) {
+        // Find first quiz with pin or first played quiz
         const quizWithPin = quizList.find((q: any) => q.pin);
         if (quizWithPin?.pin) {
           try {
