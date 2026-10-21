@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState, Suspense } from "react";
 import Image from "next/image";
 import { HiOutlineChevronRight, HiOutlineTrophy, HiOutlineFire, HiOutlineArrowTrendingUp } from "react-icons/hi2";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
@@ -23,6 +25,7 @@ function LeaderboardContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params?._id;
   const quizId = params?.quizId as string;
   const pin = searchParams.get("pin") || "";
@@ -30,9 +33,25 @@ function LeaderboardContent() {
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [quiz, setQuiz] = useState<any>(null);
   const [progress, setProgress] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -71,14 +90,14 @@ function LeaderboardContent() {
 
   const handleNextQuestion = useCallback(async () => {
     if (!quiz) return;
-    if (!isPlayerMode && pin) {
+    if (!effectivePlayerMode && pin) {
       try {
         await quizzesService.nextQuestion(pin);
       } catch (err) {
         console.warn("Server next question notification:", err);
       }
     }
-    const playerParams = isPlayerMode
+    const playerParams = effectivePlayerMode
       ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
       : "";
     if (qIndex < quiz.questions.length - 1) {
@@ -87,7 +106,7 @@ function LeaderboardContent() {
       // Game finished, go to winner screen
       router.push(`/events/${eventId}/games/${quizId}/winner?${pin ? `pin=${pin}` : ""}${playerParams}`);
     }
-  }, [router, eventId, quizId, qIndex, quiz, pin, isPlayerMode, playerNickname]);
+  }, [router, eventId, quizId, qIndex, quiz, pin, effectivePlayerMode, playerNickname]);
 
   useEffect(() => {
     if (!pin) return;
@@ -204,7 +223,7 @@ function LeaderboardContent() {
               <div className="flex flex-col gap-2.5">
                 {leaderboard.slice(1).map((player) => {
                   const isMe =
-                    isPlayerMode &&
+                    effectivePlayerMode &&
                     Boolean(playerNickname) &&
                     player.name.toLowerCase() === playerNickname.toLowerCase();
 
@@ -248,7 +267,7 @@ function LeaderboardContent() {
       </main>
 
       {/* Bottom Nav / Host Control or Attendee Live Status */}
-      {isPlayerMode ? (
+      {effectivePlayerMode ? (
         <div className="fixed bottom-10 right-10 z-20 flex items-center bg-white/95 backdrop-blur-md border border-[#f4ede7] px-6 py-3.5 rounded-2xl shadow-xl shadow-black/5 animate-in slide-in-from-right-12 duration-700">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-3" />
           <div className="flex flex-col">

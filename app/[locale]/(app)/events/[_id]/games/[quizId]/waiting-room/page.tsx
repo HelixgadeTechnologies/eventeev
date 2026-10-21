@@ -8,6 +8,8 @@ import { quizzesService } from "@/lib/services/quizzes.service";
 import { toast } from "sonner";
 
 import { io, Socket } from "socket.io-client";
+import { useAuth } from "@/context/AuthContext";
+import { eventsService } from "@/lib/services/events.service";
 
 // Mock data removed in favor of real API calls
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || "https://eventeevapi.onrender.com";
@@ -16,15 +18,33 @@ export default function WaitingRoomPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params._id;
   const quizId = params.quizId;
   const pin = searchParams.get("pin") || "";
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === 'object' ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  // If current user is the event organizer, they are ALWAYS host and NEVER a player
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   // Format PIN for display (e.g., 482910 -> 482 910)
   const formatPin = (p: string) => {
@@ -37,6 +57,8 @@ export default function WaitingRoomPage() {
 
     let hasNavigated = false;
     const triggerGameStart = (targetQ = 0) => {
+      // Hosts / organizers MUST NEVER be hijacked into player mode by socket broadcasts
+      if (!effectivePlayerMode) return;
       if (hasNavigated) return;
       hasNavigated = true;
       if (targetQ > 0) {
@@ -62,7 +84,10 @@ export default function WaitingRoomPage() {
         reconnectionAttempts: 5,
       });
 
-      socket.emit("join_quiz_session", { pin, nickname: playerNickname });
+      // Only players emit join_quiz_session with a nickname
+      if (effectivePlayerMode && playerNickname) {
+        socket.emit("join_quiz_session", { pin, nickname: playerNickname });
+      }
       socket.emit("join_room", pin);
       socket.emit("join", pin);
 
@@ -90,7 +115,7 @@ export default function WaitingRoomPage() {
       try {
         const [data, session] = await Promise.all([
           quizzesService.getLeaderboard(pin),
-          isPlayerMode ? quizzesService.getSession(pin) : Promise.resolve(null),
+          effectivePlayerMode ? quizzesService.getSession(pin) : Promise.resolve(null),
         ]);
         setPlayers(data || []);
 
@@ -109,7 +134,7 @@ export default function WaitingRoomPage() {
           )
         );
 
-        if (isPlayerMode && isGameStarted) {
+        if (effectivePlayerMode && isGameStarted) {
           const currentQ =
             typeof session.currentQuestionIndex === "number"
               ? session.currentQuestionIndex
@@ -127,7 +152,7 @@ export default function WaitingRoomPage() {
     };
 
     fetchParticipants();
-    const interval = setInterval(fetchParticipants, isPlayerMode ? 1500 : 3000);
+    const interval = setInterval(fetchParticipants, effectivePlayerMode ? 1500 : 3000);
 
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
@@ -141,7 +166,7 @@ export default function WaitingRoomPage() {
       clearInterval(interval);
       document.removeEventListener("fullscreenchange", handleFullScreenChange);
     };
-  }, [pin, isPlayerMode, eventId, quizId, playerNickname, router]);
+  }, [pin, effectivePlayerMode, eventId, quizId, playerNickname, router]);
 
   const handleBack = () => {
     router.push(`/events/${eventId}/games/${quizId}`);
@@ -244,7 +269,7 @@ export default function WaitingRoomPage() {
 
         {/* Start Game Action / Player Status */}
         <div className="mb-6 w-full max-w-sm shrink-0">
-          {isPlayerMode ? (
+          {effectivePlayerMode ? (
             <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-gray-100 shadow-sm text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-xs font-black rounded-full">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />

@@ -5,20 +5,39 @@ import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { HiOutlineVolumeUp, HiOutlineCog } from "react-icons/hi";
 import { quizzesService } from "@/lib/services/quizzes.service";
+import { eventsService } from "@/lib/services/events.service";
+import { useAuth } from "@/context/AuthContext";
 
 function CountdownContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const eventId = params._id;
   const quizId = params.quizId;
   const pin = searchParams.get("pin") || "";
   const isPlayerMode = searchParams.get("mode") === "player";
   const playerNickname = searchParams.get("nickname") || "";
 
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [count, setCount] = useState(5);
   const [isAnimating, setIsAnimating] = useState(true);
   const [playersCount, setPlayersCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!user || !eventId) return;
+    eventsService.getEventById(eventId as string).then((res) => {
+      if (res.data) {
+        const ownerId = typeof res.data.userId === "object" ? (res.data.userId?.id || res.data.userId?._id) : res.data.userId;
+        const currentUserId = user.id || (user as any)?._id;
+        if (ownerId && currentUserId && ownerId === currentUserId) {
+          setIsOrganizer(true);
+        }
+      }
+    }).catch(() => {});
+  }, [user, eventId]);
+
+  const effectivePlayerMode = isOrganizer ? false : isPlayerMode;
 
   useEffect(() => {
     if (pin) {
@@ -42,12 +61,12 @@ function CountdownContent() {
       return () => clearTimeout(timer);
     } else {
       // Navigate to the intro page with pin and player parameters passed
-      const playerParams = isPlayerMode
+      const playerParams = effectivePlayerMode
         ? `&mode=player${playerNickname ? `&nickname=${encodeURIComponent(playerNickname)}` : ""}`
         : "";
       router.push(`/events/${eventId}/games/${quizId}/intro?q=0${pin ? `&pin=${pin}` : ""}${playerParams}`);
     }
-  }, [count, eventId, quizId, pin, isPlayerMode, playerNickname, router]);
+  }, [count, eventId, quizId, pin, effectivePlayerMode, playerNickname, router]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-[#EB5017] flex flex-col font-sans overflow-hidden items-center justify-center text-white">
