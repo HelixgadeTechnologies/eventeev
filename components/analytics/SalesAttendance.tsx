@@ -61,17 +61,13 @@ const SalesAttendance: React.FC<SalesAttendanceProps> = ({
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const [ticketsRes, statsRes, eventStatsRes] = await Promise.all([
+      const [ticketsRes, statsRes] = await Promise.all([
         ticketsService.getTickets(eventId),
-        attendeesService.getAttendeeStats(eventId),
-        eventsService.getEventStats(eventId).catch(() => ({ data: null }))
+        attendeesService.getAttendeeStats(eventId)
       ]);
       
       if (ticketsRes.data) setInternalTickets(ticketsRes.data);
-      const combinedStats = {
-        ...(statsRes.data || {}),
-        ...(eventStatsRes.data || {})
-      };
+      const combinedStats = statsRes.data || {};
       setInternalStats(combinedStats);
     } catch (e) {
       console.warn("Failed fetching internal analytics:", e);

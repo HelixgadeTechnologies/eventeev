@@ -1,5 +1,6 @@
 
 import axiosInstance from '@/lib/axios'
+import { attendeesService } from './attendees.service'
 
 export interface ApiEvent {
   id: string
@@ -12,6 +13,18 @@ export interface ApiEvent {
 }
 
 export class EventsService {
+  private eventCache = new Map<string, { data: any; timestamp: number }>();
+  private inFlightEvents = new Map<string, Promise<{ data: any; error: any }>>();
+  private readonly EVENT_CACHE_TTL_MS = 20000; // 20s cache to avoid redundant roundtrips
+
+  invalidateEventCache(eventId?: string) {
+    if (eventId) {
+      this.eventCache.delete(eventId);
+    } else {
+      this.eventCache.clear();
+    }
+  }
+
   /**
    * Helper to map backend event to frontend format
    */
@@ -159,30 +172,43 @@ export class EventsService {
   }
 
   /**
-   * Get event statistics for organizer
+   * Get event statistics for organizer (delegates to attendeesService with in-flight deduplication)
    */
   async getEventStats(eventId: string) {
-    try {
-      const response = await axiosInstance.get(`/api/attendee/event/${eventId}/stats`)
-      return { data: response.data, error: null }
-    } catch (error: any) {
-      console.error('Failed to fetch event stats:', error)
-      return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } }
-    }
+    return attendeesService.getAttendeeStats(eventId);
   }
 
   /**
-   * Get event by ID
+   * Get event by ID (with in-flight deduplication and short TTL cache)
    */
-  async getEventById(eventId: string) {
-    try {
-      const response = await axiosInstance.get(`/api/event/${eventId}`)
-      const data = this.mapEvent(response.data)
-      return { data, error: null }
-    } catch (error: any) {
-      console.error('Failed to fetch event by ID:', error)
-      return { data: null, error: error.response?.data || { message: 'Failed to fetch event' } }
+  async getEventById(eventId: string): Promise<{ data: any; error: any }> {
+    if (!eventId) return { data: null, error: { message: 'Event ID required' } };
+
+    const cached = this.eventCache.get(eventId);
+    if (cached && Date.now() - cached.timestamp < this.EVENT_CACHE_TTL_MS) {
+      return { data: cached.data, error: null };
     }
+
+    if (this.inFlightEvents.has(eventId)) {
+      return this.inFlightEvents.get(eventId)!;
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        const response = await axiosInstance.get(`/api/event/${eventId}`);
+        const data = this.mapEvent(response.data);
+        this.eventCache.set(eventId, { data, timestamp: Date.now() });
+        return { data, error: null };
+      } catch (error: any) {
+        console.error('Failed to fetch event by ID:', error);
+        return { data: null, error: error.response?.data || { message: 'Failed to fetch event' } };
+      } finally {
+        this.inFlightEvents.delete(eventId);
+      }
+    })();
+
+    this.inFlightEvents.set(eventId, fetchPromise);
+    return fetchPromise;
   }
 
   /**
@@ -191,6 +217,7 @@ export class EventsService {
   async publishDraft(eventId: string) {
     try {
       const response = await axiosInstance.post(`/api/event/drafttolive/${eventId}`)
+      this.invalidateEventCache(eventId);
       return { data: response.data, error: null }
     } catch (error: any) {
       console.error('Failed to publish draft:', error)
@@ -204,6 +231,7 @@ export class EventsService {
   async updateEvent(eventId: string, payload: any) {
     try {
       const response = await axiosInstance.put(`/api/event/${eventId}`, payload);
+      this.invalidateEventCache(eventId);
       const data = this.mapEvent(response.data);
       return { data, error: null };
     } catch (error: any) {

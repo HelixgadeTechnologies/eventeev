@@ -42,17 +42,13 @@ const MarketingWidget: React.FC<MarketingWidgetProps> = ({
 
     const loadData = async () => {
       try {
-        const [eventRes, attendeeStatsRes, statsRes] = await Promise.all([
+        const [eventRes, attendeeStatsRes] = await Promise.all([
           eventsService.getEventById(eventId).catch(() => ({ data: null })),
           attendeesService.getAttendeeStats(eventId).catch(() => ({ data: null })),
-          eventsService.getEventStats(eventId).catch(() => ({ data: null })),
         ]);
 
         if (eventRes.data) setInternalEventData(eventRes.data);
-        const combined = {
-          ...(attendeeStatsRes.data || {}),
-          ...(statsRes.data || {})
-        };
+        const combined = attendeeStatsRes.data || {};
         setInternalStats(combined);
       } catch (err) {
         console.error("Failed to load marketing stats:", err);
