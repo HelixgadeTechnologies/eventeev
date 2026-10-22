@@ -8,6 +8,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/check-box";
 import { useParams } from "next/navigation";
 import { ticketsService, ApiTicket } from "@/lib/services/tickets.service";
+import { attendeesService } from "@/lib/services/attendees.service";
 import { formatCurrency } from "@/lib/utils/currency";
 import { Loader2, AlertCircle, Trash2 } from "lucide-react";
 import { TicketTier } from "@/types/ticket";
@@ -143,39 +144,48 @@ export default function TicketTierList({ tierType, addTicket, onEdit, refreshKey
     setLoading(true);
     setError(null);
     try {
-      const { data: tiers, error: tiersError } = await ticketsService.getTickets(eventId);
+      const [{ data: tiers, error: tiersError }, { data: attendeesList }] = await Promise.all([
+        ticketsService.getTickets(eventId),
+        attendeesService.getAttendees(eventId, 1, 500)
+      ]);
       if (tiersError) throw tiersError;
       
       const filteredTiers = tiers.filter(t => t.type?.toLowerCase() === tierType.toLowerCase());
       setTicketTiers(filteredTiers);
 
-      // Fetch attendees for the filtered tiers
+      // In-memory mapping to eliminate N+1 queries per ticket tier
       const soldRecords: SoldRecord[] = [];
-      await Promise.all(filteredTiers.map(async (tier) => {
-        const { data: attendees } = await ticketsService.getTicketAttendees(tier.id);
-        if (attendees && Array.isArray(attendees)) {
-          attendees.forEach((a: any) => {
-            soldRecords.push({
-              name: a.name || "Attendee",
-              email: a.email || "N/A",
-              ticketName: tier.name,
-              ticketId: a.id || a._id || "",
-              dateRegistered: (a.registrationDate || a.createdAt) 
-                ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                  })
-                : 'N/A',
-              amountPaid: tier.price || 0,
-              currency: tier.currency || 'NGN',
-            });
+      const allAttendees = Array.isArray(attendeesList) ? attendeesList : [];
+
+      filteredTiers.forEach((tier) => {
+        const tierId = tier.id || (tier as any)._id;
+        const matchingAttendees = allAttendees.filter((a: any) => 
+          a.ticketId === tierId || 
+          (a.ticket && (a.ticket.id === tierId || a.ticket._id === tierId)) ||
+          (!a.ticketId && filteredTiers.length === 1)
+        );
+
+        matchingAttendees.forEach((a: any) => {
+          soldRecords.push({
+            name: a.name || "Attendee",
+            email: a.email || "N/A",
+            ticketName: tier.name,
+            ticketId: a.id || a._id || "",
+            dateRegistered: (a.registrationDate || a.createdAt) 
+              ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                })
+              : 'N/A',
+            amountPaid: tier.price || 0,
+            currency: tier.currency || 'NGN',
           });
-        }
-      }));
+        });
+      });
       setSoldTickets(soldRecords);
     } catch (err: any) {
       console.error(`Failed to fetch ${tierType} tickets:`, err);

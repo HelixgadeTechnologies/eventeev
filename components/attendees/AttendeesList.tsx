@@ -73,44 +73,51 @@ const AttendeesList = () => {
   useEffect(() => {
     if (eventId) {
       fetchAttendees();
-      fetchTicketTiers();
     }
   }, [eventId]);
-
-  const fetchTicketTiers = async () => {
-    const { data } = await ticketsService.getTickets(eventId);
-    setTicketTiers(data);
-  };
 
   const fetchAttendees = async () => {
     setLoading(true);
     setError(null);
-    const { data, error: fetchError } = await attendeesService.getAttendees(eventId);
-    
-    if (fetchError) {
-      setError(fetchError.message || "Failed to load attendees");
+    try {
+      const [{ data, error: fetchError }, { data: tiersData }] = await Promise.all([
+        attendeesService.getAttendees(eventId),
+        ticketsService.getTickets(eventId)
+      ]);
+
+      if (tiersData) {
+        setTicketTiers(tiersData);
+      }
+
+      if (fetchError) {
+        setError(fetchError.message || "Failed to load attendees");
+        setAttendees([]);
+      } else {
+        // Map ApiAttendee to AttendeesDataType
+        const mappedAttendees: AttendeesDataType[] = (data || []).map((a: ApiAttendee) => ({
+          id: a.id,
+          name: a.name,
+          email: a.email,
+          dateRegistered: (a.registrationDate || a.createdAt) 
+            ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })
+            : 'N/A',
+          checkedIn: a.isCheckedIn
+        }));
+        setAttendees(mappedAttendees);
+      }
+    } catch (err: any) {
+      setError(err?.message || "Failed to load attendees");
       setAttendees([]);
-    } else {
-      // Map ApiAttendee to AttendeesDataType
-      const mappedAttendees: AttendeesDataType[] = data.map((a: ApiAttendee) => ({
-        id: a.id,
-        name: a.name,
-        email: a.email,
-        dateRegistered: (a.registrationDate || a.createdAt) 
-          ? new Date(a.registrationDate || a.createdAt!).toLocaleString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true
-            })
-          : 'N/A',
-        checkedIn: a.isCheckedIn
-      }));
-      setAttendees(mappedAttendees);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const exportToCSV = () => {

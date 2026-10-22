@@ -89,6 +89,17 @@ export class AttendeesService {
   }
 
   private inFlightCheckIns = new Set<string>();
+  private statsCache = new Map<string, { data: any; timestamp: number }>();
+  private inFlightStats = new Map<string, Promise<{ data: any; error: any }>>();
+  private readonly STATS_CACHE_TTL_MS = 20000; // 20s cache to avoid N+1 and redundant re-fetches
+
+  invalidateStats(eventId?: string) {
+    if (eventId) {
+      this.statsCache.delete(eventId);
+    } else {
+      this.statsCache.clear();
+    }
+  }
 
   /**
    * Check-in an attendee
@@ -100,6 +111,7 @@ export class AttendeesService {
     this.inFlightCheckIns.add(attendeeId);
     try {
       const response = await axiosInstance.patch(`/api/attendee/${attendeeId}/check-in`);
+      this.invalidateStats();
       return { data: response.data, error: null };
     } catch (error: any) {
       console.error('Failed to check-in attendee:', error);
@@ -115,6 +127,7 @@ export class AttendeesService {
   async deleteAttendee(attendeeId: string) {
     try {
       const response = await axiosInstance.delete(`/api/attendee/${attendeeId}`);
+      this.invalidateStats();
       return { data: response.data, error: null };
     } catch (error: any) {
       console.error('Failed to delete attendee:', error);
@@ -123,18 +136,38 @@ export class AttendeesService {
   }
 
   /**
-   * Get attendee statistics for an event
+   * Get attendee statistics for an event (with in-flight deduplication and short TTL cache)
    */
-  async getAttendeeStats(eventId: string) {
-    try {
-      const response = await axiosInstance.get(`/api/attendee/event/${eventId}/stats`);
-      return { data: response.data, error: null };
-    } catch (error: any) {
-      if (error.response?.status !== 403) {
-        console.error('Failed to fetch attendee stats:', error);
-      }
-      return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } };
+  async getAttendeeStats(eventId: string): Promise<{ data: any; error: any }> {
+    if (!eventId) return { data: null, error: { message: 'Event ID required' } };
+
+    const cached = this.statsCache.get(eventId);
+    if (cached && Date.now() - cached.timestamp < this.STATS_CACHE_TTL_MS) {
+      return { data: cached.data, error: null };
     }
+
+    if (this.inFlightStats.has(eventId)) {
+      return this.inFlightStats.get(eventId)!;
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        const response = await axiosInstance.get(`/api/attendee/event/${eventId}/stats`);
+        const data = response.data;
+        this.statsCache.set(eventId, { data, timestamp: Date.now() });
+        return { data, error: null };
+      } catch (error: any) {
+        if (error.response?.status !== 403) {
+          console.error('Failed to fetch attendee stats:', error);
+        }
+        return { data: null, error: error.response?.data || { message: 'Failed to fetch stats' } };
+      } finally {
+        this.inFlightStats.delete(eventId);
+      }
+    })();
+
+    this.inFlightStats.set(eventId, fetchPromise);
+    return fetchPromise;
   }
 }
 

@@ -155,7 +155,6 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
     try {
       const [
         eventRes,
-        eventStatsRes,
         attendeeStatsRes,
         attendeesRes,
         ticketsRes,
@@ -167,7 +166,6 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
         pollsRes
       ] = await Promise.all([
         eventsService.getEventById(eventId).catch(() => ({ data: null })),
-        eventsService.getEventStats(eventId).catch(() => ({ data: null })),
         attendeesService.getAttendeeStats(eventId).catch(() => ({ data: null })),
         attendeesService.getAttendees(eventId, 1, 500).catch(() => ({ data: [] })),
         ticketsService.getTickets(eventId).catch(() => ({ data: [] })),
@@ -181,10 +179,7 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
 
       if (eventRes.data) setEventData(eventRes.data);
       
-      const combinedStats = {
-        ...(attendeeStatsRes.data || {}),
-        ...(eventStatsRes.data || {})
-      };
+      const combinedStats = attendeeStatsRes.data || {};
       setStats(combinedStats);
 
       const attendeeList = attendeesRes.data || [];
@@ -257,16 +252,16 @@ export default function AnalyticsPage(props: AnalyticsPageProps) {
 
       setWinners(derivedWinners);
 
-      // Derive Chat Metrics & Peak Chat Hours from rooms
+      // Derive Chat Metrics & Peak Chat Hours from the primary event room
       if (roomsList.length > 0) {
         try {
-          const messageFetches = roomsList.slice(0, 5).map(room => {
-            const rId = room._id || room.id;
-            return chatService.getMessages(rId, 1, 100).catch(() => ({ messages: [] }));
-          });
+          const primaryRoom = roomsList.find((r: any) => 
+            r.type === 'general' || r.type === 'public' || (r.name || '').toLowerCase().includes('general')
+          ) || roomsList[0];
+          const rId = primaryRoom?._id || primaryRoom?.id;
 
-          const messageResults = await Promise.all(messageFetches);
-          const allMsgs = messageResults.flatMap(res => res.messages || []);
+          const msgRes = rId ? await chatService.getMessages(rId, 1, 100).catch(() => ({ messages: [] })) : { messages: [] };
+          const allMsgs = msgRes.messages || [];
 
           const totalMessages = allMsgs.length;
           const chattersSet = new Set(

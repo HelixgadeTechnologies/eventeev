@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import { authService } from "@/lib/services/auth.service";
 import { eventsService } from "@/lib/services/events.service";
 import { attendeesService } from "@/lib/services/attendees.service";
 import AnalyticsCard from "@/components/display/AnalyticsCard";
@@ -39,10 +40,11 @@ export default function PlatformDashboard() {
     async function loadPortfolioData() {
       setLoading(true);
       try {
-        const [pubRes, compRes, draftRes] = await Promise.all([
+        const [pubRes, compRes, draftRes, userStatsRes] = await Promise.all([
           eventsService.getPublishedEvents(),
           eventsService.getCompletedEvents(),
-          eventsService.getDraftedEvents()
+          eventsService.getDraftedEvents(),
+          authService.getUserStats().catch(() => ({ data: null }))
         ]);
 
         // Filter events belonging to the logged-in organizer
@@ -62,11 +64,16 @@ export default function PlatformDashboard() {
         setCompletedEvents(completed);
         setDraftedEvents(drafted);
 
-        // Fetch stats for published events to aggregate registrations
+        // Calculate aggregated registrations & check-ins
         let totalRsvps = 0;
         let totalCheckins = 0;
 
-        if (published.length > 0) {
+        const uStats = userStatsRes?.data;
+        if (uStats && (typeof uStats.totalAttendees === 'number' || typeof uStats.expectedRsvps === 'number')) {
+          totalRsvps = uStats.totalAttendees ?? uStats.expectedRsvps ?? 0;
+          totalCheckins = uStats.verifiedAccess ?? uStats.verifiedCheckins ?? 0;
+        } else if (published.length > 0) {
+          // If aggregate endpoint is not yet supported on this backend version, use cached/deduplicated service
           const statsPromises = published.map(event => 
             attendeesService.getAttendeeStats(event._id || event.id).catch(() => ({ data: null }))
           );

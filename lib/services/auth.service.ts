@@ -180,6 +180,18 @@ export class AuthService {
       return { user: null, token: null, error: error.response?.data?.message || 'Google login failed' }
     }
   }
+  /**
+   * Get authenticated user stats
+   */
+  async getUserStats() {
+    try {
+      const response = await axiosInstance.get('/api/user/stats');
+      const raw = response.data?.data || response.data;
+      return { data: raw, error: null };
+    } catch (error: any) {
+      return { data: null, error: error.response?.data || { message: 'Failed to fetch user stats' } };
+    }
+  }
 }
 
 export const authService = new AuthService()
